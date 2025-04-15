@@ -57,10 +57,7 @@ export default function MusicPlaylistScreen({ onBack }: MusicPlaylistScreenProps
   
   const loadTracks = async () => {
     try {
-      const response = await apiRequest<MusicTrack[]>({
-        url: "/api/music-tracks",
-        method: "GET"
-      });
+      const response = await apiRequest("/api/music-tracks");
       setTracks(response || []);
     } catch (error) {
       console.error("Error loading tracks:", error);
@@ -74,10 +71,7 @@ export default function MusicPlaylistScreen({ onBack }: MusicPlaylistScreenProps
   
   const loadPlaylists = async () => {
     try {
-      const response = await apiRequest<Playlist[]>({
-        url: "/api/playlists",
-        method: "GET"
-      });
+      const response = await apiRequest("/api/playlists");
       setPlaylists(response || []);
     } catch (error) {
       console.error("Error loading playlists:", error);
@@ -379,19 +373,19 @@ export default function MusicPlaylistScreen({ onBack }: MusicPlaylistScreenProps
       <audio ref={audioRef} src={currentAudioSrc || undefined} />
       
       {/* Header */}
-      <div className="sticky top-0 z-10 bg-white border-b p-4 shadow-sm">
-        <div className="flex items-center justify-between max-w-4xl mx-auto">
+      <div className="sticky top-0 z-10 bg-white border-b p-3 shadow-sm">
+        <div className="flex items-center justify-between w-full">
           <Button
             variant="ghost"
             size="icon"
             onClick={onBack}
-            className="mr-2"
+            className="mr-1"
             aria-label="Back"
           >
             <ArrowLeft className="h-5 w-5" />
           </Button>
           
-          <h1 className="text-xl font-bold text-gray-800 flex-1">Music Playlists</h1>
+          <h1 className="text-lg md:text-xl font-bold text-gray-800 flex-1 truncate px-2">Music Playlists</h1>
           
           <input
             type="file"
@@ -403,17 +397,18 @@ export default function MusicPlaylistScreen({ onBack }: MusicPlaylistScreenProps
           
           <Button
             onClick={() => fileInputRef.current?.click()}
-            className="bg-indigo-600 hover:bg-indigo-700 text-white"
+            className="bg-indigo-600 hover:bg-indigo-700 text-white text-xs md:text-sm p-2 md:p-3"
+            size={isMobile ? "sm" : "default"}
           >
-            <Plus className="h-4 w-4 mr-2" />
-            Add Music
+            <Plus className="h-3 w-3 md:h-4 md:w-4 mr-1 md:mr-2" />
+            <span className="whitespace-nowrap">Add Music</span>
           </Button>
         </div>
       </div>
       
-      <div className="flex flex-col md:flex-row max-w-4xl mx-auto w-full p-4 gap-6">
+      <div className="flex flex-col lg:flex-row max-w-4xl mx-auto w-full p-2 md:p-4 gap-4 md:gap-6">
         {/* Left side - Playlists */}
-        <div className="w-full md:w-1/3 space-y-6">
+        <div className="w-full lg:w-1/3 space-y-4 md:space-y-6">
           <div className="bg-white rounded-lg border p-4 shadow-sm">
             <h2 className="text-lg font-semibold mb-4 flex items-center">
               <Music className="h-5 w-5 mr-2 text-indigo-600" />
@@ -505,7 +500,7 @@ export default function MusicPlaylistScreen({ onBack }: MusicPlaylistScreenProps
         </div>
         
         {/* Right side - Tracks and Selected Playlist */}
-        <div className="w-full md:w-2/3 space-y-6">
+        <div className="w-full lg:w-2/3 space-y-4 md:space-y-6">
           {/* Selected Playlist */}
           {selectedPlaylist && (
             <div className="bg-white rounded-lg border p-4 shadow-sm">
@@ -624,7 +619,7 @@ export default function MusicPlaylistScreen({ onBack }: MusicPlaylistScreenProps
                       </div>
                     </div>
                     
-                    <div className="flex space-x-2 ml-2">
+                    <div className="flex space-x-1 md:space-x-2 ml-1 md:ml-2">
                       {selectedPlaylist && (
                         <Button
                           variant="ghost"
@@ -634,7 +629,7 @@ export default function MusicPlaylistScreen({ onBack }: MusicPlaylistScreenProps
                             selectedPlaylist.trackIds.includes(track.id)
                               ? 'text-gray-400'
                               : 'text-indigo-600'
-                          }`}
+                          } ${isMobile ? 'px-2' : ''}`}
                           onClick={() => addTrackToPlaylist(track.id)}
                           disabled={
                             Array.isArray(selectedPlaylist.trackIds) && 
@@ -644,7 +639,7 @@ export default function MusicPlaylistScreen({ onBack }: MusicPlaylistScreenProps
                           {Array.isArray(selectedPlaylist.trackIds) && 
                            selectedPlaylist.trackIds.includes(track.id)
                             ? 'Added'
-                            : 'Add to Playlist'}
+                            : isMobile ? '+' : 'Add to Playlist'}
                         </Button>
                       )}
                       
