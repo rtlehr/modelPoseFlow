@@ -39,15 +39,36 @@ export default function usePoseSession(
     setSessionPoses(poses);
     setCurrentPoseIndex(0);
     reset(config.poseLength);
-    start(); // Auto-start the first pose
-  }, [config, allPoses, reset, start]);
+    // Don't auto-start to avoid the infinite loop
+  }, [config, allPoses, reset]);
 
   // Auto-advance to next pose when timer reaches 0
   useEffect(() => {
-    if (time === 0 && sessionPoses.length > 0) {
-      nextPose();
+    let timeoutId: NodeJS.Timeout | null = null;
+    
+    if (time === 0 && sessionPoses.length > 0 && currentPoseIndex < sessionPoses.length) {
+      // Use setTimeout to avoid infinite loop
+      timeoutId = setTimeout(() => {
+        if (currentPoseIndex < sessionPoses.length - 1) {
+          setCurrentPoseIndex(prevIndex => prevIndex + 1);
+          reset(config.poseLength);
+          if (isRunning) {
+            start();
+          }
+        } else if (currentPoseIndex === sessionPoses.length - 1) {
+          // End of session reached
+          setCurrentPoseIndex(prevIndex => prevIndex + 1);
+          pause();
+        }
+      }, 300);
     }
-  }, [time, sessionPoses.length]);
+    
+    return () => {
+      if (timeoutId) {
+        clearTimeout(timeoutId);
+      }
+    };
+  }, [time, sessionPoses.length, currentPoseIndex, config.poseLength, reset, start, pause, isRunning]);
 
   const nextPose = useCallback(() => {
     if (currentPoseIndex < sessionPoses.length - 1) {

@@ -35,6 +35,16 @@ export default function TimerScreen({ onBackToSetup, sessionConfig, poses }: Tim
     }
   };
 
+  // Auto-start timer when component mounts
+  useEffect(() => {
+    // Start timer with a slight delay to ensure everything is ready
+    const timerId = setTimeout(() => {
+      startTimer();
+    }, 500);
+    
+    return () => clearTimeout(timerId);
+  }, [startTimer]);
+
   // Handle session completion
   useEffect(() => {
     if (currentPoseIndex >= totalPoses) {
