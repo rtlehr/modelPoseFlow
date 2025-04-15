@@ -1,7 +1,6 @@
 import { useState } from "react";
 import PoseLengthSelector from "./PoseLengthSelector";
 import SessionConfigSelector from "./SessionConfigSelector";
-import MusicPlaylistSelector from "./MusicPlaylistSelector";
 import { Button } from "@/components/ui/button";
 import { PoseSessionConfig } from "@/types";
 import { useToast } from "@/hooks/use-toast";
@@ -105,11 +104,6 @@ export default function SessionSetupScreen({
         />
         
         <Separator className="my-2" />
-        
-        <MusicPlaylistSelector
-          selectedPlaylistId={selectedPlaylistId}
-          onChange={setSelectedPlaylistId}
-        />
         
         <div className="flex space-x-4">
           <Button 

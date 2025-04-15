@@ -2,8 +2,6 @@ import { useState, useEffect } from "react";
 import PoseProgress from "./PoseProgress";
 import PoseDisplay from "./PoseDisplay";
 import TimerControls from "./TimerControls";
-import MusicPlayer from "./MusicPlayer";
-import SessionMusicPlayer from "./SessionMusicPlayer";
 import FullscreenModeToggle from "./FullscreenModeToggle";
 import FullscreenTimerScreen from "./FullscreenTimerScreen";
 import { Pose, PoseSessionConfig } from "@/types";
@@ -169,20 +167,7 @@ export default function TimerScreen({ onBackToSetup, sessionConfig, poses }: Tim
             onNext={nextPose}
             onPrevious={previousPose}
           />
-          
-          {/* Use the old MusicPlayer if no playlist is selected */}
-          {!sessionConfig.playlistId && (
-            <MusicPlayer isSessionPlaying={isPlaying} />
-          )}
         </>
-      )}
-      
-      {/* Add SessionMusicPlayer for selected playlist */}
-      {sessionConfig.playlistId && (
-        <SessionMusicPlayer 
-          playlistId={sessionConfig.playlistId}
-          isSessionPlaying={isPlaying}
-        />
       )}
     </div>
   );
