@@ -108,6 +108,7 @@ export default function SetupScreen({ onStartSession, poses, onBack }: SetupScre
           <PoseDescriptionInput
             onDescriptionProcessed={handleDescriptionProcessed}
             poseCount={sessionConfig.poseCount || 10}
+            poseLength={sessionConfig.poseLength || 30}
           />
         </div>
       </div>

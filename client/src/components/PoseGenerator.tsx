@@ -41,7 +41,7 @@ export default function PoseGenerator({
         // Use the requested pose count but limit to avoid timeouts
         count: Math.min(5, poseCount),
         // Pass the pose length for better prompt generation
-        poseLength: 30 // Default to 30 seconds for now
+        poseLength
       });
       
       if (!response.ok) {
