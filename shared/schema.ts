@@ -2,10 +2,13 @@ import { pgTable, text, serial, integer, varchar, jsonb, timestamp } from "drizz
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
+// Define the pose categories
+export type PoseCategory = "standing" | "sitting" | "reclining" | "action" | "random";
+
 // Define the base schema for a pose
 export const poses = pgTable("poses", {
   id: serial("id").primaryKey(),
-  category: text("category", { enum: ["standing", "sitting", "reclining", "action"] }).notNull(),
+  category: text("category", { enum: ["standing", "sitting", "reclining", "action", "random"] }).notNull(),
   url: text("url").notNull(),
 });
 

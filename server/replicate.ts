@@ -1,5 +1,5 @@
 import Replicate from 'replicate';
-import { PoseCategory } from '@shared/schema';
+import { type PoseCategory } from '@shared/schema';
 import crypto from 'crypto';
 import fs from 'fs';
 import path from 'path';
@@ -84,12 +84,23 @@ export async function generateOpenPoseImage(
     
     console.log('Generated OpenPose skeleton');
     
+    // Extract the image URL from the response
+    // The response format may vary, so we handle different possibilities
+    const openPoseImageUrl = typeof openPoseOutput === 'object' && openPoseOutput !== null 
+      ? (openPoseOutput as any).image_url || (openPoseOutput as any).output || ''
+      : '';
+    
+    if (!openPoseImageUrl) {
+      console.error('No image URL found in OpenPose output');
+      return null;
+    }
+    
     // Then use the OpenPose skeleton to generate a realistic image using ControlNet
     const output = await replicate.run(
       "jagilley/controlnet-pose:854e8727697a057c525cdb45ab037f64ecca770a1769cc52287c2e56472a247b",
       {
         input: {
-          image: openPoseOutput.image_url || "",
+          image: openPoseImageUrl,
           prompt: `${basePrompt}, ${description}, professional lighting, detailed, high resolution`,
           num_samples: "1",
           image_resolution: "768",
