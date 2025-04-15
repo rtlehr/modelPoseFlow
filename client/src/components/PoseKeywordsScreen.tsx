@@ -1,25 +1,43 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { ArrowLeft, Search, Filter } from "lucide-react";
+import { 
+  ArrowLeft, Search, Filter, Upload, Trash2, 
+  AlertTriangle, PlusCircle 
+} from "lucide-react";
+import { 
+  Dialog, DialogContent, DialogDescription, 
+  DialogHeader, DialogTitle, DialogFooter,
+  DialogClose
+} from "@/components/ui/dialog";
+import { useToast } from "@/hooks/use-toast";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { Pose } from "@shared/schema";
 import PoseKeywordManager from "./PoseKeywordManager";
 
-interface PoseKeywordsScreenProps {
+interface PoseLibraryScreenProps {
   onBack: () => void;
 }
 
-export default function PoseKeywordsScreen({ onBack }: PoseKeywordsScreenProps) {
+export default function PoseLibraryScreen({ onBack }: PoseLibraryScreenProps) {
+  const { toast } = useToast();
   const isMobile = useIsMobile();
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  
   const [activeTab, setActiveTab] = useState("all");
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedPose, setSelectedPose] = useState<Pose | null>(null);
   const [filteredPoses, setFilteredPoses] = useState<Pose[]>([]);
+  const [uploadDialogOpen, setUploadDialogOpen] = useState(false);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [poseToDelete, setPoseToDelete] = useState<Pose | null>(null);
+  const [uploading, setUploading] = useState(false);
+  const [uploadedImagePreview, setUploadedImagePreview] = useState<string | null>(null);
+  const [selectedCategory, setSelectedCategory] = useState<string>("standing");
   
   // Fetch all poses
   const { data: poses = [], isLoading, refetch } = useQuery({
@@ -83,6 +101,132 @@ export default function PoseKeywordsScreen({ onBack }: PoseKeywordsScreenProps) 
     setSelectedPose(null);
   };
   
+  // Handle file selection for upload
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (!files || files.length === 0) return;
+    
+    const file = files[0];
+    if (!file.type.startsWith('image/')) {
+      toast({
+        title: "Invalid file type",
+        description: "Please select an image file (JPEG, PNG, etc.)",
+        variant: "destructive"
+      });
+      return;
+    }
+    
+    // Create preview of the uploaded image
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      if (e.target && typeof e.target.result === 'string') {
+        setUploadedImagePreview(e.target.result);
+      }
+    };
+    reader.readAsDataURL(file);
+  };
+  
+  // Reset upload form
+  const resetUploadForm = () => {
+    setUploadedImagePreview(null);
+    setSelectedCategory("standing");
+    if (fileInputRef.current) {
+      fileInputRef.current.value = "";
+    }
+  };
+  
+  // Handle pose upload
+  const handleUploadPose = async () => {
+    if (!uploadedImagePreview) {
+      toast({
+        title: "No image selected",
+        description: "Please select an image to upload",
+        variant: "destructive"
+      });
+      return;
+    }
+    
+    try {
+      setUploading(true);
+      
+      const response = await apiRequest("POST", "/api/poses", {
+        category: selectedCategory,
+        url: uploadedImagePreview
+      });
+      
+      if (!response.ok) {
+        throw new Error("Failed to upload pose");
+      }
+      
+      const newPose = await response.json();
+      
+      toast({
+        title: "Pose uploaded",
+        description: "Pose has been added to your library"
+      });
+      
+      // Reset form and close dialog
+      resetUploadForm();
+      setUploadDialogOpen(false);
+      
+      // Refresh poses
+      refetch();
+      
+      // Select the new pose to edit keywords
+      setSelectedPose(newPose);
+      
+    } catch (error) {
+      console.error("Error uploading pose:", error);
+      toast({
+        title: "Upload failed",
+        description: "Failed to upload pose. Please try again.",
+        variant: "destructive"
+      });
+    } finally {
+      setUploading(false);
+    }
+  };
+  
+  // Handle pose deletion
+  const handleDeletePose = async () => {
+    if (!poseToDelete) return;
+    
+    try {
+      const response = await apiRequest("DELETE", `/api/poses/${poseToDelete.id}`);
+      
+      if (!response.ok) {
+        throw new Error("Failed to delete pose");
+      }
+      
+      toast({
+        title: "Pose deleted",
+        description: "Pose has been removed from your library"
+      });
+      
+      // Close dialog
+      setDeleteDialogOpen(false);
+      setPoseToDelete(null);
+      
+      // Refresh poses
+      refetch();
+      
+    } catch (error) {
+      console.error("Error deleting pose:", error);
+      toast({
+        title: "Deletion failed",
+        description: "Failed to delete pose. Please try again.",
+        variant: "destructive"
+      });
+    }
+  };
+  
+  // Open delete confirmation dialog
+  const confirmDeletePose = (pose: Pose, e: React.MouseEvent) => {
+    e.stopPropagation(); // Prevent pose selection
+    setPoseToDelete(pose);
+    setDeleteDialogOpen(true);
+  };
+  
   return (
     <div className={`bg-white rounded-xl shadow-lg ${isMobile ? 'p-4' : 'p-6'} max-w-4xl mx-auto`}>
       {/* Header with back button */}
@@ -98,7 +242,7 @@ export default function PoseKeywordsScreen({ onBack }: PoseKeywordsScreenProps) 
         </Button>
         
         <h1 className={`${isMobile ? 'text-xl' : 'text-2xl'} font-bold text-gray-800 flex-1 text-center`}>
-          Pose Keywords
+          Pose Library
         </h1>
         
         {/* Empty div to balance the layout */}
