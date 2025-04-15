@@ -1,7 +1,7 @@
 import { useState } from "react";
-import PoseCategorySelector from "./PoseCategorySelector";
 import PoseLengthSelector from "./PoseLengthSelector";
 import SessionConfigSelector from "./SessionConfigSelector";
+import PoseDescriptionInput from "./PoseDescriptionInput";
 import { Button } from "@/components/ui/button";
 import { PoseCategory, PoseSessionConfig, Pose } from "@/types";
 import { useToast } from "@/hooks/use-toast";
@@ -17,11 +17,23 @@ interface SetupScreenProps {
 export default function SetupScreen({ onStartSession, poses, onBack }: SetupScreenProps) {
   const { toast } = useToast();
   const isMobile = useIsMobile();
-  const [selectedCategories, setSelectedCategories] = useState<PoseCategory[]>(["standing", "sitting"]);
+  const [selectedCategories, setSelectedCategories] = useState<PoseCategory[]>([]);
+  const [poseDescription, setPoseDescription] = useState<string>("");
   const [poseLength, setPoseLength] = useState(30);
   const [sessionType, setSessionType] = useState<"count" | "time">("count");
   const [poseCount, setPoseCount] = useState(10);
   const [sessionTime, setSessionTime] = useState(20);
+  
+  // Handler for when pose description is analyzed and categories are extracted
+  const handleDescriptionProcessed = (categories: PoseCategory[], description: string) => {
+    setSelectedCategories(categories);
+    setPoseDescription(description);
+    
+    toast({
+      title: "Poses found!",
+      description: `Found matching poses in categories: ${categories.join(", ")}`,
+    });
+  };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -30,22 +42,19 @@ export default function SetupScreen({ onStartSession, poses, onBack }: SetupScre
     if (selectedCategories.length === 0) {
       toast({
         title: "Error",
-        description: "Please select at least one pose category",
+        description: "Please describe the types of poses you want",
         variant: "destructive",
       });
       return;
     }
 
-    // Check for random selection or filter poses based on selected categories
-    const isRandom = selectedCategories.includes("random");
-    const filteredPoses = isRandom 
-      ? poses // Use all poses if random is selected
-      : poses.filter(pose => selectedCategories.includes(pose.category));
+    // Filter poses based on selected categories
+    const filteredPoses = poses.filter(pose => selectedCategories.includes(pose.category));
     
     if (filteredPoses.length === 0) {
       toast({
         title: "Error",
-        description: "No poses available for selected categories",
+        description: "No poses available for your description. Please try a different description.",
         variant: "destructive",
       });
       return;
@@ -91,24 +100,33 @@ export default function SetupScreen({ onStartSession, poses, onBack }: SetupScre
       </div>
       
       <form onSubmit={handleSubmit} className="space-y-6">
-        <PoseCategorySelector 
-          selectedCategories={selectedCategories} 
-          onChange={setSelectedCategories} 
+        <PoseDescriptionInput
+          onDescriptionProcessed={handleDescriptionProcessed}
         />
         
-        <PoseLengthSelector 
-          poseLength={poseLength} 
-          onChange={setPoseLength} 
-        />
-        
-        <SessionConfigSelector 
-          sessionType={sessionType}
-          poseCount={poseCount}
-          sessionTime={sessionTime}
-          onSessionTypeChange={setSessionType}
-          onPoseCountChange={setPoseCount}
-          onSessionTimeChange={setSessionTime}
-        />
+        {selectedCategories.length > 0 && (
+          <>
+            <div className="mt-4 p-3 bg-gray-50 rounded-lg border border-gray-100">
+              <p className="text-sm text-gray-600">
+                <span className="font-medium">Selected categories:</span> {selectedCategories.join(", ")}
+              </p>
+            </div>
+            
+            <PoseLengthSelector 
+              poseLength={poseLength} 
+              onChange={setPoseLength} 
+            />
+            
+            <SessionConfigSelector 
+              sessionType={sessionType}
+              poseCount={poseCount}
+              sessionTime={sessionTime}
+              onSessionTypeChange={setSessionType}
+              onPoseCountChange={setPoseCount}
+              onSessionTimeChange={setSessionTime}
+            />
+          </>
+        )}
         
         <div className="flex space-x-4">
           {onBack && (

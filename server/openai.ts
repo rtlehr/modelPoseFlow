@@ -39,8 +39,11 @@ export async function analyzePoseDescription(description: string): Promise<PoseA
       response_format: { type: "json_object" },
     });
 
-    const content = response.choices[0].message.content || '{}';
-    const result = JSON.parse(content) as PoseAnalysisResult;
+    const messageContent = response.choices[0].message.content;
+    if (!messageContent) {
+      throw new Error("Empty response from OpenAI");
+    }
+    const result = JSON.parse(messageContent) as PoseAnalysisResult;
     
     // Ensure we have at least one category
     if (!result.categories || result.categories.length === 0) {

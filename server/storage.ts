@@ -1,6 +1,6 @@
 import { users, poses, type User, type InsertUser, type Pose } from "@shared/schema";
 import { db } from "./db";
-import { eq } from "drizzle-orm";
+import { eq, or, inArray } from "drizzle-orm";
 import fs from "fs";
 import path from "path";
 
@@ -13,6 +13,7 @@ export interface IStorage {
   createUser(user: InsertUser): Promise<User>;
   getAllPoses(): Promise<Pose[]>;
   getPosesByCategory(category: string): Promise<Pose[]>;
+  getPosesByCategories(categories: string[]): Promise<Pose[]>;
   seedPoses(): Promise<void>;
 }
 
@@ -41,6 +42,28 @@ export class DatabaseStorage implements IStorage {
 
   async getPosesByCategory(category: string): Promise<Pose[]> {
     return await db.select().from(poses).where(eq(poses.category, category as any));
+  }
+  
+  async getPosesByCategories(categories: string[]): Promise<Pose[]> {
+    if (!categories || categories.length === 0) {
+      return this.getAllPoses();
+    }
+    
+    // Create an array of OR conditions for each category
+    if (categories.length === 1) {
+      return await db.select().from(poses).where(
+        eq(poses.category, categories[0] as any)
+      );
+    }
+    
+    // For multiple categories, use OR conditions
+    const conditions = categories.map(category => 
+      eq(poses.category, category as any)
+    );
+    
+    return await db.select().from(poses).where(
+      or(...conditions)
+    );
   }
 
   async seedPoses(): Promise<void> {
