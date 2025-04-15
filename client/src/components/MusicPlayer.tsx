@@ -2,12 +2,17 @@ import { useState, useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
 import { Volume2, VolumeX, Play, Pause, Music } from "lucide-react";
+import { useIsMobile } from "@/hooks/use-mobile";
+import { useTouchDevice } from "@/hooks/useTouchDevice";
 
 interface MusicPlayerProps {
   isSessionPlaying: boolean;
 }
 
 export default function MusicPlayer({ isSessionPlaying }: MusicPlayerProps) {
+  const isMobile = useIsMobile();
+  const isTouchDevice = useTouchDevice();
+  
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [isPlaying, setIsPlaying] = useState(false);
   const [volume, setVolume] = useState(80);
@@ -119,9 +124,9 @@ export default function MusicPlayer({ isSessionPlaying }: MusicPlayerProps) {
   };
 
   return (
-    <div className="mt-4 p-4 bg-gray-50 rounded-lg border border-gray-200">
-      <h3 className="text-lg font-medium mb-3 flex items-center">
-        <Music className="w-5 h-5 mr-2" />
+    <div className={`mt-4 ${isMobile ? 'p-3' : 'p-4'} bg-gray-50 rounded-lg border border-gray-200`}>
+      <h3 className={`${isMobile ? 'text-base' : 'text-lg'} font-medium mb-3 flex items-center`}>
+        <Music className={`${isMobile ? 'w-4 h-4' : 'w-5 h-5'} mr-2`} />
         Music Player
       </h3>
 
@@ -130,48 +135,55 @@ export default function MusicPlayer({ isSessionPlaying }: MusicPlayerProps) {
           type="file"
           accept="audio/*"
           onChange={handleFileChange}
-          className="block w-full text-sm text-gray-500
+          className={`block w-full ${isMobile ? 'text-sm' : 'text-sm'} text-gray-500
             file:mr-4 file:py-2 file:px-4
             file:rounded-full file:border-0
             file:text-sm file:font-semibold
             file:bg-primary file:text-white
-            hover:file:bg-primary/90"
+            hover:file:bg-primary/90
+            ${isTouchDevice ? 'file:py-3 file:active:scale-95' : ''}`}
         />
       </div>
 
       {selectedFile && (
         <>
-          <div className="flex items-center justify-between mb-2">
-            <div className="text-xs text-gray-600">
+          <div className={`flex items-center ${isMobile ? 'flex-col space-y-2' : 'justify-between'} mb-2`}>
+            <div className={`${isMobile ? 'text-sm' : 'text-xs'} text-gray-600`}>
               {formatTime(currentTime)} / {formatTime(duration)}
             </div>
             <div className="flex items-center">
               <Button
                 variant="ghost"
-                size="icon"
+                size={isMobile ? "sm" : "icon"}
                 onClick={toggleMute}
-                className="mr-2"
+                className={`mr-2 ${isTouchDevice ? 'active:scale-95' : ''}`}
               >
-                {isMuted ? <VolumeX className="h-4 w-4" /> : <Volume2 className="h-4 w-4" />}
+                {isMuted ? 
+                  <VolumeX className={`${isMobile ? 'h-5 w-5' : 'h-4 w-4'}`} /> : 
+                  <Volume2 className={`${isMobile ? 'h-5 w-5' : 'h-4 w-4'}`} />
+                }
               </Button>
               <Slider
                 value={[isMuted ? 0 : volume]}
                 max={100}
                 step={1}
                 onValueChange={handleVolumeChange}
-                className="w-24"
+                className={`${isMobile ? 'w-36' : 'w-24'}`}
               />
             </div>
           </div>
 
-          <div className="flex justify-center">
+          <div className="flex justify-center mt-3">
             <Button
               variant="outline"
-              size="sm"
+              size={isMobile ? "default" : "sm"}
               onClick={togglePlay}
-              className="rounded-full w-10 h-10 p-0 flex items-center justify-center"
+              className={`rounded-full ${isMobile ? 'w-12 h-12' : 'w-10 h-10'} p-0 flex items-center justify-center ${isTouchDevice ? 'active:scale-95 touch-manipulation' : ''}`}
             >
-              {isPlaying ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4" />}
+              {isPlaying ? 
+                <Pause className={`${isMobile ? 'h-5 w-5' : 'h-4 w-4'}`} /> : 
+                <Play className={`${isMobile ? 'h-5 w-5' : 'h-4 w-4'}`} />
+              }
             </Button>
           </div>
 
