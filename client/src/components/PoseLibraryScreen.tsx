@@ -103,6 +103,26 @@ export default function PoseLibraryScreen({ onBack }: PoseLibraryScreenProps) {
   const handleClosePoseDetail = () => {
     setSelectedPose(null);
   };
+
+  // Helper function to generate keywords for a pose
+  const generateKeywordsForPose = async (pose: Pose): Promise<Pose> => {
+    try {
+      console.log(`Attempting to generate keywords for pose ID: ${pose.id}`);
+      const keywordsResponse = await apiRequest("POST", `/api/poses/${pose.id}/generate-keywords`);
+      
+      if (keywordsResponse.ok) {
+        const keywordsResult = await keywordsResponse.json();
+        console.log("Keywords generated successfully:", keywordsResult);
+        return keywordsResult.pose;
+      } else {
+        console.error("Failed to generate keywords:", await keywordsResponse.text());
+        return pose;
+      }
+    } catch (error) {
+      console.error("Error generating keywords:", error);
+      return pose;
+    }
+  };
   
   // Handle file selection for upload
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -208,26 +228,11 @@ export default function PoseLibraryScreen({ onBack }: PoseLibraryScreenProps) {
       // Refresh poses
       refetch();
       
-      // After uploading pose, generate keywords automatically
-      try {
-        console.log("Generating keywords for pose ID:", newPose.id);
-        const keywordsResponse = await apiRequest("POST", `/api/poses/${newPose.id}/generate-keywords`);
-        
-        if (keywordsResponse.ok) {
-          const keywordsResult = await keywordsResponse.json();
-          console.log("Keywords generated:", keywordsResult);
-          
-          // Update the selected pose with the keywords
-          setSelectedPose(keywordsResult.pose);
-        } else {
-          console.error("Failed to generate keywords automatically");
-          setSelectedPose(newPose);
-        }
-      } catch (keywordError) {
-        console.error("Error generating keywords:", keywordError);
-        // Still select the pose even if keyword generation fails
-        setSelectedPose(newPose);
-      }
+      // After uploading the pose, generate keywords using our helper function
+      const poseWithKeywords = await generateKeywordsForPose(newPose);
+      
+      // Update the selected pose to show keywords
+      setSelectedPose(poseWithKeywords);
       
     } catch (error: any) {
       console.error("Error uploading pose:", error);
