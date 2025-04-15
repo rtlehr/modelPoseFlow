@@ -7,12 +7,14 @@ export const poses = pgTable("poses", {
   id: serial("id").primaryKey(),
   category: text("category", { enum: ["standing", "sitting", "reclining", "action"] }).notNull(),
   url: text("url").notNull(),
+  keywords: text("keywords").array().default([]),
 });
 
 // Pose insert schema
 export const insertPoseSchema = createInsertSchema(poses).pick({
   category: true,
   url: true,
+  keywords: true,
 });
 
 // Pose types

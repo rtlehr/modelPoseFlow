@@ -23,6 +23,8 @@ export interface IStorage {
   getAllPoses(): Promise<Pose[]>;
   getPosesByCategory(category: string): Promise<Pose[]>;
   getPosesByCategories(categories: string[]): Promise<Pose[]>;
+  getPosesByKeywords(keywords: string[]): Promise<Pose[]>;
+  updatePoseKeywords(id: number, keywords: string[]): Promise<Pose | undefined>;
   seedPoses(): Promise<void>;
   
   // Music track operations
