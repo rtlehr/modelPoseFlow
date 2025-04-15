@@ -100,6 +100,7 @@ export default function Home() {
             onUserPreferences={handleGoToUserPreferences}
             onModelBlog={handleGoToModelBlog}
             onMusicPlaylist={handleGoToMusicPlaylist}
+            onPoseKeywords={handleGoToPoseKeywords}
           />
         );
         

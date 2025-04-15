@@ -51,7 +51,7 @@ export default function PoseKeywordsScreen({ onBack }: PoseKeywordsScreenProps) 
         pose => {
           // Search in keywords if available
           if (pose.keywords && Array.isArray(pose.keywords)) {
-            if (pose.keywords.some(keyword => 
+            if (pose.keywords.some((keyword: string) => 
               keyword.toLowerCase().includes(query)
             )) {
               return true;

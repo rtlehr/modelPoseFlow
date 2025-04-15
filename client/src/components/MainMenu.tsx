@@ -16,7 +16,8 @@ export default function MainMenu({
   onPoseCatalog, 
   onUserPreferences, 
   onModelBlog,
-  onMusicPlaylist
+  onMusicPlaylist,
+  onPoseKeywords
 }: MainMenuProps) {
   const isMobile = useIsMobile();
   
@@ -33,6 +34,13 @@ export default function MainMenu({
       description: "Create and manage music playlists for your drawing sessions",
       icon: <Music className="w-5 h-5" />,
       onClick: onMusicPlaylist,
+      primary: false
+    },
+    {
+      title: "Pose Keywords",
+      description: "Manage keywords for poses to improve pose matching",
+      icon: <Tag className="w-5 h-5" />,
+      onClick: onPoseKeywords,
       primary: false
     },
     {

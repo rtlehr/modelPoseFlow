@@ -38,7 +38,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       const analysis = await analyzePoseDescription(description);
       
-      let matchingPoses = [];
+      let matchingPoses: Pose[] = [];
       
       // If we have keywords, try to match by keywords first
       if (analysis.keywords && analysis.keywords.length > 0) {
