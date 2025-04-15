@@ -85,7 +85,7 @@ export default function PoseDifficultyManager({ pose, onUpdate }: PoseDifficulty
 
   return (
     <div className="border rounded-lg p-4 mb-4">
-      <h3 className="text-lg font-medium mb-2">Pose Difficulty</h3>
+      <h3 className="text-lg font-medium mb-2">Pose Difficulty (for Models to Hold)</h3>
       
       {pose.difficultyLevel ? (
         <div className="mb-3">
@@ -110,7 +110,7 @@ export default function PoseDifficultyManager({ pose, onUpdate }: PoseDifficulty
         </div>
       ) : (
         <p className="text-sm text-gray-600 mb-3">
-          This pose hasn't been analyzed for difficulty yet.
+          This pose hasn't been analyzed for model holding difficulty yet.
         </p>
       )}
       

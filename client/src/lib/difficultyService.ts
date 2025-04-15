@@ -81,15 +81,15 @@ export async function getPosesByDifficulty(difficultyLevel: number): Promise<Pos
 }
 
 /**
- * Converts a difficulty level number to a human-readable string
+ * Converts a difficulty level number to a human-readable string for model holding difficulty
  * @param level The difficulty level (1-Easy, 2-Medium, 3-Hard)
  * @returns A string representation of the difficulty level
  */
 export function getDifficultyLabel(level: number | undefined): string {
   switch(level) {
-    case 1: return 'Easy';
-    case 2: return 'Medium';
-    case 3: return 'Hard';
+    case 1: return 'Easy to Hold';
+    case 2: return 'Medium to Hold';
+    case 3: return 'Hard to Hold';
     default: return 'Unknown';
   }
 }

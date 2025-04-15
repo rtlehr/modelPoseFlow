@@ -117,7 +117,7 @@ export async function analyzePoseDescription(description: string): Promise<PoseA
 }
 
 /**
- * Analyzes a pose image to determine its difficulty level for figure drawing
+ * Analyzes a pose image to determine its difficulty level for a live model to hold
  * Returns a difficulty level (1-Easy, 2-Medium, 3-Hard) and explanation
  */
 export async function analyzePoseDifficulty(imageUrl: string): Promise<PoseDifficultyResult> {
@@ -128,29 +128,29 @@ export async function analyzePoseDifficulty(imageUrl: string): Promise<PoseDiffi
         {
           role: "system",
           content: 
-            "You are an AI assistant that helps determine the difficulty level of figure drawing poses for artists. " +
-            "Analyze the pose image and evaluate its difficulty for drawing based on several factors:\n\n" +
-            "1. Complexity of the pose (simple vs complex positioning)\n" +
-            "2. Foreshortening (minimal vs significant)\n" +
-            "3. Balance and weight distribution\n" +
-            "4. Visibility of anatomical landmarks\n" +
-            "5. Unusual angles or perspectives\n" +
-            "6. Dynamic vs static nature of the pose\n" +
-            "7. Complexity of lighting and shadows\n\n" +
+            "You are an AI assistant that helps determine the difficulty level for a live model to hold a pose. " +
+            "Analyze the pose image and evaluate its difficulty for a human model to maintain based on several factors:\n\n" +
+            "1. Muscle strain and tension required\n" +
+            "2. Balance requirements (stable vs unstable positions)\n" +
+            "3. Weight distribution and support points\n" +
+            "4. Joint pressure and potential discomfort\n" +
+            "5. Duration sustainability (how long could one reasonably hold this pose)\n" +
+            "6. Unnatural body positions\n" +
+            "7. Physical flexibility requirements\n\n" +
             "Rate the pose on a scale of 1 to 3, where:\n" +
-            "1 = EASY (simple poses, clear silhouette, minimal foreshortening, good visibility of features)\n" +
-            "2 = MEDIUM (moderate complexity, some foreshortening, slightly challenging angles)\n" +
-            "3 = HARD (complex positioning, significant foreshortening, difficult angles, challenging balance)\n\n" +
+            "1 = EASY (comfortable, natural positions, good support, minimal strain, sustainable for long periods)\n" +
+            "2 = MEDIUM (moderate muscle engagement, some balance required, mild strain, sustainable for medium durations)\n" +
+            "3 = HARD (significant muscle strain, challenging balance, uncomfortable positions, difficult to sustain for more than short periods)\n\n" +
             "Return a JSON object with:\n" +
             "- 'difficultyLevel': A number from 1-3 representing difficulty\n" +
-            "- 'difficultyReason': A brief explanation (1-2 sentences) of why this pose has that difficulty rating"
+            "- 'difficultyReason': A brief explanation (1-2 sentences) of why this pose has that difficulty rating for a live model to hold"
         },
         {
           role: "user",
           content: [
             {
               type: "text", 
-              text: "Analyze this figure pose and determine its difficulty level for artists to draw, with a brief explanation of your rating."
+              text: "Analyze this figure pose and determine how difficult it would be for a live human model to hold this pose for an extended period of time (5+ minutes), with a brief explanation of your rating."
             },
             {
               type: "image_url",

@@ -429,7 +429,7 @@ export default function PoseLibraryScreen({ onBack }: PoseLibraryScreenProps) {
             </div>
             
             <div>
-              <h3 className="text-sm font-medium mb-2">Difficulty Level</h3>
+              <h3 className="text-sm font-medium mb-2">Model Holding Difficulty</h3>
               <div className="flex flex-wrap gap-2">
                 <button 
                   onClick={() => setDifficultyFilter(null)}
@@ -449,7 +449,7 @@ export default function PoseLibraryScreen({ onBack }: PoseLibraryScreenProps) {
                       : 'border-green-200 text-green-600 hover:border-green-400'
                   }`}
                 >
-                  Easy
+                  Easy to Hold
                 </button>
                 <button 
                   onClick={() => setDifficultyFilter(2)}
@@ -459,7 +459,7 @@ export default function PoseLibraryScreen({ onBack }: PoseLibraryScreenProps) {
                       : 'border-orange-200 text-orange-600 hover:border-orange-400'
                   }`}
                 >
-                  Medium
+                  Medium to Hold
                 </button>
                 <button 
                   onClick={() => setDifficultyFilter(3)}
@@ -469,7 +469,7 @@ export default function PoseLibraryScreen({ onBack }: PoseLibraryScreenProps) {
                       : 'border-red-200 text-red-600 hover:border-red-400'
                   }`}
                 >
-                  Hard
+                  Hard to Hold
                 </button>
               </div>
             </div>
@@ -543,8 +543,8 @@ export default function PoseLibraryScreen({ onBack }: PoseLibraryScreenProps) {
                             pose.difficultyLevel === 2 ? 'text-orange-500 border-orange-500' :
                             'text-red-500 border-red-500'
                           }`}>
-                            {pose.difficultyLevel === 1 ? 'Easy' : 
-                             pose.difficultyLevel === 2 ? 'Med' : 'Hard'}
+                            {pose.difficultyLevel === 1 ? 'Easy Hold' : 
+                             pose.difficultyLevel === 2 ? 'Med Hold' : 'Hard Hold'}
                           </div>
                         )}
                       </div>
