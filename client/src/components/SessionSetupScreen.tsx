@@ -74,11 +74,17 @@ export default function SessionSetupScreen({
       </div>
       
       <div className="mb-6 p-4 bg-gray-50 rounded-lg border border-gray-100">
-        <h3 className="text-sm font-medium text-gray-700 mb-2">Selected Pose Type</h3>
+        <h3 className="text-sm font-medium text-gray-700 mb-2">Selected Pose Description</h3>
         <p className="text-sm text-gray-600 italic">"{poseDescription}"</p>
-        <div className="mt-2">
-          <span className="text-xs text-gray-500">Categories: </span>
-          <span className="text-xs font-medium text-primary">{selectedCategories.join(", ")}</span>
+        <div className="mt-2 flex items-center flex-wrap gap-1">
+          <span className="text-xs text-gray-500 mr-1">AI will match using keywords</span>
+          {selectedCategories.length > 0 && (
+            <div className="inline-flex items-center">
+              <span className="text-xs text-gray-400">·</span>
+              <span className="text-xs ml-1 text-gray-500">Fallback categories: </span>
+              <span className="text-xs font-medium text-primary ml-1">{selectedCategories.join(", ")}</span>
+            </div>
+          )}
         </div>
       </div>
       

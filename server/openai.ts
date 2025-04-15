@@ -13,7 +13,7 @@ interface PoseAnalysisResult {
 
 /**
  * Generates keywords for a pose based on its visual characteristics
- * This can be used to assist with tagging poses for better searchability
+ * These keywords are now the primary method for matching poses to user descriptions
  */
 export async function generatePoseKeywords(imageUrl: string): Promise<string[]> {
   try {
@@ -24,16 +24,17 @@ export async function generatePoseKeywords(imageUrl: string): Promise<string[]> 
           role: "system",
           content: 
             "You are an AI assistant that helps analyze figure drawing poses from images. " +
-            "Extract relevant keywords that describe the pose, body position, expression, mood, and any distinctive features. " +
-            "Focus on aspects that would be relevant for an artist looking for specific poses to draw. " +
-            "You should return a JSON array of 10-15 specific keywords that accurately describe the pose."
+            "Extract DETAILED and SPECIFIC keywords that describe the pose, body position, expression, mood, lighting, and any distinctive features. " +
+            "These keywords will be the PRIMARY METHOD for matching poses to user descriptions, so be thorough and precise. " +
+            "Include terms related to: body position, angle, perspective, gesture, expression, mood, lighting, dynamism, composition, etc. " +
+            "You should return a JSON array of 15-20 specific keywords that accurately describe the pose."
         },
         {
           role: "user",
           content: [
             {
               type: "text", 
-              text: "Generate descriptive keywords for this figure pose that would help artists find it when searching."
+              text: "Generate comprehensive descriptive keywords for this figure pose. These keywords will be used to match this pose with user descriptions, so be specific and detailed."
             },
             {
               type: "image_url",

@@ -477,8 +477,9 @@ export default function PoseLibraryScreen({ onBack }: PoseLibraryScreenProps) {
           
           <div className="space-y-4 py-4">
             <div className="flex flex-col space-y-2">
-              <label htmlFor="category" className="text-sm font-medium">
-                Pose Category
+              <label htmlFor="category" className="text-sm font-medium flex items-center">
+                <span>Basic Pose Category</span>
+                <span className="ml-2 text-xs text-gray-500 italic">(Keywords are auto-generated)</span>
               </label>
               <select
                 id="category"
@@ -491,6 +492,9 @@ export default function PoseLibraryScreen({ onBack }: PoseLibraryScreenProps) {
                 <option value="reclining">Reclining</option>
                 <option value="action">Action</option>
               </select>
+              <p className="text-xs text-gray-500">
+                After upload, AI will analyze the image and generate keywords for enhanced matching.
+              </p>
             </div>
             
             <div className="flex flex-col space-y-2">

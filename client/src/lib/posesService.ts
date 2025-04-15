@@ -2,7 +2,8 @@ import { Pose, PoseCategory } from "@/types";
 import { shuffleArray } from "./utils";
 
 /**
- * Filters poses by categories and returns them randomly or sequentially
+ * Selects poses for a session - keywords are now the primary matching method
+ * but we still use categories as a fallback for compatibility
  */
 export function getPosesForSession(
   allPoses: Pose[],
@@ -13,14 +14,22 @@ export function getPosesForSession(
   // Check if random category is selected
   const isRandom = categories.includes("random");
   
-  // If random is selected, use all poses regardless of category
-  // Otherwise, filter poses by selected categories
-  const filteredPoses = isRandom 
-    ? allPoses 
-    : allPoses.filter(pose => categories.includes(pose.category));
+  // Get available poses based on selection criteria
+  let filteredPoses = allPoses;
   
+  // Only filter by categories if:
+  // 1. Random is not selected
+  // 2. We have specific categories to filter by
+  if (!isRandom && categories.length > 0) {
+    // NOTE: This is now a fallback method - in most cases, poses come pre-filtered
+    // by keywords from the API, but we keep this for compatibility
+    filteredPoses = allPoses.filter(pose => categories.includes(pose.category));
+  }
+  
+  // If no poses match, use all available poses as a fallback
   if (filteredPoses.length === 0) {
-    return [];
+    console.log("No matching poses found, using all available poses");
+    filteredPoses = allPoses;
   }
   
   // If we need more poses than available, repeat them
