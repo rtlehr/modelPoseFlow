@@ -16,8 +16,9 @@ import {
 } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
 import { useIsMobile } from "@/hooks/use-mobile";
-import { Pose } from "@shared/schema";
+import { Pose } from "@/types";
 import PoseKeywordManager from "./PoseKeywordManager";
+import PoseDifficultyManager from "./PoseDifficultyManager";
 
 interface PoseLibraryScreenProps {
   onBack: () => void;

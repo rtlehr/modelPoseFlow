@@ -108,6 +108,97 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
   
+  // API endpoint to get poses by difficulty level
+  app.get("/api/poses/difficulty/:level", async (req: Request, res: Response) => {
+    try {
+      const difficultyLevel = parseInt(req.params.level);
+      
+      if (isNaN(difficultyLevel) || difficultyLevel < 1 || difficultyLevel > 3) {
+        return res.status(400).json({ 
+          message: "Invalid difficulty level. Must be 1 (Easy), 2 (Medium), or 3 (Hard)" 
+        });
+      }
+      
+      const poses = await storage.getPosesByDifficulty(difficultyLevel);
+      res.json(poses);
+    } catch (error) {
+      console.error("Error fetching poses by difficulty:", error);
+      res.status(500).json({ message: "Failed to fetch poses by difficulty" });
+    }
+  });
+
+  // API endpoint to analyze pose difficulty
+  app.post("/api/poses/:id/analyze-difficulty", async (req: Request, res: Response) => {
+    try {
+      const poseId = parseInt(req.params.id);
+      
+      if (isNaN(poseId)) {
+        return res.status(400).json({ message: "Invalid pose ID" });
+      }
+      
+      // Get the pose to access its image URL
+      const poses = await storage.getAllPoses();
+      const pose = poses.find(p => p.id === poseId);
+      
+      if (!pose || !pose.url) {
+        return res.status(404).json({ message: "Pose not found or missing image URL" });
+      }
+      
+      // Analyze the pose difficulty using OpenAI
+      const difficultyAnalysis = await analyzePoseDifficulty(pose.url);
+      
+      // Update the pose with the difficulty information
+      const updatedPose = await storage.updatePoseDifficulty(
+        poseId, 
+        difficultyAnalysis.difficultyLevel,
+        difficultyAnalysis.difficultyReason
+      );
+      
+      return res.status(200).json({ 
+        pose: updatedPose, 
+        difficultyLevel: difficultyAnalysis.difficultyLevel,
+        difficultyReason: difficultyAnalysis.difficultyReason
+      });
+    } catch (error) {
+      console.error("Error analyzing pose difficulty:", error);
+      return res.status(500).json({ message: "Failed to analyze pose difficulty" });
+    }
+  });
+
+  // API endpoint to manually update pose difficulty
+  app.put("/api/poses/:id/difficulty", async (req: Request, res: Response) => {
+    try {
+      const poseId = parseInt(req.params.id);
+      const { difficultyLevel, difficultyReason } = req.body;
+      
+      if (isNaN(poseId)) {
+        return res.status(400).json({ message: "Invalid pose ID" });
+      }
+      
+      if (!difficultyLevel || difficultyLevel < 1 || difficultyLevel > 3) {
+        return res.status(400).json({ 
+          message: "Invalid difficulty level. Must be 1 (Easy), 2 (Medium), or 3 (Hard)" 
+        });
+      }
+      
+      // Update the pose with the provided difficulty information
+      const updatedPose = await storage.updatePoseDifficulty(
+        poseId, 
+        difficultyLevel,
+        difficultyReason || ""
+      );
+      
+      if (!updatedPose) {
+        return res.status(404).json({ message: "Pose not found" });
+      }
+      
+      return res.status(200).json({ pose: updatedPose });
+    } catch (error) {
+      console.error("Error updating pose difficulty:", error);
+      return res.status(500).json({ message: "Failed to update pose difficulty" });
+    }
+  });
+
   // Pose keyword management endpoints
   app.post("/api/poses/:id/generate-keywords", async (req: Request, res: Response) => {
     try {
