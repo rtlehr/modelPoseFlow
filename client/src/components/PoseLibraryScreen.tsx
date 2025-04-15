@@ -208,8 +208,26 @@ export default function PoseLibraryScreen({ onBack }: PoseLibraryScreenProps) {
       // Refresh poses
       refetch();
       
-      // Select the new pose to edit keywords
-      setSelectedPose(newPose);
+      // After uploading pose, generate keywords automatically
+      try {
+        console.log("Generating keywords for pose ID:", newPose.id);
+        const keywordsResponse = await apiRequest("POST", `/api/poses/${newPose.id}/generate-keywords`);
+        
+        if (keywordsResponse.ok) {
+          const keywordsResult = await keywordsResponse.json();
+          console.log("Keywords generated:", keywordsResult);
+          
+          // Update the selected pose with the keywords
+          setSelectedPose(keywordsResult.pose);
+        } else {
+          console.error("Failed to generate keywords automatically");
+          setSelectedPose(newPose);
+        }
+      } catch (keywordError) {
+        console.error("Error generating keywords:", keywordError);
+        // Still select the pose even if keyword generation fails
+        setSelectedPose(newPose);
+      }
       
     } catch (error: any) {
       console.error("Error uploading pose:", error);
