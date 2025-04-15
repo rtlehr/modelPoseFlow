@@ -5,6 +5,8 @@ import LoadingScreen from "@/components/LoadingScreen";
 import MainMenu from "@/components/MainMenu";
 import PlaceholderScreen from "@/components/PlaceholderScreen";
 import PoseLibraryScreen from "@/components/PoseLibraryScreen";
+import BlogListScreen from "@/components/BlogListScreen";
+import BlogArticleScreen from "@/components/BlogArticleScreen";
 import { PoseSessionConfig, Pose } from "@/types";
 import { useQuery } from "@tanstack/react-query";
 
@@ -17,12 +19,14 @@ type Screen =
   | 'poseCatalog'
   | 'userPreferences'
   | 'modelBlog'
+  | 'blogArticle'
   | 'poseKeywords';
 
 export default function Home() {
   // Track which screen is currently displayed
   const [currentScreen, setCurrentScreen] = useState<Screen>('loading');
   const [sessionConfig, setSessionConfig] = useState<PoseSessionConfig | null>(null);
+  const [currentArticleSlug, setCurrentArticleSlug] = useState<string>('');
 
   // Fetch poses from the API
   const { data: poses = [] as Pose[] } = useQuery<Pose[]>({
@@ -78,6 +82,15 @@ export default function Home() {
   
   const handleGoToPoseKeywords = () => {
     setCurrentScreen('poseKeywords');
+  };
+
+  const handleSelectArticle = (slug: string) => {
+    setCurrentArticleSlug(slug);
+    setCurrentScreen('blogArticle');
+  };
+
+  const handleBackToBlogList = () => {
+    setCurrentScreen('modelBlog');
   };
 
   // Render different components based on the current screen
@@ -143,13 +156,18 @@ export default function Home() {
         
       case 'modelBlog':
         return (
-          <div className="container mx-auto px-4 py-8">
-            <PlaceholderScreen
-              title="Model Blog"
-              description="This feature will provide articles and resources about modeling and figure drawing techniques."
-              onBack={handleBackToMainMenu}
-            />
-          </div>
+          <BlogListScreen
+            onBack={handleBackToMainMenu}
+            onSelectArticle={handleSelectArticle}
+          />
+        );
+        
+      case 'blogArticle':
+        return (
+          <BlogArticleScreen
+            slug={currentArticleSlug}
+            onBack={handleBackToBlogList}
+          />
         );
         
       case 'poseKeywords':

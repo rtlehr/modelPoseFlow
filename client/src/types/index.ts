@@ -15,3 +15,17 @@ export interface PoseSessionConfig {
   keywords?: string[];
   description?: string;
 }
+
+export interface BlogArticle {
+  id: number;
+  title: string;
+  slug: string;
+  summary: string;
+  content: string;
+  coverImage?: string;
+  authorName: string;
+  publishedAt: string | Date;
+  updatedAt: string | Date;
+  featured: number;
+  tags?: string[] | null;
+}

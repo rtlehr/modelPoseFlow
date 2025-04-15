@@ -4,9 +4,12 @@ import { storage } from "./storage";
 import path from "path";
 import fs from "fs";
 import { analyzePoseDescription, generatePoseKeywords } from "./openai";
-import { Pose } from "../shared/schema";
+import { Pose, BlogArticle } from "../shared/schema";
 
 export async function registerRoutes(app: Express): Promise<Server> {
+  // Initialize database with seed data
+  await storage.seedPoses();
+  await storage.seedBlogArticles();
   // API endpoint to get all poses
   app.get("/api/poses", async (req, res) => {
     try {
@@ -354,6 +357,132 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error deleting playlist:", error);
       res.status(500).json({ message: "Failed to delete playlist" });
+    }
+  });
+  
+  // Blog article routes
+  app.get("/api/blog-articles", async (_req: Request, res: Response) => {
+    try {
+      const articles = await storage.getAllBlogArticles();
+      res.json(articles);
+    } catch (error) {
+      console.error("Error fetching blog articles:", error);
+      res.status(500).json({ message: "Failed to fetch blog articles" });
+    }
+  });
+  
+  app.get("/api/blog-articles/:id", async (req: Request, res: Response) => {
+    try {
+      const id = parseInt(req.params.id);
+      if (isNaN(id)) {
+        return res.status(400).json({ message: "Invalid article ID" });
+      }
+      
+      const article = await storage.getBlogArticle(id);
+      if (!article) {
+        return res.status(404).json({ message: "Article not found" });
+      }
+      
+      res.json(article);
+    } catch (error) {
+      console.error("Error fetching blog article:", error);
+      res.status(500).json({ message: "Failed to fetch blog article" });
+    }
+  });
+  
+  app.get("/api/blog-articles/slug/:slug", async (req: Request, res: Response) => {
+    try {
+      const { slug } = req.params;
+      
+      if (!slug) {
+        return res.status(400).json({ message: "Invalid article slug" });
+      }
+      
+      const article = await storage.getBlogArticleBySlug(slug);
+      if (!article) {
+        return res.status(404).json({ message: "Article not found" });
+      }
+      
+      res.json(article);
+    } catch (error) {
+      console.error("Error fetching blog article by slug:", error);
+      res.status(500).json({ message: "Failed to fetch blog article" });
+    }
+  });
+  
+  app.post("/api/blog-articles", async (req: Request, res: Response) => {
+    try {
+      const { title, slug, summary, content, coverImage, authorName, tags, featured } = req.body;
+      
+      if (!title || !slug || !summary || !content || !authorName) {
+        return res.status(400).json({ message: "Missing required fields" });
+      }
+      
+      const article = await storage.createBlogArticle({
+        title,
+        slug,
+        summary,
+        content,
+        coverImage,
+        authorName,
+        publishedAt: new Date(),
+        featured: featured || 0,
+        tags: tags || []
+      });
+      
+      res.status(201).json(article);
+    } catch (error) {
+      console.error("Error creating blog article:", error);
+      res.status(500).json({ message: "Failed to create blog article" });
+    }
+  });
+  
+  app.put("/api/blog-articles/:id", async (req: Request, res: Response) => {
+    try {
+      const id = parseInt(req.params.id);
+      if (isNaN(id)) {
+        return res.status(400).json({ message: "Invalid article ID" });
+      }
+      
+      const { title, slug, summary, content, coverImage, authorName, tags, featured } = req.body;
+      const updatedArticle = await storage.updateBlogArticle(id, {
+        title,
+        slug,
+        summary,
+        content,
+        coverImage,
+        authorName,
+        featured,
+        tags
+      });
+      
+      if (!updatedArticle) {
+        return res.status(404).json({ message: "Article not found" });
+      }
+      
+      res.json(updatedArticle);
+    } catch (error) {
+      console.error("Error updating blog article:", error);
+      res.status(500).json({ message: "Failed to update blog article" });
+    }
+  });
+  
+  app.delete("/api/blog-articles/:id", async (req: Request, res: Response) => {
+    try {
+      const id = parseInt(req.params.id);
+      if (isNaN(id)) {
+        return res.status(400).json({ message: "Invalid article ID" });
+      }
+      
+      const success = await storage.deleteBlogArticle(id);
+      if (!success) {
+        return res.status(404).json({ message: "Article not found" });
+      }
+      
+      res.status(204).end();
+    } catch (error) {
+      console.error("Error deleting blog article:", error);
+      res.status(500).json({ message: "Failed to delete blog article" });
     }
   });
   
