@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { useIsMobile } from "@/hooks/use-mobile";
-import { ArrowRight, Palette, Book, Settings, Music } from "lucide-react";
+import { ArrowRight, Palette, Book, Settings, Music, Tag } from "lucide-react";
 
 interface MainMenuProps {
   onStartSession: () => void;
@@ -8,6 +8,7 @@ interface MainMenuProps {
   onUserPreferences: () => void;
   onModelBlog: () => void;
   onMusicPlaylist: () => void;
+  onPoseKeywords?: () => void;
 }
 
 export default function MainMenu({ 

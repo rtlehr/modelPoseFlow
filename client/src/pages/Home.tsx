@@ -5,6 +5,7 @@ import LoadingScreen from "@/components/LoadingScreen";
 import MainMenu from "@/components/MainMenu";
 import PlaceholderScreen from "@/components/PlaceholderScreen";
 import MusicPlaylistScreen from "@/components/MusicPlaylistScreen";
+import PoseKeywordsScreen from "@/components/PoseKeywordsScreen";
 import { PoseSessionConfig, Pose } from "@/types";
 import { useQuery } from "@tanstack/react-query";
 
@@ -17,7 +18,8 @@ type Screen =
   | 'poseCatalog'
   | 'userPreferences'
   | 'modelBlog'
-  | 'musicPlaylist';
+  | 'musicPlaylist'
+  | 'poseKeywords';
 
 export default function Home() {
   // Track which screen is currently displayed
@@ -78,6 +80,10 @@ export default function Home() {
   
   const handleGoToMusicPlaylist = () => {
     setCurrentScreen('musicPlaylist');
+  };
+  
+  const handleGoToPoseKeywords = () => {
+    setCurrentScreen('poseKeywords');
   };
 
   // Render different components based on the current screen
@@ -155,6 +161,13 @@ export default function Home() {
       case 'musicPlaylist':
         return (
           <MusicPlaylistScreen 
+            onBack={handleBackToMainMenu}
+          />
+        );
+        
+      case 'poseKeywords':
+        return (
+          <PoseKeywordsScreen 
             onBack={handleBackToMainMenu}
           />
         );
