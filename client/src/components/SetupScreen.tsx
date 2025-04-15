@@ -21,14 +21,24 @@ export default function SetupScreen({ onStartSession, poses, onBack }: SetupScre
   const [showSessionSetup, setShowSessionSetup] = useState(false);
   
   // Handler for when pose description is analyzed and categories are extracted
-  const handleDescriptionProcessed = (categories: PoseCategory[], description: string) => {
+  const handleDescriptionProcessed = (categories: PoseCategory[], description: string, useAiGeneration?: boolean) => {
     setSelectedCategories(categories);
     setPoseDescription(description);
     
-    toast({
-      title: "Poses found!",
-      description: `Found matching poses in categories: ${categories.join(", ")}`,
-    });
+    if (useAiGeneration) {
+      toast({
+        title: "AI Poses Generated!",
+        description: `Custom poses have been generated based on your description.`,
+      });
+    } else {
+      toast({
+        title: "Poses Found!",
+        description: `Found matching poses in categories: ${categories.join(", ")}`,
+      });
+    }
+    
+    // Automatically proceed to session setup after description processing
+    setShowSessionSetup(true);
   };
 
   const handleProceedToSessionSetup = (e: React.FormEvent) => {
@@ -113,6 +123,7 @@ export default function SetupScreen({ onStartSession, poses, onBack }: SetupScre
           </>
         )}
         
+        {/* Continue button - only show if we're not using AI generation feature */}
         <div className="flex space-x-4">
           {onBack && (
             <Button 
@@ -121,7 +132,7 @@ export default function SetupScreen({ onStartSession, poses, onBack }: SetupScre
               onClick={onBack}
               className={`flex-1 touch-manipulation`}
             >
-              Cancel
+              Back
             </Button>
           )}
           <Button 
@@ -132,7 +143,7 @@ export default function SetupScreen({ onStartSession, poses, onBack }: SetupScre
               active:scale-[0.98] touch-manipulation
               ${selectedCategories.length === 0 ? 'opacity-50 cursor-not-allowed' : ''}`}
           >
-            Set Up Session
+            Continue to Session Setup
           </Button>
         </div>
       </form>
