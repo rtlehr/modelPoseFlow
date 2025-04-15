@@ -75,6 +75,10 @@ export default function Home() {
   const handleGoToModelBlog = () => {
     setCurrentScreen('modelBlog');
   };
+  
+  const handleGoToMusicPlaylist = () => {
+    setCurrentScreen('musicPlaylist');
+  };
 
   // Render different components based on the current screen
   const renderScreen = () => {
@@ -89,6 +93,7 @@ export default function Home() {
             onPoseCatalog={handleGoToPoseCatalog}
             onUserPreferences={handleGoToUserPreferences}
             onModelBlog={handleGoToModelBlog}
+            onMusicPlaylist={handleGoToMusicPlaylist}
           />
         );
         
@@ -145,6 +150,13 @@ export default function Home() {
               onBack={handleBackToMainMenu}
             />
           </div>
+        );
+        
+      case 'musicPlaylist':
+        return (
+          <MusicPlaylistScreen 
+            onBack={handleBackToMainMenu}
+          />
         );
         
       default:
