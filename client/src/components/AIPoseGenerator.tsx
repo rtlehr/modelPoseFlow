@@ -243,8 +243,8 @@ export default function AIPoseGenerator({ onSavePose, onCancel, open }: AIPoseGe
               <h4 className="font-medium mb-1">Tips for good results:</h4>
               <ul className="list-disc pl-5 space-y-1">
                 <li>Be specific about the pose position and orientation</li>
-                <li>Mention lighting, perspective, and style if desired</li>
-                <li>Generation takes 30-60 seconds, please be patient</li>
+                <li>Try different prompts to get different results</li>
+                <li>Generation takes a few seconds to complete</li>
                 <li>If you don't like the result, try again with a refined prompt</li>
               </ul>
             </div>
@@ -272,7 +272,7 @@ export default function AIPoseGenerator({ onSavePose, onCancel, open }: AIPoseGe
                   {isGenerating && (
                     <div className="flex justify-center mt-4">
                       <div className="animate-pulse text-indigo-500 text-sm">
-                        This may take 30-60 seconds...
+                        This may take a few seconds...
                       </div>
                     </div>
                   )}
