@@ -153,7 +153,7 @@ export default function TimerScreen({ onBackToSetup, sessionConfig, poses }: Tim
           <PoseProgress 
             currentPoseIndex={currentPoseIndex + 1} 
             totalPoses={totalPoses} 
-            poseCategory={currentPose.category}
+            keywords={currentPose.keywords}
             progress={progress}
           />
           

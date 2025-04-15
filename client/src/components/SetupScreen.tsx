@@ -2,7 +2,7 @@ import { useState } from "react";
 import PoseDescriptionInput from "./PoseDescriptionInput";
 import SessionSetupScreen from "./SessionSetupScreen";
 import { Button } from "@/components/ui/button";
-import { PoseCategory, PoseSessionConfig, Pose } from "@/types";
+import { PoseSessionConfig, Pose } from "@/types";
 import { useToast } from "@/hooks/use-toast";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { ArrowLeft } from "lucide-react";
@@ -16,18 +16,18 @@ interface SetupScreenProps {
 export default function SetupScreen({ onStartSession, poses, onBack }: SetupScreenProps) {
   const { toast } = useToast();
   const isMobile = useIsMobile();
-  const [selectedCategories, setSelectedCategories] = useState<PoseCategory[]>([]);
+  const [selectedKeywords, setSelectedKeywords] = useState<string[]>([]);
   const [poseDescription, setPoseDescription] = useState<string>("");
   const [showSessionSetup, setShowSessionSetup] = useState(false);
   
-  // Handler for when pose description is analyzed and categories are extracted
-  const handleDescriptionProcessed = (categories: PoseCategory[], description: string) => {
-    setSelectedCategories(categories);
+  // Handler for when pose description is analyzed and keywords are extracted
+  const handleDescriptionProcessed = (keywords: string[], description: string) => {
+    setSelectedKeywords(keywords);
     setPoseDescription(description);
     
     toast({
       title: "Poses found!",
-      description: `Found matching poses in categories: ${categories.join(", ")}`,
+      description: `Found matching poses using ${keywords.length} keywords`,
     });
   };
 
@@ -35,7 +35,7 @@ export default function SetupScreen({ onStartSession, poses, onBack }: SetupScre
     e.preventDefault();
     
     // Validate form
-    if (selectedCategories.length === 0) {
+    if (selectedKeywords.length === 0) {
       toast({
         title: "Error",
         description: "Please describe the types of poses you want",
@@ -44,16 +44,21 @@ export default function SetupScreen({ onStartSession, poses, onBack }: SetupScre
       return;
     }
 
-    // Filter poses based on selected categories
-    const filteredPoses = poses.filter(pose => selectedCategories.includes(pose.category));
+    // Get matching poses based on keywords
+    const matchingPoses = poses.filter(pose => {
+      if (!pose.keywords || pose.keywords.length === 0) return false;
+      return pose.keywords.some(keyword => 
+        selectedKeywords.some(selectedKw => 
+          keyword.toLowerCase().includes(selectedKw.toLowerCase())
+        )
+      );
+    });
     
-    if (filteredPoses.length === 0) {
+    if (matchingPoses.length === 0 && poses.length > 0) {
       toast({
-        title: "Error",
-        description: "No poses available for your description. Please try a different description.",
-        variant: "destructive",
+        title: "Warning",
+        description: "No exact keyword matches found. Using all available poses."
       });
-      return;
     }
 
     // Show the session setup screen
@@ -68,7 +73,7 @@ export default function SetupScreen({ onStartSession, poses, onBack }: SetupScre
   if (showSessionSetup) {
     return (
       <SessionSetupScreen
-        selectedCategories={selectedCategories}
+        selectedKeywords={selectedKeywords}
         poseDescription={poseDescription}
         onStartSession={onStartSession}
         onBack={handleBackToDescription}
@@ -103,12 +108,19 @@ export default function SetupScreen({ onStartSession, poses, onBack }: SetupScre
           onDescriptionProcessed={handleDescriptionProcessed}
         />
         
-        {selectedCategories.length > 0 && (
+        {selectedKeywords.length > 0 && (
           <>
             <div className="mt-4 p-3 bg-gray-50 rounded-lg border border-gray-100">
-              <p className="text-sm text-gray-600">
-                <span className="font-medium">Selected categories:</span> {selectedCategories.join(", ")}
+              <p className="text-sm text-gray-600 mb-1">
+                <span className="font-medium">Selected keywords:</span>
               </p>
+              <div className="flex flex-wrap gap-1">
+                {selectedKeywords.map((keyword, index) => (
+                  <span key={index} className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-primary/10 text-primary">
+                    {keyword}
+                  </span>
+                ))}
+              </div>
             </div>
           </>
         )}
@@ -126,11 +138,11 @@ export default function SetupScreen({ onStartSession, poses, onBack }: SetupScre
           )}
           <Button 
             type="submit" 
-            disabled={selectedCategories.length === 0}
+            disabled={selectedKeywords.length === 0}
             className={`${onBack ? 'flex-1' : 'w-full'} bg-primary hover:bg-indigo-700 text-white font-bold 
               ${isMobile ? 'text-lg py-4' : 'py-3'} px-4 rounded-lg transition duration-200
               active:scale-[0.98] touch-manipulation
-              ${selectedCategories.length === 0 ? 'opacity-50 cursor-not-allowed' : ''}`}
+              ${selectedKeywords.length === 0 ? 'opacity-50 cursor-not-allowed' : ''}`}
           >
             Set Up Session
           </Button>
