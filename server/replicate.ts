@@ -20,9 +20,9 @@ interface ReplicateResponseData {
  */
 export async function generatePoseImage(prompt: string): Promise<string> {
   try {
-    // Use the latest ControlNet + OpenPose model
+    // Use a publicly available ControlNet + OpenPose model
     // This model generates images from text prompts using pose guidance
-    const modelVersion = "replicate/controlnet-pose:4e0e38c35a1adcd1fe8cd1a3e0cccc0e7109abb17cbacc8a3f11aee7d12c6559";
+    const modelVersion = "fofr/controlnet-pose:595428899eab15fb4fa43d0ffee78662a216ccb3bf7fcc1ffa7f7b3331b699e1";
     
     // Initial API call to start the prediction
     const response = await fetch("https://api.replicate.com/v1/predictions", {
@@ -35,14 +35,13 @@ export async function generatePoseImage(prompt: string): Promise<string> {
         version: modelVersion,
         input: {
           prompt,
-          image_resolution: "512", // Medium resolution for faster generation
+          width: 512,
+          height: 768, // Portrait orientation for figure poses
           num_inference_steps: 25, // Balance between quality and speed
           negative_prompt: "disfigured, deformed, low quality, bad anatomy", // Avoid common issues
-          controlnet_conditioning_scale: 1.0,
           guidance_scale: 7.5, // Standard guidance scale
-          detect_resolution: 512,
-          guess_mode: false,
-          pose_detector_model: "openpose", // Use OpenPose model
+          controlnet_scale: 1.0,
+          pose_type: "openpose",  // Use OpenPose model
         }
       }),
     });
