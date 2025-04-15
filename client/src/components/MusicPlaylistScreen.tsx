@@ -14,7 +14,7 @@ interface MusicPlaylistScreenProps {
   onBack: () => void;
 }
 
-export default function MusicPlaylistScreen({ onBack }: MusicPlaylistScreenProps) {
+export default function MusicPlaylistScreen({ onBack }: MusicPlaylistScreenProps): JSX.Element {
   const [tracks, setTracks] = useState<MusicTrack[]>([]);
   const [playlists, setPlaylists] = useState<Playlist[]>([]);
   const [selectedPlaylist, setSelectedPlaylist] = useState<Playlist | null>(null);
@@ -99,44 +99,46 @@ export default function MusicPlaylistScreen({ onBack }: MusicPlaylistScreenProps
         
         // Get file metadata from the browser
         const audio = new Audio();
-        audio.src = event.target.result;
-        
-        // Wait for metadata to load to get duration
-        audio.onloadedmetadata = async () => {
-          const duration = Math.round(audio.duration);
+        if (event.target && event.target.result) {
+          audio.src = event.target.result as string;
           
-          try {
-            // Save only file metadata, not the actual file
-            const newTrack = {
-              name: file.name.replace(/\.[^/.]+$/, ""), // Remove file extension
-              artist: "Unknown", // Could be extracted from ID3 tags with a library
-              duration,
-              // Store the file path or file reference - for demo we'll use dataURL
-              filePath: null,
-              fileData: event.target.result
-            };
+          // Wait for metadata to load to get duration
+          audio.onloadedmetadata = async () => {
+            const duration = Math.round(audio.duration);
             
-            const response = await apiRequest("POST", "/api/music-tracks", newTrack);
-            const data = await response.json();
-            
-            if (data) {
-              toast({
-                title: "Success",
-                description: `Added track: ${data.name}`,
-              });
+            try {
+              // Save only file metadata, not the actual file
+              const newTrack = {
+                name: file.name.replace(/\.[^/.]+$/, ""), // Remove file extension
+                artist: "Unknown", // Could be extracted from ID3 tags with a library
+                duration,
+                // Store the file path or file reference - for demo we'll use dataURL
+                filePath: null,
+                fileData: event.target?.result as string
+              };
               
-              // Reload tracks
-              loadTracks();
+              const response = await apiRequest("POST", "/api/music-tracks", newTrack);
+              const data = await response.json();
+              
+              if (data) {
+                toast({
+                  title: "Success",
+                  description: `Added track: ${data.name}`,
+                });
+                
+                // Reload tracks
+                loadTracks();
+              }
+            } catch (error) {
+              console.error("Error adding track:", error);
+              toast({
+                title: "Error",
+                description: "Failed to add music track. Please try again.",
+                variant: "destructive"
+              });
             }
-          } catch (error) {
-            console.error("Error adding track:", error);
-            toast({
-              title: "Error",
-              description: "Failed to add music track. Please try again.",
-              variant: "destructive"
-            });
-          }
-        };
+          };
+        }
       };
       
       // Read the file as data URL (base64)
@@ -200,8 +202,9 @@ export default function MusicPlaylistScreen({ onBack }: MusicPlaylistScreenProps
     
     try {
       // Create a new trackIds array with the added track
-      const trackIds = Array.isArray(selectedPlaylist.trackIds) 
-        ? [...selectedPlaylist.trackIds, trackId] 
+      const currentTrackIds = selectedPlaylist.trackIds as number[];
+      const trackIds = Array.isArray(currentTrackIds) 
+        ? [...currentTrackIds, trackId] 
         : [trackId];
       
       const response = await apiRequest("PUT", `/api/playlists/${selectedPlaylist.id}`, {
@@ -339,7 +342,9 @@ export default function MusicPlaylistScreen({ onBack }: MusicPlaylistScreenProps
   const getPlaylistTracks = () => {
     if (!selectedPlaylist || !Array.isArray(selectedPlaylist.trackIds)) return [];
     
-    return tracks.filter(track => selectedPlaylist.trackIds.includes(track.id));
+    // Ensure trackIds are treated as numbers
+    const trackIds = selectedPlaylist.trackIds as number[];
+    return tracks.filter(track => trackIds.includes(track.id));
   };
   
   return (
