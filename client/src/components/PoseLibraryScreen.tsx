@@ -195,14 +195,21 @@ export default function PoseLibraryScreen({ onBack }: PoseLibraryScreenProps) {
       // Select the new pose to edit keywords
       setSelectedPose(newPose);
       
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error uploading pose:", error);
       
-      // Custom error message based on the error
-      const errorMessage = error.message.includes("too large") 
-        ? "Image is too large. Please select an image smaller than 2MB."
-        : "Failed to upload pose. Please try again.";
-        
+      // Safely determine if there's a message property
+      let errorMessage = "Failed to upload pose. Please try again.";
+      
+      if (error && typeof error === 'object' && 'message' in error) {
+        if (String(error.message).includes("too large")) {
+          errorMessage = "Image is too large. Please select an image smaller than 2MB.";
+        }
+      }
+      
+      // Log more details for debugging
+      console.log("Error details:", JSON.stringify(error, null, 2));
+      
       toast({
         title: "Upload failed",
         description: errorMessage,
@@ -236,8 +243,9 @@ export default function PoseLibraryScreen({ onBack }: PoseLibraryScreenProps) {
       // Refresh poses
       refetch();
       
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error deleting pose:", error);
+      console.log("Error details:", JSON.stringify(error, null, 2));
       toast({
         title: "Deletion failed",
         description: "Failed to delete pose. Please try again.",
