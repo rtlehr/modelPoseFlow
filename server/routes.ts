@@ -384,12 +384,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const imageUrl = await generatePoseImage(prompt);
       
       // Log the response data to help with debugging
-      console.log(`Generated image successfully, returning data with URL length: ${imageUrl.length}`);
+      console.log(`Generated image successfully, returning image URL: ${imageUrl}`);
       
+      // Create a more descriptive response
       res.status(200).json({ 
         url: imageUrl,
         prompt,
-        category
+        category,
+        source: "Unsplash placeholder image",
+        timestamp: new Date().toISOString()
       });
     } catch (error: any) {
       console.error("Error generating AI pose:", error);

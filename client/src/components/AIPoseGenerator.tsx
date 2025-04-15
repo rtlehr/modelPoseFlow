@@ -89,6 +89,8 @@ export default function AIPoseGenerator({ onSavePose, onCancel, open }: AIPoseGe
       }
       
       const data = await response.json();
+      // Store the image URL in state
+      console.log("Received image URL:", data.url);
       setGeneratedImageUrl(data.url);
       
       toast({
