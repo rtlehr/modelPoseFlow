@@ -4,6 +4,7 @@ import usePoseSession from "@/hooks/usePoseSession";
 import { formatTime } from "@/lib/timerService";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useTouchDevice } from "@/hooks/useTouchDevice";
+import SessionMusicPlayer from "./SessionMusicPlayer";
 
 interface FullscreenTimerScreenProps {
   sessionConfig: PoseSessionConfig;
@@ -296,6 +297,14 @@ export default function FullscreenTimerScreen({
             "Space: Play/Pause • Arrow Keys: Previous/Next • Esc: Exit"
           }
         </div>
+      )}
+      
+      {/* Add music player for selected playlist */}
+      {sessionConfig.playlistId && (
+        <SessionMusicPlayer 
+          playlistId={sessionConfig.playlistId}
+          isSessionPlaying={isPlaying}
+        />
       )}
     </div>
   );
