@@ -65,37 +65,55 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "At least one category is required" });
       }
       
-      // Generate poses using Replicate API
-      const poseCount = count || 5; // Default to 5 poses if count is not specified
+      // Limit the number of poses to generate to prevent timeouts
+      const poseCount = count && count > 0 ? Math.min(count, 5) : 3; 
       
       // Return a loading status immediately to let the client know we're processing
       res.status(202).json({ 
         message: "Pose generation started", 
         status: "processing",
-        estimatedTime: poseCount * 10 // Rough estimate in seconds
+        estimatedTime: poseCount * 20 // Increase time estimate (20 seconds per pose)
       });
       
       // Start the pose generation process asynchronously
-      generatePoseSet(description, categories, poseCount)
-        .then(async (generatedPoses) => {
-          if (generatedPoses.length === 0) {
-            console.error("Failed to generate any poses");
-            return;
+      (async () => {
+        try {
+          console.log(`Starting generation of ${poseCount} poses for categories: ${categories.join(', ')}`);
+          console.log(`Description: ${description}`);
+          
+          // Generate poses one by one instead of in parallel to avoid rate limits
+          const generatedPoses = [];
+          for (let i = 0; i < poseCount; i++) {
+            const category = categories[i % categories.length];
+            console.log(`Generating pose ${i+1}/${poseCount} for category: ${category}`);
+            
+            // Add variation to description for variety
+            const variationText = i > 0 ? `, variation ${i + 1}` : '';
+            const imageUrl = await generateOpenPoseImage(`${description}${variationText}`, category);
+            
+            if (imageUrl) {
+              console.log(`Successfully generated pose ${i+1}: ${imageUrl}`);
+              generatedPoses.push({
+                url: imageUrl,
+                category: category
+              });
+              
+              // Save each pose to the database as it's generated
+              await storage.createPose({
+                category: category,
+                url: imageUrl
+              });
+            } else {
+              console.error(`Failed to generate pose ${i+1}`);
+            }
           }
           
-          // Save the generated poses to the database
-          for (const pose of generatedPoses) {
-            await storage.createPose({
-              category: pose.category,
-              url: pose.url
-            });
-          }
+          console.log(`Generation complete. Successfully generated ${generatedPoses.length}/${poseCount} poses`);
           
-          console.log(`Successfully generated and saved ${generatedPoses.length} poses`);
-        })
-        .catch(error => {
-          console.error("Error generating poses:", error);
-        });
+        } catch (error) {
+          console.error("Error in pose generation process:", error);
+        }
+      })();
     } catch (error) {
       console.error("Error processing pose generation request:", error);
       res.status(500).json({ message: "Failed to generate poses" });

@@ -34,8 +34,8 @@ export default function PoseGenerator({
       const response = await apiRequest("POST", "/api/poses/generate", {
         description,
         categories,
-        // Generate more poses for variety
-        count: categories.includes("random") ? 10 : categories.length * 2
+        // Generate more poses for variety but limit to avoid timeouts
+        count: Math.min(5, categories.includes("random") ? 5 : categories.length * 2)
       });
       
       if (!response.ok) {
@@ -44,9 +44,11 @@ export default function PoseGenerator({
       }
       
       // Since pose generation is asynchronous on the server, we'll simulate progress here
-      // In a real implementation, we might poll a status endpoint to get actual progress
+      // This simulates time needed for the server to generate the images
       const statusData = await response.json();
-      const estimatedTime = statusData.estimatedTime || 30;
+      const estimatedTime = statusData.estimatedTime || 60; // Increase default time to 60 seconds
+      
+      console.log("AI pose generation started. Estimated time:", estimatedTime, "seconds");
       
       // Simulate progress over the estimated time
       const interval = setInterval(() => {
@@ -55,18 +57,28 @@ export default function PoseGenerator({
           const nextProgress = prev + (95 - prev) / 10;
           return nextProgress > 94 ? 94 : nextProgress;
         });
-      }, estimatedTime * 100); // Update progress faster than the actual generation
+      }, 1000); // Update every second
       
-      // Wait for a reasonable time to let the server generate poses
-      // In a real implementation, we would poll a status endpoint
-      setTimeout(() => {
+      // Wait for the server to generate poses
+      setTimeout(async () => {
         clearInterval(interval);
+        
+        // Fetch fresh poses now that they should be generated
+        try {
+          const poseResponse = await fetch("/api/poses");
+          if (poseResponse.ok) {
+            console.log("Successfully retrieved updated poses");
+          }
+        } catch (err) {
+          console.error("Error fetching updated poses:", err);
+        }
+        
         setProgress(100);
         setTimeout(() => {
           setIsGenerating(false);
           onGenerationComplete();
         }, 1000);
-      }, estimatedTime * 1000); // Wait the estimated time
+      }, estimatedTime * 1000);
       
     } catch (err) {
       console.error("Error generating poses:", err);

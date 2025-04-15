@@ -68,46 +68,26 @@ export async function generateOpenPoseImage(
   try {
     const { pose_type, basePrompt } = getCategoryParams(category);
     
-    // First, generate an OpenPose skeleton using the llava-13b model
-    // This model helps to create a basic pose structure
-    const openPoseOutput = await replicate.run(
-      "fofr/llava-13b:2facb4a474a0462c15041b78b1ad70952ea46b5ec6ad29583c0b29dbd4249591",
-      {
-        input: {
-          prompt: `Create an OpenPose skeleton for a ${pose_type} human figure. ${description}`,
-          temperature: 0.7,
-          top_p: 0.9,
-          max_tokens: 1024
-        }
-      }
-    );
+    // There's an issue with the two-step approach, so let's directly use a stable diffusion model
+    // that can generate figure poses based on text prompts
+    console.log('Generating pose image directly using Stable Diffusion...');
     
-    console.log('Generated OpenPose skeleton');
-    
-    // Extract the image URL from the response
-    // The response format may vary, so we handle different possibilities
-    const openPoseImageUrl = typeof openPoseOutput === 'object' && openPoseOutput !== null 
-      ? (openPoseOutput as any).image_url || (openPoseOutput as any).output || ''
-      : '';
-    
-    if (!openPoseImageUrl) {
-      console.error('No image URL found in OpenPose output');
-      return null;
-    }
-    
-    // Then use the OpenPose skeleton to generate a realistic image using ControlNet
+    // Use stability-ai/sdxl model which is good at generating human figures
     const output = await replicate.run(
-      "jagilley/controlnet-pose:854e8727697a057c525cdb45ab037f64ecca770a1769cc52287c2e56472a247b",
+      "stability-ai/sdxl:c221b2b8ef527988fb59bf24a8b97c4561f1c671f73bd389f866bfb27c061316",
       {
         input: {
-          image: openPoseImageUrl,
-          prompt: `${basePrompt}, ${description}, professional lighting, detailed, high resolution`,
-          num_samples: "1",
-          image_resolution: "768",
-          ddim_steps: 30,
-          scale: 9,
-          a_prompt: "best quality, extremely detailed, realistic, high resolution",
-          n_prompt: "longbody, lowres, bad anatomy, bad hands, missing fingers, extra digit, fewer digits, cropped, worst quality, low quality, deformed body, bloated, ugly, unrealistic"
+          prompt: `${basePrompt}, ${description}, professional figure drawing reference, clear silhouette, plain background, professional lighting, detailed, full body, high resolution`,
+          negative_prompt: "deformed, distorted, disfigured, poorly drawn, bad anatomy, wrong anatomy, extra limb, missing limb, floating limbs, disconnected limbs, mutation, mutated, ugly, disgusting, amputation",
+          width: 768,
+          height: 768,
+          num_outputs: 1,
+          scheduler: "K_EULER_ANCESTRAL",
+          num_inference_steps: 30,
+          guidance_scale: 7.5,
+          refine: "expert_ensemble_refiner",
+          high_noise_frac: 0.8,
+          apply_watermark: false
         }
       }
     );
