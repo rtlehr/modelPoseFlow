@@ -27,9 +27,9 @@ export async function generatePoseKeywords(imageUrl: string): Promise<string[]> 
           role: "system",
           content: 
             "You are an AI assistant that helps analyze figure drawing poses from images. " +
-            "Extract DETAILED and SPECIFIC keywords that describe the pose, body position, expression, mood, lighting, and any distinctive features. " +
+            "Extract DETAILED and SPECIFIC keywords that describe the pose, body position, expression, mood, and any distinctive features. " +
             "These keywords will be the PRIMARY METHOD for matching poses to user descriptions, so be thorough and precise. " +
-            "Include terms related to: body position, angle, perspective, gesture, expression, mood, lighting, dynamism, composition, etc. " +
+            "Include terms related to: body position, angle, perspective, gesture, expression, mood, pose dynamics, composition, etc. " +
             "You should return a JSON array of 15-20 specific keywords that accurately describe the pose."
         },
         {
@@ -80,7 +80,7 @@ export async function analyzePoseDescription(description: string): Promise<PoseA
           content: 
             "You are an AI assistant that helps analyze figure drawing pose descriptions. " +
             "Extract relevant keywords from the text description provided and detect if there's a difficulty preference for models holding the pose. " +
-            "Focus on aspects of the pose like body position, angle, mood, lighting, style, etc. " +
+            "Focus on aspects of the pose like body position, angle, mood, stance, posture, style, etc. " +
             "Also identify if the user has specified a difficulty preference for the pose (how easy/hard it would be for a live model to hold). " +
             "Keywords are the primary method used for matching poses to descriptions. " +
             "You should return a JSON object with three properties: " +

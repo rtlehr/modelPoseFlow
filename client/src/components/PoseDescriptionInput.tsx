@@ -72,7 +72,7 @@ export default function PoseDescriptionInput({ onDescriptionProcessed }: PoseDes
         <Textarea
           value={description}
           onChange={handleDescriptionChange}
-          placeholder="Enter your pose description here... (e.g., 'standing pose with easy difficulty to hold' or 'dramatic lighting with medium difficulty')"
+          placeholder="Enter your pose description here... (e.g., 'standing pose with easy difficulty to hold' or 'seated pose with medium difficulty')"
           className={`w-full min-h-[100px] ${isMobile ? 'text-base' : 'text-sm'} border-gray-300 focus:border-primary focus:ring-primary rounded-md p-3`}
           disabled={isAnalyzing}
         />
@@ -103,14 +103,14 @@ export default function PoseDescriptionInput({ onDescriptionProcessed }: PoseDes
             The system will match your description with pose keywords, prioritizing poses with the most matching keywords.
           </p>
           <p className={`${isMobile ? 'text-sm' : 'text-xs'} text-gray-400 italic mt-1`}>
-            Examples: "dramatic lighting and strong shadows", "twisted torso with arms extended", "three-quarter view with contemplative expression"
+            Examples: "standing pose with weight on one leg", "twisted torso with arms extended", "three-quarter view with contemplative expression"
           </p>
           <div className="mt-3 p-2 bg-blue-50 border border-blue-100 rounded-md">
             <p className={`${isMobile ? 'text-sm' : 'text-xs'} text-blue-800 font-medium`}>
               <span className="font-bold">New!</span> You can now specify difficulty levels for models to hold the pose:
             </p>
             <p className={`${isMobile ? 'text-sm' : 'text-xs'} text-blue-600 mt-1`}>
-              Examples: "Give me easy poses to hold", "I need medium difficulty standing poses", "Show hard poses with dramatic lighting"
+              Examples: "Give me easy poses to hold", "I need medium difficulty standing poses", "Show hard poses with extended arms"
             </p>
           </div>
           <p className={`${isMobile ? 'text-sm' : 'text-xs'} text-blue-600 mt-2 flex items-center`}>
