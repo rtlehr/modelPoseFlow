@@ -9,9 +9,10 @@ import PoseGenerator from "./PoseGenerator";
 
 interface PoseDescriptionInputProps {
   onDescriptionProcessed: (categories: PoseCategory[], description: string, useAiGeneration?: boolean) => void;
+  poseCount?: number; // Number of poses to generate (for AI generation)
 }
 
-export default function PoseDescriptionInput({ onDescriptionProcessed }: PoseDescriptionInputProps) {
+export default function PoseDescriptionInput({ onDescriptionProcessed, poseCount = 10 }: PoseDescriptionInputProps) {
   const isMobile = useIsMobile();
   const [description, setDescription] = useState("");
   const [isAnalyzing, setIsAnalyzing] = useState(false);
@@ -131,6 +132,7 @@ export default function PoseDescriptionInput({ onDescriptionProcessed }: PoseDes
           <PoseGenerator
             description={description}
             categories={categories}
+            poseCount={poseCount}
             onGenerationComplete={handleAiGenerationComplete}
           />
         ) : (

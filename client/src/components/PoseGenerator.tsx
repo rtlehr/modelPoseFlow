@@ -7,12 +7,14 @@ import { apiRequest } from "@/lib/queryClient";
 interface PoseGeneratorProps {
   description: string;
   categories: PoseCategory[];
+  poseCount?: number;
   onGenerationComplete: () => void;
 }
 
 export default function PoseGenerator({ 
   description, 
   categories,
+  poseCount = 10,
   onGenerationComplete 
 }: PoseGeneratorProps) {
   const [isGenerating, setIsGenerating] = useState(false);
