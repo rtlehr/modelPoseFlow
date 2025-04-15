@@ -4,6 +4,7 @@ import TimerScreen from "@/components/TimerScreen";
 import LoadingScreen from "@/components/LoadingScreen";
 import MainMenu from "@/components/MainMenu";
 import PlaceholderScreen from "@/components/PlaceholderScreen";
+import MusicPlaylistScreen from "@/components/MusicPlaylistScreen";
 import { PoseSessionConfig, Pose } from "@/types";
 import { useQuery } from "@tanstack/react-query";
 
@@ -15,7 +16,8 @@ type Screen =
   | 'timer'
   | 'poseCatalog'
   | 'userPreferences'
-  | 'modelBlog';
+  | 'modelBlog'
+  | 'musicPlaylist';
 
 export default function Home() {
   // Track which screen is currently displayed
