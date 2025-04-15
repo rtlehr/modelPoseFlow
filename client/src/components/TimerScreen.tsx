@@ -16,6 +16,8 @@ interface TimerScreenProps {
 }
 
 export default function TimerScreen({ onBackToSetup, sessionConfig, poses }: TimerScreenProps) {
+  // Always declare all hooks at the top level, unconditionally
+  const isMobile = useIsMobile();
   const [isFullscreen, setIsFullscreen] = useState(false);
   const {
     currentPose,
@@ -111,7 +113,7 @@ export default function TimerScreen({ onBackToSetup, sessionConfig, poses }: Tim
     };
   }, []);
 
-  // If in fullscreen mode, render the fullscreen UI
+  // Conditionally render different UI based on fullscreen state
   if (isFullscreen) {
     return (
       <FullscreenTimerScreen
@@ -122,8 +124,7 @@ export default function TimerScreen({ onBackToSetup, sessionConfig, poses }: Tim
     );
   }
 
-  const isMobile = useIsMobile();
-
+  // Render the regular UI if not in fullscreen mode
   return (
     <div className={`bg-white rounded-xl shadow-lg ${isMobile ? 'p-4' : 'p-6'} max-w-4xl mx-auto`}>
       <div className={`flex justify-between items-center ${isMobile ? 'mb-3' : 'mb-4'}`}>
