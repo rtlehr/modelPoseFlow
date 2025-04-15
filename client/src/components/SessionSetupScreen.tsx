@@ -27,7 +27,6 @@ export default function SessionSetupScreen({
   const [sessionType, setSessionType] = useState<"count" | "time">("count");
   const [poseCount, setPoseCount] = useState(10);
   const [sessionTime, setSessionTime] = useState(20);
-  const [selectedPlaylistId, setSelectedPlaylistId] = useState<number | null>(null);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -48,7 +47,7 @@ export default function SessionSetupScreen({
       sessionType,
       poseCount: calculatedPoseCount,
       sessionTime,
-      playlistId: selectedPlaylistId,
+      playlistId: null,
     });
   };
 

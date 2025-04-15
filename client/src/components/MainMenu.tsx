@@ -1,13 +1,12 @@
 import { Button } from "@/components/ui/button";
 import { useIsMobile } from "@/hooks/use-mobile";
-import { ArrowRight, Palette, Book, Settings, Music, Images } from "lucide-react";
+import { ArrowRight, Palette, Book, Settings, Images } from "lucide-react";
 
 interface MainMenuProps {
   onStartSession: () => void;
   onPoseCatalog: () => void;
   onUserPreferences: () => void;
   onModelBlog: () => void;
-  onMusicPlaylist: () => void;
   onPoseKeywords?: () => void;
 }
 
@@ -16,7 +15,6 @@ export default function MainMenu({
   onPoseCatalog, 
   onUserPreferences, 
   onModelBlog,
-  onMusicPlaylist,
   onPoseKeywords
 }: MainMenuProps) {
   const isMobile = useIsMobile();
@@ -29,13 +27,7 @@ export default function MainMenu({
       onClick: onStartSession,
       primary: true
     },
-    {
-      title: "Music Playlists",
-      description: "Create and manage music playlists for your drawing sessions",
-      icon: <Music className="w-5 h-5" />,
-      onClick: onMusicPlaylist,
-      primary: false
-    },
+
     {
       title: "Manage Pose Library",
       description: "Upload, tag, and organize your pose collection",

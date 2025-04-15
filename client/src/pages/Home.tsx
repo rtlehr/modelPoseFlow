@@ -4,7 +4,6 @@ import TimerScreen from "@/components/TimerScreen";
 import LoadingScreen from "@/components/LoadingScreen";
 import MainMenu from "@/components/MainMenu";
 import PlaceholderScreen from "@/components/PlaceholderScreen";
-import MusicPlaylistScreen from "@/components/MusicPlaylistScreen";
 import PoseLibraryScreen from "@/components/PoseLibraryScreen";
 import { PoseSessionConfig, Pose } from "@/types";
 import { useQuery } from "@tanstack/react-query";
@@ -18,7 +17,6 @@ type Screen =
   | 'poseCatalog'
   | 'userPreferences'
   | 'modelBlog'
-  | 'musicPlaylist'
   | 'poseKeywords';
 
 export default function Home() {
@@ -78,9 +76,7 @@ export default function Home() {
     setCurrentScreen('modelBlog');
   };
   
-  const handleGoToMusicPlaylist = () => {
-    setCurrentScreen('musicPlaylist');
-  };
+
   
   const handleGoToPoseKeywords = () => {
     setCurrentScreen('poseKeywords');
@@ -99,7 +95,6 @@ export default function Home() {
             onPoseCatalog={handleGoToPoseCatalog}
             onUserPreferences={handleGoToUserPreferences}
             onModelBlog={handleGoToModelBlog}
-            onMusicPlaylist={handleGoToMusicPlaylist}
             onPoseKeywords={handleGoToPoseKeywords}
           />
         );
