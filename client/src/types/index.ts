@@ -12,4 +12,5 @@ export interface PoseSessionConfig {
   sessionType: "count" | "time";
   poseCount: number;
   sessionTime: number;
+  playlistId: number | null; // null means "No Music"
 }

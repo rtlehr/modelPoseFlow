@@ -1,11 +1,13 @@
 import { useState } from "react";
 import PoseLengthSelector from "./PoseLengthSelector";
 import SessionConfigSelector from "./SessionConfigSelector";
+import MusicPlaylistSelector from "./MusicPlaylistSelector";
 import { Button } from "@/components/ui/button";
 import { PoseCategory, PoseSessionConfig } from "@/types";
 import { useToast } from "@/hooks/use-toast";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { ArrowLeft } from "lucide-react";
+import { Separator } from "@/components/ui/separator";
 
 interface SessionSetupScreenProps {
   selectedCategories: PoseCategory[];
@@ -26,6 +28,7 @@ export default function SessionSetupScreen({
   const [sessionType, setSessionType] = useState<"count" | "time">("count");
   const [poseCount, setPoseCount] = useState(10);
   const [sessionTime, setSessionTime] = useState(20);
+  const [selectedPlaylistId, setSelectedPlaylistId] = useState<number | null>(null);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -45,6 +48,7 @@ export default function SessionSetupScreen({
       sessionType,
       poseCount: calculatedPoseCount,
       sessionTime,
+      playlistId: selectedPlaylistId,
     });
   };
 
@@ -91,6 +95,13 @@ export default function SessionSetupScreen({
           onSessionTypeChange={setSessionType}
           onPoseCountChange={setPoseCount}
           onSessionTimeChange={setSessionTime}
+        />
+        
+        <Separator className="my-2" />
+        
+        <MusicPlaylistSelector
+          selectedPlaylistId={selectedPlaylistId}
+          onChange={setSelectedPlaylistId}
         />
         
         <div className="flex space-x-4">
