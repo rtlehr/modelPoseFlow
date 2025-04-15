@@ -5,7 +5,7 @@ import LoadingScreen from "@/components/LoadingScreen";
 import MainMenu from "@/components/MainMenu";
 import PlaceholderScreen from "@/components/PlaceholderScreen";
 import MusicPlaylistScreen from "@/components/MusicPlaylistScreen";
-import PoseKeywordsScreen from "@/components/PoseKeywordsScreen";
+import PoseLibraryScreen from "@/components/PoseLibraryScreen";
 import { PoseSessionConfig, Pose } from "@/types";
 import { useQuery } from "@tanstack/react-query";
 
@@ -168,7 +168,7 @@ export default function Home() {
         
       case 'poseKeywords':
         return (
-          <PoseKeywordsScreen 
+          <PoseLibraryScreen 
             onBack={handleBackToMainMenu}
           />
         );

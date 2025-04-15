@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { 
   ArrowLeft, Search, Filter, Upload, Trash2, 
-  AlertTriangle, PlusCircle 
+  AlertTriangle, PlusCircle, X
 } from "lucide-react";
 import { 
   Dialog, DialogContent, DialogDescription, 
@@ -285,7 +285,7 @@ export default function PoseLibraryScreen({ onBack }: PoseLibraryScreenProps) {
       ) : (
         // Pose list view
         <div className="space-y-4">
-          {/* Search and filters */}
+          {/* Search and filters with Add button */}
           <div className="flex items-center space-x-2">
             <div className="relative flex-1">
               <Search className="absolute left-2 top-2.5 h-4 w-4 text-gray-400" />
@@ -299,6 +299,14 @@ export default function PoseLibraryScreen({ onBack }: PoseLibraryScreenProps) {
             
             <Button variant="outline" size="icon">
               <Filter className="h-4 w-4" />
+            </Button>
+            
+            <Button 
+              onClick={() => setUploadDialogOpen(true)}
+              className="bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700"
+            >
+              <PlusCircle className="h-4 w-4 mr-2" />
+              {isMobile ? 'Add' : 'Add Pose'}
             </Button>
           </div>
           
@@ -326,7 +334,7 @@ export default function PoseLibraryScreen({ onBack }: PoseLibraryScreenProps) {
                   {filteredPoses.map((pose) => (
                     <Card 
                       key={pose.id}
-                      className="overflow-hidden cursor-pointer hover:shadow-md transition-shadow"
+                      className="overflow-hidden cursor-pointer hover:shadow-md transition-shadow group"
                       onClick={() => handleSelectPose(pose)}
                     >
                       <div className="aspect-[3/4] relative">
@@ -335,6 +343,17 @@ export default function PoseLibraryScreen({ onBack }: PoseLibraryScreenProps) {
                           alt={`Pose ${pose.id}`}
                           className="w-full h-full object-cover"
                         />
+                        <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-30 transition-all duration-200 flex items-center justify-center opacity-0 group-hover:opacity-100">
+                          <Button 
+                            variant="destructive"
+                            size="sm" 
+                            className="opacity-90"
+                            onClick={(e) => confirmDeletePose(pose, e)}
+                          >
+                            <Trash2 className="h-4 w-4 mr-1" />
+                            Delete
+                          </Button>
+                        </div>
                       </div>
                       <div className="p-2">
                         <div className="flex items-center justify-between">
@@ -357,6 +376,163 @@ export default function PoseLibraryScreen({ onBack }: PoseLibraryScreenProps) {
           </Tabs>
         </div>
       )}
+      {/* Upload Dialog */}
+      <Dialog open={uploadDialogOpen} onOpenChange={setUploadDialogOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Upload New Pose</DialogTitle>
+            <DialogDescription>
+              Upload an image of a figure pose to add to your library.
+            </DialogDescription>
+          </DialogHeader>
+          
+          <div className="space-y-4 py-4">
+            <div className="flex flex-col space-y-2">
+              <label htmlFor="category" className="text-sm font-medium">
+                Pose Category
+              </label>
+              <select
+                id="category"
+                value={selectedCategory}
+                onChange={(e) => setSelectedCategory(e.target.value)}
+                className="rounded-md border border-gray-300 p-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              >
+                <option value="standing">Standing</option>
+                <option value="sitting">Sitting</option>
+                <option value="reclining">Reclining</option>
+                <option value="action">Action</option>
+              </select>
+            </div>
+            
+            <div className="flex flex-col space-y-2">
+              <label htmlFor="poseImage" className="text-sm font-medium">
+                Pose Image
+              </label>
+              
+              {uploadedImagePreview ? (
+                <div className="relative aspect-[3/4] w-full max-w-[200px] mx-auto border rounded-md overflow-hidden">
+                  <img 
+                    src={uploadedImagePreview} 
+                    alt="Preview" 
+                    className="w-full h-full object-cover"
+                  />
+                  <Button
+                    size="sm"
+                    variant="destructive"
+                    className="absolute top-2 right-2"
+                    onClick={() => setUploadedImagePreview(null)}
+                  >
+                    <X className="h-4 w-4" />
+                  </Button>
+                </div>
+              ) : (
+                <div 
+                  className="border-2 border-dashed border-gray-300 rounded-md p-8 text-center cursor-pointer hover:border-indigo-500 transition-colors"
+                  onClick={() => fileInputRef.current?.click()}
+                >
+                  <Upload className="h-8 w-8 mx-auto text-gray-400" />
+                  <p className="mt-2 text-sm text-gray-500">
+                    Click to select an image, or drag and drop
+                  </p>
+                  <p className="text-xs text-gray-400 mt-1">
+                    JPG, PNG, or GIF files
+                  </p>
+                </div>
+              )}
+              
+              <input 
+                ref={fileInputRef}
+                id="poseImage"
+                type="file"
+                accept="image/*"
+                className="hidden"
+                onChange={handleFileChange}
+              />
+            </div>
+          </div>
+          
+          <DialogFooter className="flex space-x-2 justify-end">
+            <Button 
+              variant="outline" 
+              onClick={() => {
+                resetUploadForm();
+                setUploadDialogOpen(false);
+              }}
+            >
+              Cancel
+            </Button>
+            <Button 
+              onClick={handleUploadPose}
+              disabled={!uploadedImagePreview || uploading}
+              className="bg-gradient-to-r from-indigo-500 to-purple-600"
+            >
+              {uploading ? 
+                <div className="flex items-center">
+                  <span className="animate-spin mr-1">
+                    <svg className="h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                  </span>
+                  Uploading...
+                </div> : 
+                <>
+                  <Upload className="h-4 w-4 mr-2" />
+                  Upload Pose
+                </>
+              }
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+      
+      {/* Delete Confirmation Dialog */}
+      <Dialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <AlertTriangle className="h-5 w-5 text-red-500" />
+              Confirm Deletion
+            </DialogTitle>
+            <DialogDescription>
+              Are you sure you want to delete this pose? This action cannot be undone.
+            </DialogDescription>
+          </DialogHeader>
+          
+          {poseToDelete && (
+            <div className="py-4 flex items-center space-x-4">
+              <div className="w-20 h-20 relative rounded-md overflow-hidden">
+                <img 
+                  src={poseToDelete.url} 
+                  alt={`Pose ${poseToDelete.id}`}
+                  className="w-full h-full object-cover"
+                />
+              </div>
+              <div>
+                <p className="text-sm font-medium">Pose ID: {poseToDelete.id}</p>
+                <p className="text-sm text-gray-500 capitalize">Category: {poseToDelete.category}</p>
+                {poseToDelete.keywords && (
+                  <p className="text-sm text-gray-500">
+                    Has {poseToDelete.keywords.length} keywords
+                  </p>
+                )}
+              </div>
+            </div>
+          )}
+          
+          <DialogFooter className="flex space-x-2 justify-end">
+            <Button variant="outline" onClick={() => setDeleteDialogOpen(false)}>
+              Cancel
+            </Button>
+            <Button 
+              variant="destructive" 
+              onClick={handleDeletePose}
+            >
+              Delete Permanently
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
