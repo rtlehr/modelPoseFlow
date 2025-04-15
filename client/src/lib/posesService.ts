@@ -10,10 +10,14 @@ export function getPosesForSession(
   count: number,
   randomize: boolean = true
 ): Pose[] {
-  // Filter poses by selected categories
-  const filteredPoses = allPoses.filter(pose => 
-    categories.includes(pose.category)
-  );
+  // Check if random category is selected
+  const isRandom = categories.includes("random");
+  
+  // If random is selected, use all poses regardless of category
+  // Otherwise, filter poses by selected categories
+  const filteredPoses = isRandom 
+    ? allPoses 
+    : allPoses.filter(pose => categories.includes(pose.category));
   
   if (filteredPoses.length === 0) {
     return [];

@@ -1,4 +1,4 @@
-export type PoseCategory = "standing" | "sitting" | "reclining" | "action";
+export type PoseCategory = "standing" | "sitting" | "reclining" | "action" | "random";
 
 export interface Pose {
   id: number;

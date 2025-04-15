@@ -32,8 +32,11 @@ export default function SetupScreen({ onStartSession, poses }: SetupScreenProps)
       return;
     }
 
-    // Get filtered poses based on selected categories
-    const filteredPoses = poses.filter(pose => selectedCategories.includes(pose.category));
+    // Check for random selection or filter poses based on selected categories
+    const isRandom = selectedCategories.includes("random");
+    const filteredPoses = isRandom 
+      ? poses // Use all poses if random is selected
+      : poses.filter(pose => selectedCategories.includes(pose.category));
     
     if (filteredPoses.length === 0) {
       toast({
