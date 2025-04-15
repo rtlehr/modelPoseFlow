@@ -21,10 +21,8 @@ export interface IStorage {
   
   // Pose operations
   getAllPoses(): Promise<Pose[]>;
-  getPosesByCategory(category: string): Promise<Pose[]>;
-  getPosesByCategories(categories: string[]): Promise<Pose[]>;
   getPosesByKeywords(keywords: string[]): Promise<Pose[]>;
-  createPose(pose: { category: string, url: string }): Promise<Pose>;
+  createPose(pose: { url: string }): Promise<Pose>;
   updatePoseKeywords(id: number, keywords: string[]): Promise<Pose | undefined>;
   deletePose(id: number): Promise<boolean>;
   seedPoses(): Promise<void>;
@@ -67,31 +65,8 @@ export class DatabaseStorage implements IStorage {
     return await db.select().from(poses);
   }
 
-  async getPosesByCategory(category: string): Promise<Pose[]> {
-    return await db.select().from(poses).where(eq(poses.category, category as any));
-  }
-  
-  async getPosesByCategories(categories: string[]): Promise<Pose[]> {
-    if (!categories || categories.length === 0) {
-      return this.getAllPoses();
-    }
-    
-    // Create an array of OR conditions for each category
-    if (categories.length === 1) {
-      return await db.select().from(poses).where(
-        eq(poses.category, categories[0] as any)
-      );
-    }
-    
-    // For multiple categories, use OR conditions
-    const conditions = categories.map(category => 
-      eq(poses.category, category as any)
-    );
-    
-    return await db.select().from(poses).where(
-      or(...conditions)
-    );
-  }
+  // Category-based methods have been removed
+  // All pose selection now uses keywords
   
   async getPosesByKeywords(keywords: string[]): Promise<Pose[]> {
     if (!keywords || keywords.length === 0) {
@@ -121,9 +96,8 @@ export class DatabaseStorage implements IStorage {
     });
   }
   
-  async createPose(pose: { category: string, url: string }): Promise<Pose> {
+  async createPose(pose: { url: string }): Promise<Pose> {
     const insertData: InsertPose = {
-      category: pose.category as any,
       url: pose.url
     };
     
@@ -165,9 +139,10 @@ export class DatabaseStorage implements IStorage {
         
         // Insert poses in batches
         for (const pose of posesData) {
+          // Only use url and keywords from the pose data
           await db.insert(poses).values({
-            category: pose.category as any,
-            url: pose.url
+            url: pose.url,
+            keywords: pose.keywords || [] // Use keywords if available
           });
         }
         

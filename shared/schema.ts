@@ -5,19 +5,13 @@ import { z } from "zod";
 // Define the base schema for a pose
 export const poses = pgTable("poses", {
   id: serial("id").primaryKey(),
-  // While we're transitioning to keyword-based selection, we keep the category field
-  // but make it use a default value
-  category: text("category", { enum: ["standing", "sitting", "reclining", "action"] })
-    .default("standing")
-    .notNull(),
   url: text("url").notNull(),
-  // Keywords now play a more important role in pose selection
+  // Keywords are now the only method for pose matching
   keywords: text("keywords").array().default([]),
 });
 
 // Pose insert schema
 export const insertPoseSchema = createInsertSchema(poses).pick({
-  category: true,
   url: true,
   keywords: true,
 });
