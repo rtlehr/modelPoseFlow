@@ -383,6 +383,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Generate the image using Replicate
       const imageUrl = await generatePoseImage(prompt);
       
+      // Log the response data to help with debugging
+      console.log(`Generated image successfully, returning data with URL length: ${imageUrl.length}`);
+      
       res.status(200).json({ 
         url: imageUrl,
         prompt,

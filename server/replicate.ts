@@ -60,7 +60,7 @@ export async function generatePoseImage(prompt: string): Promise<string> {
     };
     
     // Find the appropriate category based on the prompt keywords
-    let category = 'standing'; // default category
+    let category: 'standing' | 'sitting' | 'reclining' | 'action' | 'women' | 'men' = 'standing'; // default category
     
     const promptLower = prompt.toLowerCase();
     
