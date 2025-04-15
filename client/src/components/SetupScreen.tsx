@@ -1,7 +1,6 @@
 import { useState } from "react";
-import PoseLengthSelector from "./PoseLengthSelector";
-import SessionConfigSelector from "./SessionConfigSelector";
 import PoseDescriptionInput from "./PoseDescriptionInput";
+import SessionSetupScreen from "./SessionSetupScreen";
 import { Button } from "@/components/ui/button";
 import { PoseCategory, PoseSessionConfig, Pose } from "@/types";
 import { useToast } from "@/hooks/use-toast";
@@ -19,10 +18,7 @@ export default function SetupScreen({ onStartSession, poses, onBack }: SetupScre
   const isMobile = useIsMobile();
   const [selectedCategories, setSelectedCategories] = useState<PoseCategory[]>([]);
   const [poseDescription, setPoseDescription] = useState<string>("");
-  const [poseLength, setPoseLength] = useState(30);
-  const [sessionType, setSessionType] = useState<"count" | "time">("count");
-  const [poseCount, setPoseCount] = useState(10);
-  const [sessionTime, setSessionTime] = useState(20);
+  const [showSessionSetup, setShowSessionSetup] = useState(false);
   
   // Handler for when pose description is analyzed and categories are extracted
   const handleDescriptionProcessed = (categories: PoseCategory[], description: string) => {
@@ -35,7 +31,7 @@ export default function SetupScreen({ onStartSession, poses, onBack }: SetupScre
     });
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleProceedToSessionSetup = (e: React.FormEvent) => {
     e.preventDefault();
     
     // Validate form
@@ -60,24 +56,27 @@ export default function SetupScreen({ onStartSession, poses, onBack }: SetupScre
       return;
     }
 
-    // Calculate total poses if session type is time
-    let calculatedPoseCount = poseCount;
-    if (sessionType === "time") {
-      calculatedPoseCount = Math.floor((sessionTime * 60) / poseLength);
-      if (calculatedPoseCount < 1) {
-        calculatedPoseCount = 1;
-      }
-    }
-
-    onStartSession({
-      categories: selectedCategories,
-      poseLength,
-      sessionType,
-      poseCount: calculatedPoseCount,
-      sessionTime,
-    });
+    // Show the session setup screen
+    setShowSessionSetup(true);
+  };
+  
+  const handleBackToDescription = () => {
+    setShowSessionSetup(false);
   };
 
+  // If showSessionSetup is true, render the SessionSetupScreen
+  if (showSessionSetup) {
+    return (
+      <SessionSetupScreen
+        selectedCategories={selectedCategories}
+        poseDescription={poseDescription}
+        onStartSession={onStartSession}
+        onBack={handleBackToDescription}
+      />
+    );
+  }
+
+  // Otherwise, render the pose description input screen
   return (
     <div className={`bg-white rounded-xl shadow-lg ${isMobile ? 'p-4' : 'p-6'} max-w-xl mx-auto`}>
       <div className="flex justify-between items-center mb-4">
@@ -93,13 +92,13 @@ export default function SetupScreen({ onStartSession, poses, onBack }: SetupScre
           </Button>
         )}
         <h1 className={`${isMobile ? 'text-xl' : 'text-2xl'} font-bold text-gray-800 ${onBack ? 'flex-1 text-center' : ''}`}>
-          Session Setup
+          Describe Poses
         </h1>
         {/* Empty div to balance the layout when back button exists */}
         {onBack && <div className="w-6"></div>}
       </div>
       
-      <form onSubmit={handleSubmit} className="space-y-6">
+      <form onSubmit={handleProceedToSessionSetup} className="space-y-6">
         <PoseDescriptionInput
           onDescriptionProcessed={handleDescriptionProcessed}
         />
@@ -111,20 +110,6 @@ export default function SetupScreen({ onStartSession, poses, onBack }: SetupScre
                 <span className="font-medium">Selected categories:</span> {selectedCategories.join(", ")}
               </p>
             </div>
-            
-            <PoseLengthSelector 
-              poseLength={poseLength} 
-              onChange={setPoseLength} 
-            />
-            
-            <SessionConfigSelector 
-              sessionType={sessionType}
-              poseCount={poseCount}
-              sessionTime={sessionTime}
-              onSessionTypeChange={setSessionType}
-              onPoseCountChange={setPoseCount}
-              onSessionTimeChange={setSessionTime}
-            />
           </>
         )}
         
@@ -141,11 +126,13 @@ export default function SetupScreen({ onStartSession, poses, onBack }: SetupScre
           )}
           <Button 
             type="submit" 
+            disabled={selectedCategories.length === 0}
             className={`${onBack ? 'flex-1' : 'w-full'} bg-primary hover:bg-indigo-700 text-white font-bold 
               ${isMobile ? 'text-lg py-4' : 'py-3'} px-4 rounded-lg transition duration-200
-              active:scale-[0.98] touch-manipulation`}
+              active:scale-[0.98] touch-manipulation
+              ${selectedCategories.length === 0 ? 'opacity-50 cursor-not-allowed' : ''}`}
           >
-            Start Session
+            Set Up Session
           </Button>
         </div>
       </form>
