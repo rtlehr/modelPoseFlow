@@ -4,7 +4,7 @@ import TimerScreen from "@/components/TimerScreen";
 import LoadingScreen from "@/components/LoadingScreen";
 import MainMenu from "@/components/MainMenu";
 import PlaceholderScreen from "@/components/PlaceholderScreen";
-import { PoseSessionConfig } from "@/types";
+import { PoseSessionConfig, Pose } from "@/types";
 import { useQuery } from "@tanstack/react-query";
 
 // Define the screens we can show
@@ -23,7 +23,7 @@ export default function Home() {
   const [sessionConfig, setSessionConfig] = useState<PoseSessionConfig | null>(null);
 
   // Fetch poses from the API
-  const { data: poses = [] } = useQuery({
+  const { data: poses = [] as Pose[] } = useQuery<Pose[]>({
     queryKey: ['/api/poses'],
   });
 
