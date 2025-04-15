@@ -100,10 +100,16 @@ export default function PoseDescriptionInput({ onDescriptionProcessed }: PoseDes
         {/* Show examples */}
         <div className="mt-3">
           <p className={`${isMobile ? 'text-sm' : 'text-xs'} text-gray-500 font-medium`}>
-            The system will match your description with pose keywords for the best results.
+            The system will match your description with pose keywords, prioritizing poses with the most matching keywords.
           </p>
           <p className={`${isMobile ? 'text-sm' : 'text-xs'} text-gray-400 italic mt-1`}>
             Examples: "dramatic lighting and strong shadows", "twisted torso with arms extended", "three-quarter view with contemplative expression"
+          </p>
+          <p className={`${isMobile ? 'text-sm' : 'text-xs'} text-blue-600 mt-1 flex items-center`}>
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            <span>Specific, detailed descriptions yield better matching results.</span>
           </p>
         </div>
       </div>

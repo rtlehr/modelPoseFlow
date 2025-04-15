@@ -78,7 +78,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Match by keywords (our only matching strategy now)
       if (analysis.keywords && analysis.keywords.length > 0) {
         console.log("Finding poses by keywords:", analysis.keywords);
+        
+        // Get poses that have keywords matching the requested keywords
         matchingPoses = await storage.getPosesByKeywords(analysis.keywords);
+        
+        // Client-side code will rank these poses by keyword match count
+        // so poses with more matching keywords will be used first
+        if (matchingPoses.length > 0) {
+          console.log(`Found ${matchingPoses.length} poses with keyword matches`);
+        }
       }
       
       // If we don't have poses, get all poses as a last resort
