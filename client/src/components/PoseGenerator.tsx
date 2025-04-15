@@ -36,8 +36,8 @@ export default function PoseGenerator({
       const response = await apiRequest("POST", "/api/poses/generate", {
         description,
         categories,
-        // Generate more poses for variety but limit to avoid timeouts
-        count: Math.min(5, categories.includes("random") ? 5 : categories.length * 2)
+        // Use the requested pose count but limit to avoid timeouts
+        count: Math.min(5, poseCount)
       });
       
       if (!response.ok) {
