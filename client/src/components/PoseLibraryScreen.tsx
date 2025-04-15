@@ -53,7 +53,7 @@ export default function PoseLibraryScreen({ onBack }: PoseLibraryScreenProps) {
   
   // Update filtered poses when poses data changes or filters change
   useEffect(() => {
-    if (!poses) return;
+    if (!poses || poses.length === 0) return;
     
     let filtered = [...poses];
     
@@ -82,7 +82,10 @@ export default function PoseLibraryScreen({ onBack }: PoseLibraryScreenProps) {
       );
     }
     
-    setFilteredPoses(filtered);
+    // Use JSON.stringify to do a deep comparison to avoid infinite updates
+    if (JSON.stringify(filtered) !== JSON.stringify(filteredPoses)) {
+      setFilteredPoses(filtered);
+    }
   }, [poses, activeTab, searchQuery]);
   
   // Handle pose selection
