@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from "react";
 import useTimer from "./useTimer";
 import { getPosesForSession } from "@/lib/posesService";
+import { playCountdownBeep, playDoubleBeep } from "@/lib/soundService";
 import { Pose, PoseSessionConfig } from "@/types";
 
 interface PoseSessionHook {
@@ -42,11 +43,22 @@ export default function usePoseSession(
     // Don't auto-start to avoid the infinite loop
   }, [config, allPoses, reset]);
 
+  // Sound effects for countdown (5 seconds and under)
+  useEffect(() => {
+    // Play countdown beeps when timer is at 5 seconds or less
+    if (isRunning && time <= 5 && time > 0) {
+      playCountdownBeep();
+    }
+  }, [time, isRunning]);
+
   // Auto-advance to next pose when timer reaches 0
   useEffect(() => {
     let timeoutId: NodeJS.Timeout | null = null;
     
     if (time === 0 && sessionPoses.length > 0 && currentPoseIndex < sessionPoses.length) {
+      // Play double beep to indicate pose change
+      playDoubleBeep();
+      
       // Use setTimeout to avoid infinite loop
       timeoutId = setTimeout(() => {
         if (currentPoseIndex < sessionPoses.length - 1) {
@@ -72,11 +84,14 @@ export default function usePoseSession(
 
   const nextPose = useCallback(() => {
     if (currentPoseIndex < sessionPoses.length - 1) {
+      // Play double beep to indicate pose change
+      playDoubleBeep();
       setCurrentPoseIndex(prev => prev + 1);
       reset(config.poseLength);
       start();
     } else if (currentPoseIndex === sessionPoses.length - 1) {
       // End of session reached
+      playDoubleBeep();
       setCurrentPoseIndex(prev => prev + 1);
       pause();
     }
@@ -84,6 +99,8 @@ export default function usePoseSession(
 
   const previousPose = useCallback(() => {
     if (currentPoseIndex > 0) {
+      // Play double beep to indicate pose change
+      playDoubleBeep();
       setCurrentPoseIndex(prev => prev - 1);
       reset(config.poseLength);
       start();
