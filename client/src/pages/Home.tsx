@@ -76,8 +76,6 @@ export default function Home() {
     setCurrentScreen('modelBlog');
   };
   
-
-  
   const handleGoToPoseKeywords = () => {
     setCurrentScreen('poseKeywords');
   };
@@ -152,13 +150,6 @@ export default function Home() {
               onBack={handleBackToMainMenu}
             />
           </div>
-        );
-        
-      case 'musicPlaylist':
-        return (
-          <MusicPlaylistScreen 
-            onBack={handleBackToMainMenu}
-          />
         );
         
       case 'poseKeywords':
