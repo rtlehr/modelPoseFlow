@@ -1,4 +1,4 @@
-import { pgTable, text, serial, integer, varchar } from "drizzle-orm/pg-core";
+import { pgTable, text, serial, integer, varchar, jsonb, timestamp } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
@@ -33,3 +33,47 @@ export const insertUserSchema = createInsertSchema(users).pick({
 
 export type InsertUser = z.infer<typeof insertUserSchema>;
 export type User = typeof users.$inferSelect;
+
+// Music tracks table - will store references to user's local files
+export const musicTracks = pgTable("music_tracks", {
+  id: serial("id").primaryKey(),
+  name: text("name").notNull(),
+  artist: text("artist"),
+  duration: integer("duration"), // Duration in seconds
+  filePath: text("file_path"), // For stored file paths (optional)
+  // Use base64 encoding to store small files directly in the database if needed
+  // Other approach would be just storing metadata and accessing files via File API
+  fileData: text("file_data"), // For storing small audio files directly (optional)
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const insertMusicTrackSchema = createInsertSchema(musicTracks).pick({
+  name: true,
+  artist: true,
+  duration: true,
+  filePath: true,
+  fileData: true,
+});
+
+export type InsertMusicTrack = z.infer<typeof insertMusicTrackSchema>;
+export type MusicTrack = typeof musicTracks.$inferSelect;
+
+// Playlists table
+export const playlists = pgTable("playlists", {
+  id: serial("id").primaryKey(),
+  name: text("name").notNull(),
+  description: text("description"),
+  // Store the tracks as a JSON array of track IDs or a relation could be created separately
+  trackIds: jsonb("track_ids").default([]),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const insertPlaylistSchema = createInsertSchema(playlists).pick({
+  name: true,
+  description: true,
+  trackIds: true,
+});
+
+export type InsertPlaylist = z.infer<typeof insertPlaylistSchema>;
+export type Playlist = typeof playlists.$inferSelect;

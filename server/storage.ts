@@ -1,4 +1,10 @@
-import { users, poses, type User, type InsertUser, type Pose } from "@shared/schema";
+import { 
+  users, poses, 
+  musicTracks, playlists,
+  type User, type InsertUser, type Pose,
+  type MusicTrack, type InsertMusicTrack,
+  type Playlist, type InsertPlaylist
+} from "@shared/schema";
 import { db } from "./db";
 import { eq, or, inArray } from "drizzle-orm";
 import fs from "fs";
@@ -8,13 +14,30 @@ import path from "path";
 // you might need
 
 export interface IStorage {
+  // User operations
   getUser(id: number): Promise<User | undefined>;
   getUserByUsername(username: string): Promise<User | undefined>;
   createUser(user: InsertUser): Promise<User>;
+  
+  // Pose operations
   getAllPoses(): Promise<Pose[]>;
   getPosesByCategory(category: string): Promise<Pose[]>;
   getPosesByCategories(categories: string[]): Promise<Pose[]>;
   seedPoses(): Promise<void>;
+  
+  // Music track operations
+  getAllMusicTracks(): Promise<MusicTrack[]>;
+  getMusicTrack(id: number): Promise<MusicTrack | undefined>;
+  createMusicTrack(track: InsertMusicTrack): Promise<MusicTrack>;
+  updateMusicTrack(id: number, track: Partial<InsertMusicTrack>): Promise<MusicTrack | undefined>;
+  deleteMusicTrack(id: number): Promise<boolean>;
+  
+  // Playlist operations
+  getAllPlaylists(): Promise<Playlist[]>;
+  getPlaylist(id: number): Promise<Playlist | undefined>;
+  createPlaylist(playlist: InsertPlaylist): Promise<Playlist>;
+  updatePlaylist(id: number, playlist: Partial<InsertPlaylist>): Promise<Playlist | undefined>;
+  deletePlaylist(id: number): Promise<boolean>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -92,6 +115,77 @@ export class DatabaseStorage implements IStorage {
       console.error("Failed to seed poses:", error);
       throw error;
     }
+  }
+  
+  // Music track operations
+  async getAllMusicTracks(): Promise<MusicTrack[]> {
+    return await db.select().from(musicTracks);
+  }
+  
+  async getMusicTrack(id: number): Promise<MusicTrack | undefined> {
+    const [track] = await db.select().from(musicTracks).where(eq(musicTracks.id, id));
+    return track || undefined;
+  }
+  
+  async createMusicTrack(track: InsertMusicTrack): Promise<MusicTrack> {
+    const [createdTrack] = await db
+      .insert(musicTracks)
+      .values(track)
+      .returning();
+    return createdTrack;
+  }
+  
+  async updateMusicTrack(id: number, track: Partial<InsertMusicTrack>): Promise<MusicTrack | undefined> {
+    const [updatedTrack] = await db
+      .update(musicTracks)
+      .set(track)
+      .where(eq(musicTracks.id, id))
+      .returning();
+    return updatedTrack || undefined;
+  }
+  
+  async deleteMusicTrack(id: number): Promise<boolean> {
+    const result = await db
+      .delete(musicTracks)
+      .where(eq(musicTracks.id, id));
+    return !!result;
+  }
+  
+  // Playlist operations
+  async getAllPlaylists(): Promise<Playlist[]> {
+    return await db.select().from(playlists);
+  }
+  
+  async getPlaylist(id: number): Promise<Playlist | undefined> {
+    const [playlist] = await db.select().from(playlists).where(eq(playlists.id, id));
+    return playlist || undefined;
+  }
+  
+  async createPlaylist(playlist: InsertPlaylist): Promise<Playlist> {
+    const [createdPlaylist] = await db
+      .insert(playlists)
+      .values(playlist)
+      .returning();
+    return createdPlaylist;
+  }
+  
+  async updatePlaylist(id: number, playlist: Partial<InsertPlaylist>): Promise<Playlist | undefined> {
+    const [updatedPlaylist] = await db
+      .update(playlists)
+      .set({
+        ...playlist,
+        updatedAt: new Date() // Update the updatedAt timestamp
+      })
+      .where(eq(playlists.id, id))
+      .returning();
+    return updatedPlaylist || undefined;
+  }
+  
+  async deletePlaylist(id: number): Promise<boolean> {
+    const result = await db
+      .delete(playlists)
+      .where(eq(playlists.id, id));
+    return !!result;
   }
 }
 

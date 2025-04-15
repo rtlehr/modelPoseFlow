@@ -51,6 +51,200 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
   
+  // Music track routes
+  app.get("/api/music-tracks", async (_req: Request, res: Response) => {
+    try {
+      const tracks = await storage.getAllMusicTracks();
+      res.json(tracks);
+    } catch (error) {
+      console.error("Error fetching music tracks:", error);
+      res.status(500).json({ message: "Failed to fetch music tracks" });
+    }
+  });
+  
+  app.get("/api/music-tracks/:id", async (req: Request, res: Response) => {
+    try {
+      const id = parseInt(req.params.id);
+      if (isNaN(id)) {
+        return res.status(400).json({ message: "Invalid track ID" });
+      }
+      
+      const track = await storage.getMusicTrack(id);
+      if (!track) {
+        return res.status(404).json({ message: "Track not found" });
+      }
+      
+      res.json(track);
+    } catch (error) {
+      console.error("Error fetching music track:", error);
+      res.status(500).json({ message: "Failed to fetch music track" });
+    }
+  });
+  
+  app.post("/api/music-tracks", async (req: Request, res: Response) => {
+    try {
+      const { name, artist, duration, filePath, fileData } = req.body;
+      
+      if (!name) {
+        return res.status(400).json({ message: "Track name is required" });
+      }
+      
+      const track = await storage.createMusicTrack({
+        name,
+        artist,
+        duration,
+        filePath,
+        fileData
+      });
+      
+      res.status(201).json(track);
+    } catch (error) {
+      console.error("Error creating music track:", error);
+      res.status(500).json({ message: "Failed to create music track" });
+    }
+  });
+  
+  app.put("/api/music-tracks/:id", async (req: Request, res: Response) => {
+    try {
+      const id = parseInt(req.params.id);
+      if (isNaN(id)) {
+        return res.status(400).json({ message: "Invalid track ID" });
+      }
+      
+      const { name, artist, duration, filePath, fileData } = req.body;
+      const updatedTrack = await storage.updateMusicTrack(id, {
+        name,
+        artist,
+        duration,
+        filePath,
+        fileData
+      });
+      
+      if (!updatedTrack) {
+        return res.status(404).json({ message: "Track not found" });
+      }
+      
+      res.json(updatedTrack);
+    } catch (error) {
+      console.error("Error updating music track:", error);
+      res.status(500).json({ message: "Failed to update music track" });
+    }
+  });
+  
+  app.delete("/api/music-tracks/:id", async (req: Request, res: Response) => {
+    try {
+      const id = parseInt(req.params.id);
+      if (isNaN(id)) {
+        return res.status(400).json({ message: "Invalid track ID" });
+      }
+      
+      const success = await storage.deleteMusicTrack(id);
+      if (!success) {
+        return res.status(404).json({ message: "Track not found" });
+      }
+      
+      res.status(204).end();
+    } catch (error) {
+      console.error("Error deleting music track:", error);
+      res.status(500).json({ message: "Failed to delete music track" });
+    }
+  });
+  
+  // Playlist routes
+  app.get("/api/playlists", async (_req: Request, res: Response) => {
+    try {
+      const playlists = await storage.getAllPlaylists();
+      res.json(playlists);
+    } catch (error) {
+      console.error("Error fetching playlists:", error);
+      res.status(500).json({ message: "Failed to fetch playlists" });
+    }
+  });
+  
+  app.get("/api/playlists/:id", async (req: Request, res: Response) => {
+    try {
+      const id = parseInt(req.params.id);
+      if (isNaN(id)) {
+        return res.status(400).json({ message: "Invalid playlist ID" });
+      }
+      
+      const playlist = await storage.getPlaylist(id);
+      if (!playlist) {
+        return res.status(404).json({ message: "Playlist not found" });
+      }
+      
+      res.json(playlist);
+    } catch (error) {
+      console.error("Error fetching playlist:", error);
+      res.status(500).json({ message: "Failed to fetch playlist" });
+    }
+  });
+  
+  app.post("/api/playlists", async (req: Request, res: Response) => {
+    try {
+      const { name, description, trackIds } = req.body;
+      
+      if (!name) {
+        return res.status(400).json({ message: "Playlist name is required" });
+      }
+      
+      const playlist = await storage.createPlaylist({
+        name,
+        description,
+        trackIds
+      });
+      
+      res.status(201).json(playlist);
+    } catch (error) {
+      console.error("Error creating playlist:", error);
+      res.status(500).json({ message: "Failed to create playlist" });
+    }
+  });
+  
+  app.put("/api/playlists/:id", async (req: Request, res: Response) => {
+    try {
+      const id = parseInt(req.params.id);
+      if (isNaN(id)) {
+        return res.status(400).json({ message: "Invalid playlist ID" });
+      }
+      
+      const { name, description, trackIds } = req.body;
+      const updatedPlaylist = await storage.updatePlaylist(id, {
+        name,
+        description,
+        trackIds
+      });
+      
+      if (!updatedPlaylist) {
+        return res.status(404).json({ message: "Playlist not found" });
+      }
+      
+      res.json(updatedPlaylist);
+    } catch (error) {
+      console.error("Error updating playlist:", error);
+      res.status(500).json({ message: "Failed to update playlist" });
+    }
+  });
+  
+  app.delete("/api/playlists/:id", async (req: Request, res: Response) => {
+    try {
+      const id = parseInt(req.params.id);
+      if (isNaN(id)) {
+        return res.status(400).json({ message: "Invalid playlist ID" });
+      }
+      
+      const success = await storage.deletePlaylist(id);
+      if (!success) {
+        return res.status(404).json({ message: "Playlist not found" });
+      }
+      
+      res.status(204).end();
+    } catch (error) {
+      console.error("Error deleting playlist:", error);
+      res.status(500).json({ message: "Failed to delete playlist" });
+    }
+  });
+  
   const httpServer = createServer(app);
 
   return httpServer;
