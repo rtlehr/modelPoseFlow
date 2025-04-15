@@ -121,20 +121,24 @@ export default function TimerScreen({ onBackToSetup, sessionConfig, poses }: Tim
     );
   }
 
+  const isMobile = useIsMobile();
+
   return (
-    <div className="bg-white rounded-xl shadow-lg p-6">
-      <div className="flex justify-between items-center mb-4">
-        <h1 className="text-2xl font-bold text-gray-800">Figure Model Pose Timer</h1>
+    <div className={`bg-white rounded-xl shadow-lg ${isMobile ? 'p-4' : 'p-6'} max-w-4xl mx-auto`}>
+      <div className={`flex justify-between items-center ${isMobile ? 'mb-3' : 'mb-4'}`}>
+        <h1 className={`${isMobile ? 'text-xl' : 'text-2xl'} font-bold text-gray-800`}>
+          {isMobile ? 'Pose Timer' : 'Figure Model Pose Timer'}
+        </h1>
         <div className="flex items-center space-x-2">
           <FullscreenModeToggle 
             isFullscreen={isFullscreen}
             onToggleFullscreen={toggleFullscreen}
           />
           <button 
-            className="text-gray-600 hover:text-gray-800"
+            className="text-gray-600 hover:text-gray-800 touch-manipulation"
             onClick={onBackToSetup}
           >
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <svg xmlns="http://www.w3.org/2000/svg" className={`${isMobile ? 'h-7 w-7' : 'h-6 w-6'}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
             </svg>
           </button>

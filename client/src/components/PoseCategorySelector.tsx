@@ -1,4 +1,5 @@
 import { PoseCategory } from "@/types";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 interface PoseCategorySelectorProps {
   selectedCategories: PoseCategory[];
@@ -6,6 +7,8 @@ interface PoseCategorySelectorProps {
 }
 
 export default function PoseCategorySelector({ selectedCategories, onChange }: PoseCategorySelectorProps) {
+  const isMobile = useIsMobile();
+  
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { value, checked } = e.target;
     const category = value as PoseCategory;
@@ -17,13 +20,18 @@ export default function PoseCategorySelector({ selectedCategories, onChange }: P
     }
   };
 
+  // Larger touch area and checkbox size for mobile
+  const checkboxSize = isMobile ? 'w-6 h-6' : 'w-5 h-5';
+  const labelSpacing = isMobile ? 'space-x-4' : 'space-x-3';
+  const fontSize = isMobile ? 'text-base' : 'text-sm';
+
   return (
     <div className="space-y-3">
-      <h2 className="text-xl font-semibold text-gray-700">Pose Categories</h2>
-      <p className="text-sm text-gray-500">Select at least one category of poses:</p>
+      <h2 className={`${isMobile ? 'text-xl' : 'text-lg'} font-semibold text-gray-700`}>Pose Categories</h2>
+      <p className={`${fontSize} text-gray-500`}>Select at least one category of poses:</p>
       
       <div className="grid grid-cols-2 gap-3">
-        <label className="checkbox-container flex items-center space-x-3 cursor-pointer">
+        <label className={`checkbox-container flex items-center ${labelSpacing} cursor-pointer ${isMobile ? 'py-2' : ''}`}>
           <div className="relative">
             <input 
               type="checkbox" 
@@ -34,12 +42,12 @@ export default function PoseCategorySelector({ selectedCategories, onChange }: P
               onChange={handleChange}
               disabled={selectedCategories.includes("random")}
             />
-            <div className={`custom-checkbox w-5 h-5 border-2 ${selectedCategories.includes("random") ? 'border-gray-200 bg-gray-100' : 'border-gray-300'} rounded relative`}></div>
+            <div className={`custom-checkbox ${checkboxSize} border-2 ${selectedCategories.includes("random") ? 'border-gray-200 bg-gray-100' : 'border-gray-300'} rounded relative`}></div>
           </div>
-          <span className={`${selectedCategories.includes("random") ? 'text-gray-400' : 'text-gray-700'}`}>Standing</span>
+          <span className={`${selectedCategories.includes("random") ? 'text-gray-400' : 'text-gray-700'} ${fontSize}`}>Standing</span>
         </label>
         
-        <label className="checkbox-container flex items-center space-x-3 cursor-pointer">
+        <label className={`checkbox-container flex items-center ${labelSpacing} cursor-pointer ${isMobile ? 'py-2' : ''}`}>
           <div className="relative">
             <input 
               type="checkbox" 
@@ -50,12 +58,12 @@ export default function PoseCategorySelector({ selectedCategories, onChange }: P
               onChange={handleChange}
               disabled={selectedCategories.includes("random")}
             />
-            <div className={`custom-checkbox w-5 h-5 border-2 ${selectedCategories.includes("random") ? 'border-gray-200 bg-gray-100' : 'border-gray-300'} rounded relative`}></div>
+            <div className={`custom-checkbox ${checkboxSize} border-2 ${selectedCategories.includes("random") ? 'border-gray-200 bg-gray-100' : 'border-gray-300'} rounded relative`}></div>
           </div>
-          <span className={`${selectedCategories.includes("random") ? 'text-gray-400' : 'text-gray-700'}`}>Sitting</span>
+          <span className={`${selectedCategories.includes("random") ? 'text-gray-400' : 'text-gray-700'} ${fontSize}`}>Sitting</span>
         </label>
         
-        <label className="checkbox-container flex items-center space-x-3 cursor-pointer">
+        <label className={`checkbox-container flex items-center ${labelSpacing} cursor-pointer ${isMobile ? 'py-2' : ''}`}>
           <div className="relative">
             <input 
               type="checkbox" 
@@ -66,12 +74,12 @@ export default function PoseCategorySelector({ selectedCategories, onChange }: P
               onChange={handleChange}
               disabled={selectedCategories.includes("random")}
             />
-            <div className={`custom-checkbox w-5 h-5 border-2 ${selectedCategories.includes("random") ? 'border-gray-200 bg-gray-100' : 'border-gray-300'} rounded relative`}></div>
+            <div className={`custom-checkbox ${checkboxSize} border-2 ${selectedCategories.includes("random") ? 'border-gray-200 bg-gray-100' : 'border-gray-300'} rounded relative`}></div>
           </div>
-          <span className={`${selectedCategories.includes("random") ? 'text-gray-400' : 'text-gray-700'}`}>Reclining</span>
+          <span className={`${selectedCategories.includes("random") ? 'text-gray-400' : 'text-gray-700'} ${fontSize}`}>Reclining</span>
         </label>
         
-        <label className="checkbox-container flex items-center space-x-3 cursor-pointer">
+        <label className={`checkbox-container flex items-center ${labelSpacing} cursor-pointer ${isMobile ? 'py-2' : ''}`}>
           <div className="relative">
             <input 
               type="checkbox" 
@@ -82,14 +90,14 @@ export default function PoseCategorySelector({ selectedCategories, onChange }: P
               onChange={handleChange}
               disabled={selectedCategories.includes("random")}
             />
-            <div className={`custom-checkbox w-5 h-5 border-2 ${selectedCategories.includes("random") ? 'border-gray-200 bg-gray-100' : 'border-gray-300'} rounded relative`}></div>
+            <div className={`custom-checkbox ${checkboxSize} border-2 ${selectedCategories.includes("random") ? 'border-gray-200 bg-gray-100' : 'border-gray-300'} rounded relative`}></div>
           </div>
-          <span className={`${selectedCategories.includes("random") ? 'text-gray-400' : 'text-gray-700'}`}>Action</span>
+          <span className={`${selectedCategories.includes("random") ? 'text-gray-400' : 'text-gray-700'} ${fontSize}`}>Action</span>
         </label>
       </div>
       
       <div className="mt-3 border-t pt-3">
-        <label className="checkbox-container flex items-center space-x-3 cursor-pointer">
+        <label className={`checkbox-container flex items-center ${labelSpacing} cursor-pointer ${isMobile ? 'py-2' : ''}`}>
           <div className="relative">
             <input 
               type="checkbox" 
@@ -108,9 +116,9 @@ export default function PoseCategorySelector({ selectedCategories, onChange }: P
                 }
               }}
             />
-            <div className="custom-checkbox w-5 h-5 border-2 border-primary rounded relative"></div>
+            <div className={`custom-checkbox ${checkboxSize} border-2 border-primary rounded relative`}></div>
           </div>
-          <span className="text-primary font-medium">Random (all categories)</span>
+          <span className={`text-primary font-medium ${isMobile ? 'text-base' : ''}`}>Random (all categories)</span>
         </label>
       </div>
     </div>

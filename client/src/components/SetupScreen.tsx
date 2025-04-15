@@ -5,6 +5,7 @@ import SessionConfigSelector from "./SessionConfigSelector";
 import { Button } from "@/components/ui/button";
 import { PoseCategory, PoseSessionConfig, Pose } from "@/types";
 import { useToast } from "@/hooks/use-toast";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 interface SetupScreenProps {
   onStartSession: (config: PoseSessionConfig) => void;
@@ -13,6 +14,7 @@ interface SetupScreenProps {
 
 export default function SetupScreen({ onStartSession, poses }: SetupScreenProps) {
   const { toast } = useToast();
+  const isMobile = useIsMobile();
   const [selectedCategories, setSelectedCategories] = useState<PoseCategory[]>(["standing", "sitting"]);
   const [poseLength, setPoseLength] = useState(30);
   const [sessionType, setSessionType] = useState<"count" | "time">("count");
@@ -66,8 +68,10 @@ export default function SetupScreen({ onStartSession, poses }: SetupScreenProps)
   };
 
   return (
-    <div className="bg-white rounded-xl shadow-lg p-6">
-      <h1 className="text-3xl font-bold text-center text-gray-800 mb-6">Figure Model Pose Timer</h1>
+    <div className={`bg-white rounded-xl shadow-lg ${isMobile ? 'p-4' : 'p-6'} max-w-xl mx-auto`}>
+      <h1 className={`${isMobile ? 'text-2xl' : 'text-3xl'} font-bold text-center text-gray-800 mb-6`}>
+        Figure Model Pose Timer
+      </h1>
       
       <form onSubmit={handleSubmit} className="space-y-6">
         <PoseCategorySelector 
@@ -91,7 +95,9 @@ export default function SetupScreen({ onStartSession, poses }: SetupScreenProps)
         
         <Button 
           type="submit" 
-          className="w-full bg-primary hover:bg-indigo-700 text-white font-bold py-3 px-4 rounded-lg transition duration-200"
+          className={`w-full bg-primary hover:bg-indigo-700 text-white font-bold 
+            ${isMobile ? 'text-lg py-4' : 'py-3'} px-4 rounded-lg transition duration-200
+            active:scale-[0.98] touch-manipulation`}
         >
           Start Session
         </Button>
