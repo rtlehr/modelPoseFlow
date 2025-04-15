@@ -388,7 +388,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         prompt,
         category
       });
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error generating AI pose:", error);
       res.status(500).json({ 
         message: "Failed to generate AI pose",

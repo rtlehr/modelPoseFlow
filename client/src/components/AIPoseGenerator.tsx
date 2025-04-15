@@ -42,7 +42,7 @@ export default function AIPoseGenerator({ onSavePose, onCancel, open }: AIPoseGe
   const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   
-  const toast = useToast();
+  const { toast } = useToast();
   const isMobile = useIsMobile();
   
   // Sample prompts for users to try
@@ -95,7 +95,7 @@ export default function AIPoseGenerator({ onSavePose, onCancel, open }: AIPoseGe
         title: "Pose generated",
         description: "Your AI pose has been generated successfully!"
       });
-    } catch (err) {
+    } catch (err: any) {
       console.error("Error generating pose:", err);
       setError(err.message || "Failed to generate AI pose. Please try again.");
       
@@ -129,7 +129,7 @@ export default function AIPoseGenerator({ onSavePose, onCancel, open }: AIPoseGe
       setGeneratedImageUrl(null);
       selectRandomPrompt();
       
-    } catch (err) {
+    } catch (err: any) {
       console.error("Error saving pose:", err);
       
       toast({
