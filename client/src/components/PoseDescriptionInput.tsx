@@ -67,7 +67,7 @@ export default function PoseDescriptionInput({ onDescriptionProcessed }: PoseDes
       
       <div className="space-y-2">
         <p className={`${isMobile ? 'text-base' : 'text-sm'} text-gray-500`}>
-          Describe the types of poses you want (e.g., "dynamic running poses with foreshortening" or "sitting poses with dramatic lighting"):
+          Describe the types of poses you want, using specific keywords that match your desired poses:
         </p>
         
         <Textarea
@@ -100,8 +100,11 @@ export default function PoseDescriptionInput({ onDescriptionProcessed }: PoseDes
         
         {/* Show examples */}
         <div className="mt-3">
-          <p className={`${isMobile ? 'text-sm' : 'text-xs'} text-gray-400 italic`}>
-            Examples: "dramatic standing poses with arms raised", "relaxed sitting poses with natural lighting", "dynamic action poses with exaggerated perspective"
+          <p className={`${isMobile ? 'text-sm' : 'text-xs'} text-gray-500 font-medium`}>
+            The system will match your description with pose keywords for the best results.
+          </p>
+          <p className={`${isMobile ? 'text-sm' : 'text-xs'} text-gray-400 italic mt-1`}>
+            Examples: "dramatic lighting and strong shadows", "twisted torso with arms extended", "three-quarter view with contemplative expression"
           </p>
         </div>
       </div>

@@ -75,11 +75,13 @@ export async function analyzePoseDescription(description: string): Promise<PoseA
           role: "system",
           content: 
             "You are an AI assistant that helps analyze figure drawing pose descriptions. " +
-            "Extract relevant pose categories and keywords from the text description provided. " +
+            "Extract relevant keywords from the text description provided. " +
+            "Focus on aspects of the pose like body position, angle, mood, lighting, style, etc. " +
+            "You can still categorize the pose, but keywords are more important for matching. " +
             "The available pose categories are: standing, sitting, reclining, and action. " +
             "You should return a JSON object with three properties: " +
             "1. 'categories': An array of categories that match the description (at least one) " +
-            "2. 'keywords': An array of 3-5 relevant keywords from the description " +
+            "2. 'keywords': An array of 8-10 specific relevant keywords from the description " +
             "3. 'description': A brief summary of the pose in 10 words or less"
         },
         {
@@ -96,9 +98,9 @@ export async function analyzePoseDescription(description: string): Promise<PoseA
     }
     const result = JSON.parse(messageContent) as PoseAnalysisResult;
     
-    // Ensure we have at least one category
+    // Ensure we have at least one category (this is less important now, but kept for backward compatibility)
     if (!result.categories || result.categories.length === 0) {
-      result.categories = ["standing"]; // Default to standing if no categories detected
+      result.categories = ["standing"]; 
     }
     
     // Validate the categories to ensure they match our expected types
@@ -111,13 +113,19 @@ export async function analyzePoseDescription(description: string): Promise<PoseA
       result.categories = ["standing"];
     }
     
+    // Ensure we have keywords
+    if (!result.keywords || result.keywords.length === 0) {
+      // Generate some basic keywords based on the categories
+      result.keywords = result.categories.map(cat => cat);
+    }
+    
     return result;
   } catch (error) {
     console.error("Error analyzing pose description:", error);
     // Fallback to a default response if OpenAI fails
     return {
       categories: ["standing"],
-      keywords: [],
+      keywords: ["standing", "figure", "pose"],
       description: "Default pose selection"
     };
   }

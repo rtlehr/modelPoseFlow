@@ -89,14 +89,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       let matchingPoses: Pose[] = [];
       
-      // If we have keywords, try to match by keywords first
+      // Always try to match by keywords first - this is now our primary matching strategy
       if (analysis.keywords && analysis.keywords.length > 0) {
+        console.log("Finding poses by keywords:", analysis.keywords);
         matchingPoses = await storage.getPosesByKeywords(analysis.keywords);
       }
       
-      // If no poses found by keywords, fall back to categories
+      // Only if we have no keyword matches, fall back to categories
       if (matchingPoses.length === 0) {
+        console.log("No keyword matches found, falling back to categories:", analysis.categories);
         matchingPoses = await storage.getPosesByCategories(analysis.categories);
+      }
+      
+      // If we still don't have poses, get all poses as a last resort
+      if (matchingPoses.length === 0) {
+        console.log("No category matches found either, returning all poses");
+        matchingPoses = await storage.getAllPoses();
       }
       
       res.json({
