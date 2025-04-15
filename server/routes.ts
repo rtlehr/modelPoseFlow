@@ -3,7 +3,7 @@ import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import path from "path";
 import fs from "fs";
-import { analyzePoseDescription } from "./openai";
+import { analyzePoseDescription, generatePoseKeywords } from "./openai";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // API endpoint to get all poses
@@ -38,8 +38,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       const analysis = await analyzePoseDescription(description);
       
-      // Get poses matching the identified categories
-      const matchingPoses = await storage.getPosesByCategories(analysis.categories);
+      let matchingPoses = [];
+      
+      // If we have keywords, try to match by keywords first
+      if (analysis.keywords && analysis.keywords.length > 0) {
+        matchingPoses = await storage.getPosesByKeywords(analysis.keywords);
+      }
+      
+      // If no poses found by keywords, fall back to categories
+      if (matchingPoses.length === 0) {
+        matchingPoses = await storage.getPosesByCategories(analysis.categories);
+      }
       
       res.json({
         analysis,
@@ -48,6 +57,64 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error analyzing pose description:", error);
       res.status(500).json({ message: "Failed to analyze pose description" });
+    }
+  });
+  
+  // Pose keyword management endpoints
+  app.post("/api/poses/:id/generate-keywords", async (req: Request, res: Response) => {
+    try {
+      const poseId = parseInt(req.params.id);
+      
+      if (isNaN(poseId)) {
+        return res.status(400).json({ message: "Invalid pose ID" });
+      }
+      
+      // Get the pose to access its image URL
+      const poses = await storage.getAllPoses();
+      const pose = poses.find(p => p.id === poseId);
+      
+      if (!pose || !pose.url) {
+        return res.status(404).json({ message: "Pose not found or missing image URL" });
+      }
+      
+      // Generate keywords for the pose image
+      const keywords = await generatePoseKeywords(pose.url);
+      
+      // Update the pose with the generated keywords
+      const updatedPose = await storage.updatePoseKeywords(poseId, keywords);
+      
+      return res.status(200).json({ pose: updatedPose, keywords });
+    } catch (error) {
+      console.error("Error generating pose keywords:", error);
+      return res.status(500).json({ message: "Failed to generate pose keywords" });
+    }
+  });
+  
+  // Endpoint for manually updating pose keywords
+  app.put("/api/poses/:id/keywords", async (req: Request, res: Response) => {
+    try {
+      const poseId = parseInt(req.params.id);
+      const { keywords } = req.body;
+      
+      if (isNaN(poseId)) {
+        return res.status(400).json({ message: "Invalid pose ID" });
+      }
+      
+      if (!Array.isArray(keywords)) {
+        return res.status(400).json({ message: "Keywords must be an array of strings" });
+      }
+      
+      // Update the pose with the provided keywords
+      const updatedPose = await storage.updatePoseKeywords(poseId, keywords);
+      
+      if (!updatedPose) {
+        return res.status(404).json({ message: "Pose not found" });
+      }
+      
+      return res.status(200).json({ pose: updatedPose });
+    } catch (error) {
+      console.error("Error updating pose keywords:", error);
+      return res.status(500).json({ message: "Failed to update pose keywords" });
     }
   });
   

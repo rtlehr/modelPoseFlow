@@ -90,6 +90,44 @@ export class DatabaseStorage implements IStorage {
       or(...conditions)
     );
   }
+  
+  async getPosesByKeywords(keywords: string[]): Promise<Pose[]> {
+    if (!keywords || keywords.length === 0) {
+      return this.getAllPoses();
+    }
+    
+    // Get all poses first and then filter by keywords in JS
+    // This is because Drizzle ORM doesn't have a direct way to query array contains 
+    // We could use SQL fragments for more efficiency in a production app
+    const allPoses = await this.getAllPoses();
+    
+    // Filter poses that have at least one of the keywords
+    return allPoses.filter(pose => {
+      const poseKeywords = pose.keywords || [];
+      
+      if (!Array.isArray(poseKeywords) || poseKeywords.length === 0) {
+        return false;
+      }
+      
+      // Check if any of the search keywords match any of the pose's keywords
+      // Using case-insensitive comparison
+      return keywords.some(keyword => 
+        poseKeywords.some(poseKeyword => 
+          poseKeyword.toLowerCase().includes(keyword.toLowerCase())
+        )
+      );
+    });
+  }
+  
+  async updatePoseKeywords(id: number, keywords: string[]): Promise<Pose | undefined> {
+    const [updatedPose] = await db
+      .update(poses)
+      .set({ keywords })
+      .where(eq(poses.id, id))
+      .returning();
+    
+    return updatedPose || undefined;
+  }
 
   async seedPoses(): Promise<void> {
     try {

@@ -12,9 +12,60 @@ interface PoseAnalysisResult {
 }
 
 /**
- * Analyzes a natural language pose description and extracts relevant pose categories
- * and keywords to use for searching and filtering poses.
+ * Generates keywords for a pose based on its visual characteristics
+ * This can be used to assist with tagging poses for better searchability
  */
+export async function generatePoseKeywords(imageUrl: string): Promise<string[]> {
+  try {
+    const response = await openai.chat.completions.create({
+      model: "gpt-4o",
+      messages: [
+        {
+          role: "system",
+          content: 
+            "You are an AI assistant that helps analyze figure drawing poses from images. " +
+            "Extract relevant keywords that describe the pose, body position, expression, mood, and any distinctive features. " +
+            "Focus on aspects that would be relevant for an artist looking for specific poses to draw. " +
+            "You should return a JSON array of 10-15 specific keywords that accurately describe the pose."
+        },
+        {
+          role: "user",
+          content: [
+            {
+              type: "text", 
+              text: "Generate descriptive keywords for this figure pose that would help artists find it when searching."
+            },
+            {
+              type: "image_url",
+              image_url: {
+                url: imageUrl
+              }
+            }
+          ]
+        }
+      ],
+      response_format: { type: "json_object" },
+    });
+
+    const messageContent = response.choices[0].message.content;
+    if (!messageContent) {
+      throw new Error("Empty response from OpenAI");
+    }
+    
+    const result = JSON.parse(messageContent);
+    if (Array.isArray(result.keywords)) {
+      return result.keywords;
+    } else if (Array.isArray(result)) {
+      return result;
+    }
+    
+    return [];
+  } catch (error) {
+    console.error("Error generating pose keywords:", error);
+    return [];
+  }
+}
+
 export async function analyzePoseDescription(description: string): Promise<PoseAnalysisResult> {
   try {
     const response = await openai.chat.completions.create({
