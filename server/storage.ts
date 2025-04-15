@@ -415,43 +415,43 @@ Remember, gesture drawing isn't about perfect anatomy or details—it's about ca
             tags: ["gesture", "techniques", "quick sketches"]
           },
           {
-            title: "Working with Light and Shadow in Figure Drawing",
-            slug: "light-and-shadow-in-figure-drawing",
+            title: "Creating Form and Dimension in Figure Drawing",
+            slug: "form-and-dimension-in-figure-drawing",
             summary: "Learn how to use value to create form and dimension in your figure drawings.",
             content: `
-# Working with Light and Shadow in Figure Drawing
+# Creating Form and Dimension in Figure Drawing
 
-Understanding how light interacts with the human form is crucial for creating convincing, three-dimensional figure drawings. Light and shadow do more than just create realism—they help convey mood, atmosphere, and drama in your artwork.
+Understanding how to create convincing three-dimensional forms is crucial for effective figure drawing. Good technique helps convey volume, depth, and solidity in your artwork.
 
-## The Five Elements of Light and Shadow
+## The Elements of Form
 
-When studying the figure, look for these five value relationships:
+When studying the figure, look for these key value relationships:
 
-1. **Cast Shadow**: The dark area created when the form blocks light from reaching the surface behind it
-2. **Form Shadow**: The area of the form that turns away from the light
-3. **Halftone**: The transitional area between light and shadow
-4. **Reflected Light**: The subtle illumination in shadow areas caused by light bouncing off nearby surfaces
-5. **Highlight**: The brightest spot where light directly hits the form
+1. **Primary Planes**: The main directional planes of the figure (front, sides, back)
+2. **Secondary Planes**: Smaller planes that define muscles and anatomical landmarks
+3. **Transitions**: The subtle shifts between one plane and another
+4. **Core Shadows**: The areas where form turns away most dramatically
+5. **Highlighted Areas**: The parts of the form that are most prominent
 
-## Common Lighting Setups
+## Techniques for Creating Volume
 
-### Single Side Lighting
+### Cross-Contour Lines
 
-The most dramatic and easy-to-read lighting setup. Place a single light source to one side of your model to create clear shadow patterns that reveal the form.
+Draw lines that wrap around the form to show its three-dimensional quality. These lines follow the surface contours and help communicate volume.
 
-### Rembrandt Lighting
+### Directional Hatching
 
-Named after the master painter, this setup features light from approximately a 45-degree angle that creates a distinctive triangle of light on the cheek opposite the light source.
+Use hatching lines that follow the form's surface direction. As the form turns, change the direction of your hatching to emphasize the turn.
 
-### Rim Lighting
+### Form Shadow Mapping
 
-Positioning light behind the figure creates a glowing outline that separates the figure from the background. This creates dramatic silhouettes and emphasizes contours.
+Identify and carefully render the areas where forms turn away from the viewer. These shadows help define the boundaries between different planes.
 
-## Techniques for Rendering Light and Shadow
+## Methods for Rendering Form
 
 ### Cross-Hatching
 
-Build up value gradually using intersecting lines. Vary the direction, spacing, and pressure to create different tones.
+Build up value gradually using intersecting lines. Vary the direction, spacing, and pressure to create different tones that follow the form.
 
 ### Blending
 
@@ -461,20 +461,20 @@ Use tools like blending stumps, tortillons, or your finger to smooth transitions
 
 Practice creating a consistent 9-step value scale from white to black. Having control over your value range will give your drawings more depth and dimension.
 
-## Tips for Working with Light and Shadow
+## Tips for Creating Convincing Form
 
-- Squint your eyes when looking at your subject to simplify values and see the major light/shadow pattern
+- Squint your eyes when looking at your subject to simplify forms and see the major planes
 - Always establish your darkest darks and lightest lights early in the drawing
-- Remember that shadows are not uniform darkness—look for subtle variations within shadow areas
-- Pay attention to edge quality—sharp edges occur at the boundary between light and shadow on hard surfaces, while soft edges occur on rounded forms
+- Remember that transitions between planes are rarely uniform—look for subtle variations
+- Pay attention to edge quality—sharp edges occur at the boundary between different planes on hard surfaces, while soft edges occur on rounded forms
 
-Understanding light and shadow is a lifelong study for artists. Regular practice with various lighting conditions will develop your ability to see and render form convincingly.
+Understanding form and volume is a lifelong study for artists. Regular practice from different angles will develop your ability to see and render three-dimensional form convincingly.
             `,
             coverImage: "https://images.unsplash.com/photo-1544636331-e26879cd4d9b",
             authorName: "Sophia Williams",
             publishedAt: new Date(2025, 2, 25), // March 25, 2025
             featured: 0,
-            tags: ["lighting", "shading", "value"]
+            tags: ["form", "volume", "technique", "value"]
           }
         ];
         
