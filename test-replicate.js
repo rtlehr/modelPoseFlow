@@ -1,5 +1,5 @@
 // Simple test script to verify Replicate integration
-const Replicate = require('replicate');
+import Replicate from 'replicate';
 
 const replicate = new Replicate({
   auth: process.env.REPLICATE_API_TOKEN,
