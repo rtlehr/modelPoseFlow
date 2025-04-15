@@ -17,34 +17,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // API endpoint to get poses by category
-  app.get("/api/poses/:category", async (req, res) => {
-    try {
-      const category = req.params.category;
-      const poses = await storage.getPosesByCategory(category);
-      res.json(poses);
-    } catch (error) {
-      res.status(500).json({ message: "Failed to fetch poses by category" });
-    }
-  });
+  // Category-based endpoints have been removed
+  // All pose selection now uses keywords
   
   // API endpoint to create a new pose
   app.post("/api/poses", async (req: Request, res: Response) => {
     try {
-      const { category, url } = req.body;
+      const { url } = req.body;
       
-      if (!category || !url) {
-        return res.status(400).json({ message: "Category and URL are required" });
-      }
-      
-      // Validate category
-      const validCategories = ["standing", "sitting", "reclining", "action"];
-      if (!validCategories.includes(category)) {
-        return res.status(400).json({ message: "Invalid category" });
+      if (!url) {
+        return res.status(400).json({ message: "URL is required" });
       }
       
       // Create a new pose in storage
-      const newPose = await storage.createPose({ category, url });
+      const newPose = await storage.createPose({ url });
       
       return res.status(200).json(newPose);
     } catch (error) {
@@ -89,21 +75,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       let matchingPoses: Pose[] = [];
       
-      // Always try to match by keywords first - this is now our primary matching strategy
+      // Match by keywords (our only matching strategy now)
       if (analysis.keywords && analysis.keywords.length > 0) {
         console.log("Finding poses by keywords:", analysis.keywords);
         matchingPoses = await storage.getPosesByKeywords(analysis.keywords);
       }
       
-      // Only if we have no keyword matches, fall back to categories
+      // If we don't have poses, get all poses as a last resort
       if (matchingPoses.length === 0) {
-        console.log("No keyword matches found, falling back to categories:", analysis.categories);
-        matchingPoses = await storage.getPosesByCategories(analysis.categories);
-      }
-      
-      // If we still don't have poses, get all poses as a last resort
-      if (matchingPoses.length === 0) {
-        console.log("No category matches found either, returning all poses");
+        console.log("No keyword matches found, returning all poses");
         matchingPoses = await storage.getAllPoses();
       }
       

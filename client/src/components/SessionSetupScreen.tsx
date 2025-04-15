@@ -3,21 +3,21 @@ import PoseLengthSelector from "./PoseLengthSelector";
 import SessionConfigSelector from "./SessionConfigSelector";
 import MusicPlaylistSelector from "./MusicPlaylistSelector";
 import { Button } from "@/components/ui/button";
-import { PoseCategory, PoseSessionConfig } from "@/types";
+import { PoseSessionConfig } from "@/types";
 import { useToast } from "@/hooks/use-toast";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { ArrowLeft } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
 
 interface SessionSetupScreenProps {
-  selectedCategories: PoseCategory[];
+  selectedKeywords: string[];
   poseDescription: string;
   onStartSession: (config: PoseSessionConfig) => void;
   onBack: () => void;
 }
 
 export default function SessionSetupScreen({ 
-  selectedCategories, 
+  selectedKeywords, 
   poseDescription,
   onStartSession, 
   onBack 
@@ -43,7 +43,8 @@ export default function SessionSetupScreen({
     }
 
     onStartSession({
-      categories: selectedCategories,
+      keywords: selectedKeywords,
+      description: poseDescription,
       poseLength,
       sessionType,
       poseCount: calculatedPoseCount,

@@ -3,10 +3,9 @@ import { useIsMobile } from "@/hooks/use-mobile";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Loader2 } from "lucide-react";
-import { PoseCategory } from "@/types";
 
 interface PoseDescriptionInputProps {
-  onDescriptionProcessed: (categories: PoseCategory[], description: string) => void;
+  onDescriptionProcessed: (keywords: string[], description: string) => void;
 }
 
 export default function PoseDescriptionInput({ onDescriptionProcessed }: PoseDescriptionInputProps) {
@@ -46,12 +45,12 @@ export default function PoseDescriptionInput({ onDescriptionProcessed }: PoseDes
       
       const data = await response.json();
       
-      if (!data.analysis?.categories?.length) {
-        throw new Error("No pose categories found. Please try a different description.");
+      if (!data.analysis?.keywords?.length) {
+        throw new Error("No keywords found. Please try a different description.");
       }
       
-      // Pass the categories back to the parent component
-      onDescriptionProcessed(data.analysis.categories, description);
+      // Pass the keywords back to the parent component
+      onDescriptionProcessed(data.analysis.keywords, description);
     } catch (err: any) {
       setError(err.message || "Failed to analyze pose description. Please try again.");
     } finally {
