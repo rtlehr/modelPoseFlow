@@ -152,13 +152,30 @@ export default function PoseLibraryScreen({ onBack }: PoseLibraryScreenProps) {
     try {
       setUploading(true);
       
+      // Check if the image data is larger than 2MB (approximate conversion from base64)
+      // Base64 encoding increases size by ~33%, so check for ~1.5MB in base64 chars
+      if (uploadedImagePreview.length > 2000000) {
+        toast({
+          title: "Image too large",
+          description: "Please select an image smaller than 2MB",
+          variant: "destructive"
+        });
+        setUploading(false);
+        return;
+      }
+      
       const response = await apiRequest("POST", "/api/poses", {
         category: selectedCategory,
         url: uploadedImagePreview
       });
       
       if (!response.ok) {
-        throw new Error("Failed to upload pose");
+        // Check if the error is due to payload size
+        if (response.status === 413) {
+          throw new Error("Image too large (max 2MB)");
+        } else {
+          throw new Error("Failed to upload pose");
+        }
       }
       
       const newPose = await response.json();
@@ -180,9 +197,15 @@ export default function PoseLibraryScreen({ onBack }: PoseLibraryScreenProps) {
       
     } catch (error) {
       console.error("Error uploading pose:", error);
+      
+      // Custom error message based on the error
+      const errorMessage = error.message.includes("too large") 
+        ? "Image is too large. Please select an image smaller than 2MB."
+        : "Failed to upload pose. Please try again.";
+        
       toast({
         title: "Upload failed",
-        description: "Failed to upload pose. Please try again.",
+        description: errorMessage,
         variant: "destructive"
       });
     } finally {
@@ -438,7 +461,7 @@ export default function PoseLibraryScreen({ onBack }: PoseLibraryScreenProps) {
                     Click to select an image, or drag and drop
                   </p>
                   <p className="text-xs text-gray-400 mt-1">
-                    JPG, PNG, or GIF files
+                    JPG, PNG, or GIF files (max 2MB)
                   </p>
                 </div>
               )}
