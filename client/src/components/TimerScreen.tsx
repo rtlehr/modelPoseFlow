@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import PoseProgress from "./PoseProgress";
 import PoseDisplay from "./PoseDisplay";
 import TimerControls from "./TimerControls";
+import MusicPlayer from "./MusicPlayer";
 import { Pose, PoseSessionConfig } from "@/types";
 import usePoseSession from "@/hooks/usePoseSession";
 
@@ -76,6 +77,8 @@ export default function TimerScreen({ onBackToSetup, sessionConfig, poses }: Tim
             onNext={nextPose}
             onPrevious={previousPose}
           />
+          
+          <MusicPlayer isSessionPlaying={isPlaying} />
         </>
       )}
     </div>
