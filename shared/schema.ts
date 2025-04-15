@@ -78,3 +78,33 @@ export const insertPlaylistSchema = createInsertSchema(playlists).pick({
 
 export type InsertPlaylist = z.infer<typeof insertPlaylistSchema>;
 export type Playlist = typeof playlists.$inferSelect;
+
+// Blog articles table
+export const blogArticles = pgTable("blog_articles", {
+  id: serial("id").primaryKey(),
+  title: text("title").notNull(),
+  slug: text("slug").notNull().unique(),
+  summary: text("summary").notNull(),
+  content: text("content").notNull(),
+  coverImage: text("cover_image"), // URL to cover image
+  authorName: text("author_name").notNull(),
+  publishedAt: timestamp("published_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+  featured: integer("featured").default(0), // 0 = not featured, 1 = featured
+  tags: text("tags").array().default([]), // For filtering/categorizing articles
+});
+
+export const insertBlogArticleSchema = createInsertSchema(blogArticles).pick({
+  title: true, 
+  slug: true,
+  summary: true,
+  content: true,
+  coverImage: true,
+  authorName: true,
+  publishedAt: true,
+  featured: true,
+  tags: true,
+});
+
+export type InsertBlogArticle = z.infer<typeof insertBlogArticleSchema>;
+export type BlogArticle = typeof blogArticles.$inferSelect;
