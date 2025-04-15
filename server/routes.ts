@@ -4,6 +4,7 @@ import { storage } from "./storage";
 import path from "path";
 import fs from "fs";
 import { analyzePoseDescription } from "./openai";
+import { generatePoseSet } from "./replicate";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // API endpoint to get all poses
@@ -48,6 +49,56 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error analyzing pose description:", error);
       res.status(500).json({ message: "Failed to analyze pose description" });
+    }
+  });
+  
+  // API endpoint to generate AI poses based on description
+  app.post("/api/poses/generate", async (req: Request, res: Response) => {
+    try {
+      const { description, categories, count } = req.body;
+      
+      if (!description || typeof description !== 'string') {
+        return res.status(400).json({ message: "Description is required and must be a string" });
+      }
+      
+      if (!categories || !Array.isArray(categories) || categories.length === 0) {
+        return res.status(400).json({ message: "At least one category is required" });
+      }
+      
+      // Generate poses using Replicate API
+      const poseCount = count || 5; // Default to 5 poses if count is not specified
+      
+      // Return a loading status immediately to let the client know we're processing
+      res.status(202).json({ 
+        message: "Pose generation started", 
+        status: "processing",
+        estimatedTime: poseCount * 10 // Rough estimate in seconds
+      });
+      
+      // Start the pose generation process asynchronously
+      generatePoseSet(description, categories, poseCount)
+        .then(async (generatedPoses) => {
+          if (generatedPoses.length === 0) {
+            console.error("Failed to generate any poses");
+            return;
+          }
+          
+          // Save the generated poses to the database
+          for (const pose of generatedPoses) {
+            await storage.createPose({
+              category: pose.category,
+              url: pose.url
+            });
+          }
+          
+          console.log(`Successfully generated and saved ${generatedPoses.length} poses`);
+        })
+        .catch(error => {
+          console.error("Error generating poses:", error);
+        });
+    } catch (error) {
+      console.error("Error processing pose generation request:", error);
+      res.status(500).json({ message: "Failed to generate poses" });
     }
   });
   
