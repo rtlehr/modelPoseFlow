@@ -4,7 +4,6 @@ import { storage } from "./storage";
 import path from "path";
 import fs from "fs";
 import { analyzePoseDescription, generatePoseKeywords } from "./openai";
-import { generatePoseImage } from "./replicate";
 import { Pose } from "../shared/schema";
 
 export async function registerRoutes(app: Express): Promise<Server> {
@@ -359,47 +358,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error deleting playlist:", error);
       res.status(500).json({ message: "Failed to delete playlist" });
-    }
-  });
-  
-  // API endpoint to generate AI poses using Replicate
-  app.post("/api/poses/generate-ai", async (req: Request, res: Response) => {
-    try {
-      const { prompt, category } = req.body;
-      
-      if (!prompt || typeof prompt !== 'string') {
-        return res.status(400).json({ message: "Prompt is required and must be a string" });
-      }
-      
-      // Validate category
-      const validCategories = ["standing", "sitting", "reclining", "action"];
-      if (!validCategories.includes(category)) {
-        return res.status(400).json({ message: "Invalid category" });
-      }
-      
-      // Log that we're starting generation
-      console.log(`Generating AI pose image with prompt: "${prompt}"`);
-      
-      // Generate the image using Replicate
-      const imageUrl = await generatePoseImage(prompt);
-      
-      // Log the response data to help with debugging
-      console.log(`Generated image successfully, returning image URL: ${imageUrl}`);
-      
-      // Create a more descriptive response
-      res.status(200).json({ 
-        url: imageUrl,
-        prompt,
-        category,
-        source: "Unsplash placeholder image",
-        timestamp: new Date().toISOString()
-      });
-    } catch (error: any) {
-      console.error("Error generating AI pose:", error);
-      res.status(500).json({ 
-        message: "Failed to generate AI pose",
-        error: error.message || "Unknown error"
-      });
     }
   });
   

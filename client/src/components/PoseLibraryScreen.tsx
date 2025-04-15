@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { 
   ArrowLeft, Search, Filter, Upload, Trash2, 
-  AlertTriangle, PlusCircle, X, Wand2
+  AlertTriangle, PlusCircle, X
 } from "lucide-react";
 import { 
   Dialog, DialogContent, DialogDescription, 
@@ -18,7 +18,6 @@ import { useToast } from "@/hooks/use-toast";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { Pose } from "@shared/schema";
 import PoseKeywordManager from "./PoseKeywordManager";
-import AIPoseGenerator from "./AIPoseGenerator";
 
 interface PoseLibraryScreenProps {
   onBack: () => void;
@@ -34,7 +33,6 @@ export default function PoseLibraryScreen({ onBack }: PoseLibraryScreenProps) {
   const [selectedPose, setSelectedPose] = useState<Pose | null>(null);
   const [filteredPoses, setFilteredPoses] = useState<Pose[]>([]);
   const [uploadDialogOpen, setUploadDialogOpen] = useState(false);
-  const [aiGeneratorOpen, setAiGeneratorOpen] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [poseToDelete, setPoseToDelete] = useState<Pose | null>(null);
   const [uploading, setUploading] = useState(false);
@@ -371,23 +369,13 @@ export default function PoseLibraryScreen({ onBack }: PoseLibraryScreenProps) {
               <Filter className="h-4 w-4" />
             </Button>
             
-            <div className="flex gap-2">
-              <Button 
-                onClick={() => setAiGeneratorOpen(true)}
-                className="bg-gradient-to-r from-purple-500 to-pink-600 hover:from-purple-600 hover:to-pink-700"
-              >
-                <Wand2 className="h-4 w-4 mr-2" />
-                {isMobile ? 'AI' : 'AI Pose'}
-              </Button>
-              
-              <Button 
-                onClick={() => setUploadDialogOpen(true)}
-                className="bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700"
-              >
-                <PlusCircle className="h-4 w-4 mr-2" />
-                {isMobile ? 'Add' : 'Add Pose'}
-              </Button>
-            </div>
+            <Button 
+              onClick={() => setUploadDialogOpen(true)}
+              className="bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700"
+            >
+              <PlusCircle className="h-4 w-4 mr-2" />
+              {isMobile ? 'Add' : 'Add Pose'}
+            </Button>
           </div>
           
           {/* Category tabs */}
@@ -613,52 +601,6 @@ export default function PoseLibraryScreen({ onBack }: PoseLibraryScreenProps) {
           </DialogFooter>
         </DialogContent>
       </Dialog>
-      
-      {/* AI Pose Generator Dialog */}
-      <AIPoseGenerator 
-        open={aiGeneratorOpen}
-        onCancel={() => setAiGeneratorOpen(false)}
-        onSavePose={async (poseData) => {
-          try {
-            // Save the AI generated pose
-            const response = await apiRequest("POST", "/api/poses", poseData);
-            
-            if (!response.ok) {
-              throw new Error("Failed to save AI-generated pose");
-            }
-            
-            const newPose = await response.json();
-            
-            toast({
-              title: "AI pose saved",
-              description: "Pose has been added to your library"
-            });
-            
-            // Generate keywords for the new pose
-            console.log("Generating keywords for AI pose ID:", newPose.id);
-            const keywordsResponse = await apiRequest("POST", `/api/poses/${newPose.id}/generate-keywords`);
-            
-            if (keywordsResponse.ok) {
-              const keywordsResult = await keywordsResponse.json();
-              setSelectedPose(keywordsResult.pose);
-            } else {
-              setSelectedPose(newPose);
-            }
-            
-            // Close dialog and refresh library
-            setAiGeneratorOpen(false);
-            refetch();
-            
-          } catch (error: any) {
-            console.error("Error saving AI pose:", error);
-            toast({
-              title: "Save failed",
-              description: "Failed to save the AI-generated pose",
-              variant: "destructive"
-            });
-          }
-        }}
-      />
     </div>
   );
 }
