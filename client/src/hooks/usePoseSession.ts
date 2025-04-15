@@ -32,7 +32,7 @@ export default function usePoseSession(
   useEffect(() => {
     const poses = getPosesForSession(
       allPoses,
-      config.categories,
+      config.keywords || [], // Use keywords instead of categories
       config.poseCount,
       true // Randomize poses
     );
