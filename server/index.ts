@@ -3,6 +3,7 @@ import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
 import { storage } from "./storage";
 import path from "path";
+import fs from "fs";
 
 const app = express();
 app.use(express.json());
@@ -10,7 +11,14 @@ app.use(express.urlencoded({ extended: false }));
 
 // Serve generated poses as static files
 const posesDir = path.join(process.cwd(), 'data', 'generated_poses');
+console.log('Serving generated poses from:', posesDir);
 app.use('/data/generated_poses', express.static(posesDir));
+
+// Create directory if it doesn't exist
+if (!fs.existsSync(posesDir)) {
+  console.log('Creating generated poses directory');
+  fs.mkdirSync(posesDir, { recursive: true });
+}
 
 app.use((req, res, next) => {
   const start = Date.now();

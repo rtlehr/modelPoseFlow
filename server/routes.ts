@@ -4,7 +4,7 @@ import { storage } from "./storage";
 import path from "path";
 import fs from "fs";
 import { analyzePoseDescription } from "./openai";
-import { generatePoseSet } from "./replicate";
+import { generatePoseSet, generateOpenPoseImage } from "./replicate";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // API endpoint to get all poses
