@@ -59,7 +59,8 @@ export default function SetupScreen({ onStartSession, poses, onBack }: SetupScre
     const finalConfig: PoseSessionConfig = {
       ...sessionConfig as PoseSessionConfig,
       categories,
-      useAiGenerated: !!useAI
+      useAiGenerated: !!useAI,
+      poseDescription: description
     };
     
     // Start the session with the complete configuration

@@ -121,14 +121,16 @@ export default function SessionSetupScreen({
         />
         
         <div className="flex space-x-4">
-          <Button 
-            type="button"
-            variant="outline"
-            onClick={onBack}
-            className="flex-1 touch-manipulation"
-          >
-            Back
-          </Button>
+          {onBack && (
+            <Button 
+              type="button"
+              variant="outline"
+              onClick={onBack}
+              className="flex-1 touch-manipulation"
+            >
+              Back
+            </Button>
+          )}
           <Button 
             type="submit" 
             className={`flex-1 bg-primary hover:bg-indigo-700 text-white font-bold 
