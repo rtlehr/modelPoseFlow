@@ -23,8 +23,10 @@ export interface IStorage {
   // Pose operations
   getAllPoses(): Promise<Pose[]>;
   getPosesByKeywords(keywords: string[]): Promise<Pose[]>;
+  getPosesByDifficulty(difficultyLevel: number): Promise<Pose[]>;
   createPose(pose: { url: string }): Promise<Pose>;
   updatePoseKeywords(id: number, keywords: string[]): Promise<Pose | undefined>;
+  updatePoseDifficulty(id: number, difficultyLevel: number, difficultyReason: string): Promise<Pose | undefined>;
   deletePose(id: number): Promise<boolean>;
   seedPoses(): Promise<void>;
   
@@ -127,6 +129,23 @@ export class DatabaseStorage implements IStorage {
       .returning();
     
     return updatedPose || undefined;
+  }
+  
+  async updatePoseDifficulty(id: number, difficultyLevel: number, difficultyReason: string): Promise<Pose | undefined> {
+    const [updatedPose] = await db
+      .update(poses)
+      .set({ difficultyLevel, difficultyReason })
+      .where(eq(poses.id, id))
+      .returning();
+    
+    return updatedPose || undefined;
+  }
+  
+  async getPosesByDifficulty(difficultyLevel: number): Promise<Pose[]> {
+    return await db
+      .select()
+      .from(poses)
+      .where(eq(poses.difficultyLevel, difficultyLevel));
   }
   
   async deletePose(id: number): Promise<boolean> {

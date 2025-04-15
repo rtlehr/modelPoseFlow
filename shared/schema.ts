@@ -8,12 +8,18 @@ export const poses = pgTable("poses", {
   url: text("url").notNull(),
   // Keywords are now the only method for pose matching
   keywords: text("keywords").array().default([]),
+  // Difficulty classification: 1-Easy, 2-Medium, 3-Hard
+  difficultyLevel: integer("difficulty_level").default(2),
+  // Explanation for the difficulty classification
+  difficultyReason: text("difficulty_reason"),
 });
 
 // Pose insert schema
 export const insertPoseSchema = createInsertSchema(poses).pick({
   url: true,
   keywords: true,
+  difficultyLevel: true,
+  difficultyReason: true,
 });
 
 // Pose types
