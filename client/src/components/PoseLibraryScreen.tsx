@@ -178,7 +178,23 @@ export default function PoseLibraryScreen({ onBack }: PoseLibraryScreenProps) {
         }
       }
       
-      const newPose = await response.json();
+      let newPose;
+      try {
+        // Add more detailed logging
+        console.log("Response status:", response.status);
+        const responseText = await response.text();
+        console.log("Response text:", responseText);
+        
+        // Try to parse the JSON response
+        if (responseText.trim()) {
+          newPose = JSON.parse(responseText);
+        } else {
+          throw new Error("Empty response from server");
+        }
+      } catch (parseError) {
+        console.error("Error parsing response:", parseError);
+        throw new Error("Invalid response from server");
+      }
       
       toast({
         title: "Pose uploaded",

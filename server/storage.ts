@@ -1,7 +1,7 @@
 import { 
   users, poses, 
   musicTracks, playlists,
-  type User, type InsertUser, type Pose,
+  type User, type InsertUser, type Pose, type InsertPose,
   type MusicTrack, type InsertMusicTrack,
   type Playlist, type InsertPlaylist
 } from "@shared/schema";
@@ -24,7 +24,9 @@ export interface IStorage {
   getPosesByCategory(category: string): Promise<Pose[]>;
   getPosesByCategories(categories: string[]): Promise<Pose[]>;
   getPosesByKeywords(keywords: string[]): Promise<Pose[]>;
+  createPose(pose: { category: string, url: string }): Promise<Pose>;
   updatePoseKeywords(id: number, keywords: string[]): Promise<Pose | undefined>;
+  deletePose(id: number): Promise<boolean>;
   seedPoses(): Promise<void>;
   
   // Music track operations
@@ -119,6 +121,20 @@ export class DatabaseStorage implements IStorage {
     });
   }
   
+  async createPose(pose: { category: string, url: string }): Promise<Pose> {
+    const insertData: InsertPose = {
+      category: pose.category as any,
+      url: pose.url
+    };
+    
+    const [createdPose] = await db
+      .insert(poses)
+      .values(insertData)
+      .returning();
+    
+    return createdPose;
+  }
+  
   async updatePoseKeywords(id: number, keywords: string[]): Promise<Pose | undefined> {
     const [updatedPose] = await db
       .update(poses)
@@ -127,6 +143,14 @@ export class DatabaseStorage implements IStorage {
       .returning();
     
     return updatedPose || undefined;
+  }
+  
+  async deletePose(id: number): Promise<boolean> {
+    const result = await db
+      .delete(poses)
+      .where(eq(poses.id, id));
+    
+    return !!result;
   }
 
   async seedPoses(): Promise<void> {

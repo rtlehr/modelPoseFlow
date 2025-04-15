@@ -27,6 +27,54 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(500).json({ message: "Failed to fetch poses by category" });
     }
   });
+  
+  // API endpoint to create a new pose
+  app.post("/api/poses", async (req: Request, res: Response) => {
+    try {
+      const { category, url } = req.body;
+      
+      if (!category || !url) {
+        return res.status(400).json({ message: "Category and URL are required" });
+      }
+      
+      // Validate category
+      const validCategories = ["standing", "sitting", "reclining", "action"];
+      if (!validCategories.includes(category)) {
+        return res.status(400).json({ message: "Invalid category" });
+      }
+      
+      // Create a new pose in storage
+      const newPose = await storage.createPose({ category, url });
+      
+      return res.status(200).json(newPose);
+    } catch (error) {
+      console.error("Error creating pose:", error);
+      return res.status(500).json({ message: "Failed to create pose" });
+    }
+  });
+  
+  // API endpoint to delete a pose
+  app.delete("/api/poses/:id", async (req: Request, res: Response) => {
+    try {
+      const poseId = parseInt(req.params.id);
+      
+      if (isNaN(poseId)) {
+        return res.status(400).json({ message: "Invalid pose ID" });
+      }
+      
+      // Delete the pose
+      const success = await storage.deletePose(poseId);
+      
+      if (!success) {
+        return res.status(404).json({ message: "Pose not found" });
+      }
+      
+      return res.status(204).end();
+    } catch (error) {
+      console.error("Error deleting pose:", error);
+      return res.status(500).json({ message: "Failed to delete pose" });
+    }
+  });
 
   // API endpoint to analyze pose description and return matching poses
   app.post("/api/poses/analyze", async (req: Request, res: Response) => {
