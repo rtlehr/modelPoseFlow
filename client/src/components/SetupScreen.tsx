@@ -18,111 +18,124 @@ export default function SetupScreen({ onStartSession, poses, onBack }: SetupScre
   const isMobile = useIsMobile();
   const [selectedCategories, setSelectedCategories] = useState<PoseCategory[]>([]);
   const [poseDescription, setPoseDescription] = useState<string>("");
-  const [showPoseSelection, setShowPoseSelection] = useState(false);
-  const [sessionConfig, setSessionConfig] = useState<Partial<PoseSessionConfig>>({
-    poseLength: 30,
-    sessionType: "count",
-    poseCount: 10,
-    sessionTime: 20,
-    playlistId: null
-  });
-  const [useAiGeneration, setUseAiGeneration] = useState(false);
-  
-  // Handler for session setup configuration
-  const handleConfigureSession = (config: Partial<PoseSessionConfig>) => {
-    setSessionConfig({
-      ...sessionConfig,
-      ...config
-    });
-    setShowPoseSelection(true);
-  };
+  const [showSessionSetup, setShowSessionSetup] = useState(false);
   
   // Handler for when pose description is analyzed and categories are extracted
-  const handleDescriptionProcessed = (categories: PoseCategory[], description: string, useAI?: boolean) => {
+  const handleDescriptionProcessed = (categories: PoseCategory[], description: string) => {
     setSelectedCategories(categories);
     setPoseDescription(description);
-    setUseAiGeneration(!!useAI);
     
-    if (useAI) {
+    toast({
+      title: "Poses found!",
+      description: `Found matching poses in categories: ${categories.join(", ")}`,
+    });
+  };
+
+  const handleProceedToSessionSetup = (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    // Validate form
+    if (selectedCategories.length === 0) {
       toast({
-        title: "AI Poses Generating!",
-        description: `Generating ${sessionConfig.poseCount} custom poses based on your description.`,
+        title: "Error",
+        description: "Please describe the types of poses you want",
+        variant: "destructive",
       });
-    } else {
-      toast({
-        title: "Poses Found!",
-        description: `Found matching poses in categories: ${categories.join(", ")}`,
-      });
+      return;
     }
+
+    // Filter poses based on selected categories
+    const filteredPoses = poses.filter(pose => selectedCategories.includes(pose.category));
     
-    // Create the final session config
-    const finalConfig: PoseSessionConfig = {
-      ...sessionConfig as PoseSessionConfig,
-      categories,
-      useAiGenerated: !!useAI,
-      poseDescription: description
-    };
-    
-    // Start the session with the complete configuration
-    onStartSession(finalConfig);
+    if (filteredPoses.length === 0) {
+      toast({
+        title: "Error",
+        description: "No poses available for your description. Please try a different description.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    // Show the session setup screen
+    setShowSessionSetup(true);
+  };
+  
+  const handleBackToDescription = () => {
+    setShowSessionSetup(false);
   };
 
-  // Handler to go back from pose selection to session setup
-  const handleBackToSessionSetup = () => {
-    setShowPoseSelection(false);
-  };
-
-  // If we're showing the pose selection screen
-  if (showPoseSelection) {
+  // If showSessionSetup is true, render the SessionSetupScreen
+  if (showSessionSetup) {
     return (
-      <div className={`bg-white rounded-xl shadow-lg ${isMobile ? 'p-4' : 'p-6'} max-w-xl mx-auto`}>
-        <div className="flex justify-between items-center mb-4">
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={handleBackToSessionSetup}
-            className="text-gray-600 hover:text-gray-800 touch-manipulation -ml-2"
-            aria-label="Back to session setup"
-          >
-            <ArrowLeft className={`${isMobile ? 'h-5 w-5' : 'h-6 w-6'}`} />
-          </Button>
-          
-          <h1 className={`${isMobile ? 'text-xl' : 'text-2xl'} font-bold text-gray-800 flex-1 text-center`}>
-            Pose Selection
-          </h1>
-          
-          {/* Empty div to balance the layout */}
-          <div className="w-6"></div>
-        </div>
-        
-        <div className="space-y-6">
-          <div className="mb-6 p-4 bg-gray-50 rounded-lg border border-gray-100">
-            <h3 className="text-sm font-medium text-gray-700 mb-2">Session Configuration</h3>
-            <p className="text-sm text-gray-600">
-              {sessionConfig.sessionType === "count" 
-                ? `${sessionConfig.poseCount} poses, ${sessionConfig.poseLength} seconds each` 
-                : `${sessionConfig.sessionTime} minute session, ${sessionConfig.poseLength} seconds per pose`}
-            </p>
-          </div>
-          
-          <PoseDescriptionInput
-            onDescriptionProcessed={handleDescriptionProcessed}
-            poseCount={sessionConfig.poseCount || 10}
-            poseLength={sessionConfig.poseLength || 30}
-          />
-        </div>
-      </div>
+      <SessionSetupScreen
+        selectedCategories={selectedCategories}
+        poseDescription={poseDescription}
+        onStartSession={onStartSession}
+        onBack={handleBackToDescription}
+      />
     );
   }
 
-  // Otherwise, show the session setup screen first
+  // Otherwise, render the pose description input screen
   return (
-    <SessionSetupScreen
-      selectedCategories={[]}
-      poseDescription=""
-      onStartSession={handleConfigureSession}
-      onBack={onBack}
-      isInitialSetup={true}
-    />
+    <div className={`bg-white rounded-xl shadow-lg ${isMobile ? 'p-4' : 'p-6'} max-w-xl mx-auto`}>
+      <div className="flex justify-between items-center mb-4">
+        {onBack && (
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={onBack}
+            className="text-gray-600 hover:text-gray-800 touch-manipulation -ml-2"
+            aria-label="Back to main menu"
+          >
+            <ArrowLeft className={`${isMobile ? 'h-5 w-5' : 'h-6 w-6'}`} />
+          </Button>
+        )}
+        <h1 className={`${isMobile ? 'text-xl' : 'text-2xl'} font-bold text-gray-800 ${onBack ? 'flex-1 text-center' : ''}`}>
+          Describe Poses
+        </h1>
+        {/* Empty div to balance the layout when back button exists */}
+        {onBack && <div className="w-6"></div>}
+      </div>
+      
+      <form onSubmit={handleProceedToSessionSetup} className="space-y-6">
+        <PoseDescriptionInput
+          onDescriptionProcessed={handleDescriptionProcessed}
+        />
+        
+        {selectedCategories.length > 0 && (
+          <>
+            <div className="mt-4 p-3 bg-gray-50 rounded-lg border border-gray-100">
+              <p className="text-sm text-gray-600">
+                <span className="font-medium">Selected categories:</span> {selectedCategories.join(", ")}
+              </p>
+            </div>
+          </>
+        )}
+        
+        <div className="flex space-x-4">
+          {onBack && (
+            <Button 
+              type="button"
+              variant="outline"
+              onClick={onBack}
+              className={`flex-1 touch-manipulation`}
+            >
+              Cancel
+            </Button>
+          )}
+          <Button 
+            type="submit" 
+            disabled={selectedCategories.length === 0}
+            className={`${onBack ? 'flex-1' : 'w-full'} bg-primary hover:bg-indigo-700 text-white font-bold 
+              ${isMobile ? 'text-lg py-4' : 'py-3'} px-4 rounded-lg transition duration-200
+              active:scale-[0.98] touch-manipulation
+              ${selectedCategories.length === 0 ? 'opacity-50 cursor-not-allowed' : ''}`}
+          >
+            Set Up Session
+          </Button>
+        </div>
+      </form>
+    </div>
   );
 }

@@ -4,8 +4,6 @@ import { storage } from "./storage";
 import path from "path";
 import fs from "fs";
 import { analyzePoseDescription } from "./openai";
-import { generatePoseSet, generateOpenPoseImage } from "./replicate";
-import { enhanceImagePrompt } from "./openai-image-prompt";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // API endpoint to get all poses
@@ -50,86 +48,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error analyzing pose description:", error);
       res.status(500).json({ message: "Failed to analyze pose description" });
-    }
-  });
-  
-  // API endpoint to generate AI poses based on description
-  app.post("/api/poses/generate", async (req: Request, res: Response) => {
-    try {
-      const { description, categories, count, poseLength } = req.body;
-      
-      if (!description || typeof description !== 'string') {
-        return res.status(400).json({ message: "Description is required and must be a string" });
-      }
-      
-      if (!categories || !Array.isArray(categories) || categories.length === 0) {
-        return res.status(400).json({ message: "At least one category is required" });
-      }
-      
-      // Limit the number of poses to generate to prevent timeouts
-      const poseCount = count && count > 0 ? Math.min(count, 5) : 3; 
-      const poseDuration = poseLength || 30; // Default to 30 seconds if not provided
-      
-      // Return a loading status immediately to let the client know we're processing
-      res.status(202).json({ 
-        message: "Pose generation started", 
-        status: "processing",
-        estimatedTime: poseCount * 20 // Increase time estimate (20 seconds per pose)
-      });
-      
-      // Start the pose generation process asynchronously
-      (async () => {
-        try {
-          console.log(`Starting generation of ${poseCount} poses for categories: ${categories.join(', ')}`);
-          console.log(`Original description: ${description}`);
-          
-          // First, use OpenAI to enhance the image prompt
-          const enhancedPrompt = await enhanceImagePrompt(
-            description,
-            poseCount,
-            poseDuration,
-            categories
-          );
-          
-          console.log(`Enhanced prompt: ${enhancedPrompt}`);
-          
-          // Generate poses one by one instead of in parallel to avoid rate limits
-          const generatedPoses = [];
-          for (let i = 0; i < poseCount; i++) {
-            const category = categories[i % categories.length];
-            console.log(`Generating pose ${i+1}/${poseCount} for category: ${category}`);
-            
-            // Add variation to description for variety
-            const variationText = i > 0 ? ` variation ${i + 1}` : '';
-            const imagePrompt = `${enhancedPrompt}${variationText}`;
-            const imageUrl = await generateOpenPoseImage(imagePrompt, category);
-            
-            if (imageUrl) {
-              console.log(`Successfully generated pose ${i+1}: ${imageUrl}`);
-              generatedPoses.push({
-                url: imageUrl,
-                category: category
-              });
-              
-              // Save each pose to the database as it's generated
-              await storage.createPose({
-                category: category,
-                url: imageUrl
-              });
-            } else {
-              console.error(`Failed to generate pose ${i+1}`);
-            }
-          }
-          
-          console.log(`Generation complete. Successfully generated ${generatedPoses.length}/${poseCount} poses`);
-          
-        } catch (error) {
-          console.error("Error in pose generation process:", error);
-        }
-      })();
-    } catch (error) {
-      console.error("Error processing pose generation request:", error);
-      res.status(500).json({ message: "Failed to generate poses" });
     }
   });
   

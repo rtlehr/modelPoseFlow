@@ -1,7 +1,7 @@
 import { 
   users, poses, 
   musicTracks, playlists,
-  type User, type InsertUser, type Pose, type InsertPose,
+  type User, type InsertUser, type Pose,
   type MusicTrack, type InsertMusicTrack,
   type Playlist, type InsertPlaylist
 } from "@shared/schema";
@@ -23,7 +23,6 @@ export interface IStorage {
   getAllPoses(): Promise<Pose[]>;
   getPosesByCategory(category: string): Promise<Pose[]>;
   getPosesByCategories(categories: string[]): Promise<Pose[]>;
-  createPose(pose: InsertPose): Promise<Pose>;
   seedPoses(): Promise<void>;
   
   // Music track operations
@@ -88,14 +87,6 @@ export class DatabaseStorage implements IStorage {
     return await db.select().from(poses).where(
       or(...conditions)
     );
-  }
-  
-  async createPose(insertPose: InsertPose): Promise<Pose> {
-    const [pose] = await db
-      .insert(poses)
-      .values(insertPose)
-      .returning();
-    return pose;
   }
 
   async seedPoses(): Promise<void> {
