@@ -7,14 +7,21 @@
     @apply border-border;
   }
 
+  html {
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+  }
+
   body {
-    @apply font-sans antialiased bg-gray-100 text-foreground;
+    @apply font-sans antialiased bg-gray-100 text-foreground overflow-x-hidden;
+    overscroll-behavior: none;
   }
 
   :fullscreen, ::backdrop {
     @apply bg-black;
   }
 
+  /* Improved checkbox styles with better hit targets */
   .checkbox-container input:checked ~ .custom-checkbox {
     @apply bg-primary border-primary;
   }
@@ -32,6 +39,16 @@
     transform: rotate(45deg);
   }
 
+  /* Increase hit target area without changing visual size */
+  .checkbox-container {
+    position: relative;
+  }
+
+  .checkbox-container input {
+    @apply absolute inset-0 opacity-0 w-full h-full cursor-pointer z-10;
+    touch-action: manipulation;
+  }
+
   .pose-image-container {
     aspect-ratio: 3/4;
   }
@@ -43,6 +60,27 @@
 
   .animate-progress {
     animation: progress 1s linear infinite;
+  }
+
+  /* Improved mobile touch targets */
+  button, 
+  input[type="radio"], 
+  input[type="checkbox"],
+  .clickable {
+    touch-action: manipulation;
+  }
+
+  /* Activate momentum scrolling on iOS */
+  .scrollable {
+    -webkit-overflow-scrolling: touch;
+  }
+
+  /* Mobile active states */
+  @media (hover: none) {
+    .touch-active:active {
+      @apply scale-[0.98] opacity-90;
+      transition: transform 0.1s ease-in-out, opacity 0.1s ease-in-out;
+    }
   }
 
   /* Fullscreen mode styles */
@@ -66,5 +104,18 @@
   .fullscreen-gradient-bottom {
     @apply absolute bottom-0 left-0 right-0;
     background: linear-gradient(to top, rgba(0, 0, 0, 0.7), transparent);
+  }
+
+  /* Better input focus for touch devices */
+  input:focus, button:focus {
+    @apply outline-primary;
+    outline-offset: 2px;
+  }
+
+  /* Media query for better mobile support */
+  @media (max-width: 640px) {
+    html, body {
+      font-size: 16px; /* Ensure minimum readable text size */
+    }
   }
 }

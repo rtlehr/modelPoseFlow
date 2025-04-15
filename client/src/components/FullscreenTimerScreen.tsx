@@ -1,7 +1,9 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { Pose, PoseSessionConfig } from "@/types";
 import usePoseSession from "@/hooks/usePoseSession";
 import { formatTime } from "@/lib/timerService";
+import { useIsMobile } from "@/hooks/use-mobile";
+import { useTouchDevice } from "@/hooks/useTouchDevice";
 
 interface FullscreenTimerScreenProps {
   sessionConfig: PoseSessionConfig;
@@ -14,6 +16,9 @@ export default function FullscreenTimerScreen({
   poses, 
   onExitFullscreen 
 }: FullscreenTimerScreenProps) {
+  const isMobile = useIsMobile();
+  const isTouchDevice = useTouchDevice();
+  
   const {
     currentPose,
     currentPoseIndex,
@@ -31,7 +36,11 @@ export default function FullscreenTimerScreen({
   const [controlsVisible, setControlsVisible] = useState(true);
   // Timer for auto-hiding controls
   const [hideTimer, setHideTimer] = useState<NodeJS.Timeout | null>(null);
-
+  // Track touch events for swipe detection
+  const touchStartX = useRef<number | null>(null);
+  const touchEndX = useRef<number | null>(null);
+  const touchStartTime = useRef<number | null>(null);
+  
   // Auto-start timer when component mounts
   useEffect(() => {
     const timerId = setTimeout(() => {
@@ -41,8 +50,8 @@ export default function FullscreenTimerScreen({
     return () => clearTimeout(timerId);
   }, [startTimer]);
 
-  // Function to handle mouse movement
-  const handleMouseMove = useCallback(() => {
+  // Show controls when user interacts
+  const showControls = useCallback(() => {
     // Show controls
     setControlsVisible(true);
     
@@ -51,28 +60,81 @@ export default function FullscreenTimerScreen({
       clearTimeout(hideTimer);
     }
     
-    // Set a new timer to hide controls after 3 seconds of inactivity
+    // Set a new timer to hide controls after inactivity (longer for touch devices)
     const timer = setTimeout(() => {
       setControlsVisible(false);
-    }, 3000);
+    }, isTouchDevice ? 4000 : 3000);
     
     setHideTimer(timer);
-  }, [hideTimer]);
+  }, [hideTimer, isTouchDevice]);
 
-  // Set up event listeners for mouse movement
-  useEffect(() => {
-    document.addEventListener("mousemove", handleMouseMove);
+  // Handle user interaction (mouse or touch)
+  const handleUserInteraction = useCallback(() => {
+    showControls();
+  }, [showControls]);
+
+  // Handle touch events for swipe gestures
+  const handleTouchStart = useCallback((e: TouchEvent) => {
+    touchStartX.current = e.touches[0].clientX;
+    touchStartTime.current = Date.now();
+    showControls();
+  }, [showControls]);
+
+  const handleTouchEnd = useCallback((e: TouchEvent) => {
+    if (touchStartX.current === null) return;
     
-    // Show controls initially and set hide timer
-    handleMouseMove();
+    touchEndX.current = e.changedTouches[0].clientX;
+    const touchTime = Date.now() - (touchStartTime.current || 0);
+    
+    // Calculate swipe distance and direction
+    const swipeDistance = touchEndX.current - touchStartX.current;
+    const swipeThreshold = window.innerWidth * 0.15; // 15% of screen width
+    
+    // Check if swipe is fast enough and long enough to be intentional
+    if (Math.abs(swipeDistance) > swipeThreshold && touchTime < 300) {
+      if (swipeDistance > 0) {
+        // Swipe right - go to previous pose
+        previousPose();
+      } else {
+        // Swipe left - go to next pose
+        nextPose();
+      }
+    } else if (Math.abs(swipeDistance) < 20) {
+      // Tap (not a swipe) - toggle play/pause
+      isPlaying ? pauseTimer() : startTimer();
+    }
+    
+    // Reset touch tracking
+    touchStartX.current = null;
+    touchEndX.current = null;
+    touchStartTime.current = null;
+  }, [nextPose, previousPose, isPlaying, pauseTimer, startTimer, showControls]);
+
+  // Set up event listeners
+  useEffect(() => {
+    // For mouse devices
+    document.addEventListener("mousemove", handleUserInteraction);
+    
+    // For touch devices
+    if (isTouchDevice) {
+      document.addEventListener("touchstart", handleTouchStart);
+      document.addEventListener("touchend", handleTouchEnd);
+    }
+    
+    // Show controls initially
+    showControls();
     
     return () => {
-      document.removeEventListener("mousemove", handleMouseMove);
+      document.removeEventListener("mousemove", handleUserInteraction);
+      if (isTouchDevice) {
+        document.removeEventListener("touchstart", handleTouchStart);
+        document.removeEventListener("touchend", handleTouchEnd);
+      }
       if (hideTimer) {
         clearTimeout(hideTimer);
       }
     };
-  }, [handleMouseMove, hideTimer]);
+  }, [handleUserInteraction, hideTimer, isTouchDevice, handleTouchStart, handleTouchEnd, showControls]);
 
   // Handle keyboard shortcuts
   useEffect(() => {
@@ -110,7 +172,11 @@ export default function FullscreenTimerScreen({
   return (
     <div 
       className="fullscreen-mode flex items-center justify-center"
-      onClick={() => isPlaying ? pauseTimer() : startTimer()}
+      onClick={() => {
+        if (!isTouchDevice) {
+          isPlaying ? pauseTimer() : startTimer();
+        }
+      }}
     >
       {/* Pose image (centered and maximized) */}
       <div className="relative w-full h-full">
@@ -118,6 +184,7 @@ export default function FullscreenTimerScreen({
           src={currentPose.url} 
           alt={`Pose ${currentPoseIndex + 1}`}
           className="absolute inset-0 w-full h-full object-contain"
+          draggable="false"
         />
       </div>
       
@@ -130,18 +197,19 @@ export default function FullscreenTimerScreen({
         {/* Top bar with exit and progress info */}
         <div className="fullscreen-gradient-top p-4 flex justify-between items-center pointer-events-auto">
           <button 
-            className="text-white hover:text-gray-300 transition-colors"
+            className="text-white hover:text-gray-300 transition-colors active:scale-95 active:opacity-80"
             onClick={(e) => {
               e.stopPropagation();
               onExitFullscreen();
             }}
+            aria-label="Exit fullscreen"
           >
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <svg xmlns="http://www.w3.org/2000/svg" className={`${isMobile ? 'h-9 w-9' : 'h-8 w-8'}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
             </svg>
           </button>
           
-          <div className="text-white text-xl">
+          <div className={`text-white ${isMobile ? 'text-xl font-medium' : 'text-xl'}`}>
             <span className="font-bold">{currentPoseIndex + 1}</span>
             <span className="mx-1">/</span>
             <span>{totalPoses}</span>
@@ -151,36 +219,38 @@ export default function FullscreenTimerScreen({
         
         {/* Timer and pose controls */}
         <div className="fullscreen-gradient-bottom p-4 flex justify-between items-center pointer-events-auto">
-          <div className="text-white text-4xl font-bold">
+          <div className={`text-white font-mono ${isMobile ? 'text-5xl' : 'text-4xl'} font-bold`}>
             {formatTime(remainingTime)}
           </div>
           
-          <div className="flex space-x-6">
+          <div className={`flex ${isMobile ? 'space-x-8' : 'space-x-6'}`}>
             <button 
-              className="text-white hover:text-gray-300 transition-colors"
+              className="text-white hover:text-gray-300 transition-colors active:scale-95 active:opacity-80 p-2"
               onClick={(e) => {
                 e.stopPropagation();
                 previousPose();
               }}
+              aria-label="Previous pose"
             >
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <svg xmlns="http://www.w3.org/2000/svg" className={`${isMobile ? 'h-10 w-10' : 'h-8 w-8'}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
               </svg>
             </button>
             
             <button 
-              className="text-white hover:text-gray-300 transition-colors"
+              className="text-white hover:text-gray-300 transition-colors active:scale-95 active:opacity-80 p-2"
               onClick={(e) => {
                 e.stopPropagation();
                 isPlaying ? pauseTimer() : startTimer();
               }}
+              aria-label={isPlaying ? "Pause" : "Play"}
             >
               {isPlaying ? (
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-10 w-10" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <svg xmlns="http://www.w3.org/2000/svg" className={`${isMobile ? 'h-12 w-12' : 'h-10 w-10'}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 9v6m4-6v6m7-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
               ) : (
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-10 w-10" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <svg xmlns="http://www.w3.org/2000/svg" className={`${isMobile ? 'h-12 w-12' : 'h-10 w-10'}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
@@ -188,13 +258,14 @@ export default function FullscreenTimerScreen({
             </button>
             
             <button 
-              className="text-white hover:text-gray-300 transition-colors"
+              className="text-white hover:text-gray-300 transition-colors active:scale-95 active:opacity-80 p-2"
               onClick={(e) => {
                 e.stopPropagation();
                 nextPose();
               }}
+              aria-label="Next pose"
             >
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <svg xmlns="http://www.w3.org/2000/svg" className={`${isMobile ? 'h-10 w-10' : 'h-8 w-8'}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
               </svg>
             </button>
@@ -203,17 +274,20 @@ export default function FullscreenTimerScreen({
       </div>
       
       {/* Progress bar (bottom of screen) */}
-      <div className="fullscreen-progress-bar">
+      <div className={`fullscreen-progress-bar ${isMobile ? 'h-2' : 'h-1'}`}>
         <div 
-          className="h-full bg-primary"
+          className={`h-full bg-primary ${isMobile ? 'h-2' : 'h-1'}`}
           style={{ width: `${progress}%` }}
         ></div>
       </div>
       
-      {/* Keyboard shortcuts info (visible briefly on initial load) */}
+      {/* Instruction info based on device type */}
       {controlsVisible && (
         <div className="absolute bottom-16 left-1/2 transform -translate-x-1/2 bg-black/60 text-white text-sm px-4 py-2 rounded-full pointer-events-none">
-          Space: Play/Pause • Arrow Keys: Previous/Next • Esc: Exit
+          {isTouchDevice ? 
+            "Swipe left/right to change poses" : 
+            "Space: Play/Pause • Arrow Keys: Previous/Next • Esc: Exit"
+          }
         </div>
       )}
     </div>
