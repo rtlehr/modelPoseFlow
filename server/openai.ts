@@ -6,6 +6,7 @@ const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 interface PoseAnalysisResult {
   keywords: string[];
   description: string;
+  difficultyPreference?: number | null; // 1=Easy, 2=Medium, 3=Hard, null=Any
 }
 
 interface PoseDifficultyResult {
@@ -78,12 +79,15 @@ export async function analyzePoseDescription(description: string): Promise<PoseA
           role: "system",
           content: 
             "You are an AI assistant that helps analyze figure drawing pose descriptions. " +
-            "Extract relevant keywords from the text description provided. " +
+            "Extract relevant keywords from the text description provided and detect if there's a difficulty preference for models holding the pose. " +
             "Focus on aspects of the pose like body position, angle, mood, lighting, style, etc. " +
-            "Keywords are the only method used for matching poses to descriptions. " +
-            "You should return a JSON object with two properties: " +
+            "Also identify if the user has specified a difficulty preference for the pose (how easy/hard it would be for a live model to hold). " +
+            "Keywords are the primary method used for matching poses to descriptions. " +
+            "You should return a JSON object with three properties: " +
             "1. 'keywords': An array of 12-15 specific relevant keywords from the description " +
-            "2. 'description': A brief summary of the pose in 10 words or less"
+            "2. 'description': A brief summary of the pose in 10 words or less " +
+            "3. 'difficultyPreference': A number representing the difficulty level (1=Easy, 2=Medium, 3=Hard), or null if no preference specified " +
+            "For difficulty, look for phrases like 'easy poses', 'medium difficulty', 'challenging poses', etc."
         },
         {
           role: "user",
@@ -103,6 +107,21 @@ export async function analyzePoseDescription(description: string): Promise<PoseA
     if (!result.keywords || result.keywords.length === 0) {
       // Generate some basic keywords
       result.keywords = ["figure", "pose", "drawing"];
+    }
+    
+    // If the description contained difficulty keywords, add them to the main keywords list
+    if (result.difficultyPreference === 1) {
+      if (!result.keywords.includes("easy")) {
+        result.keywords.push("easy");
+      }
+    } else if (result.difficultyPreference === 2) {
+      if (!result.keywords.includes("medium")) {
+        result.keywords.push("medium");
+      }
+    } else if (result.difficultyPreference === 3) {
+      if (!result.keywords.includes("hard")) {
+        result.keywords.push("hard");
+      }
     }
     
     return result;

@@ -98,6 +98,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
         matchingPoses = await storage.getAllPoses();
       }
       
+      // Filter by difficulty preference if specified
+      if (analysis.difficultyPreference !== undefined && analysis.difficultyPreference !== null) {
+        console.log(`Filtering poses by difficulty level: ${analysis.difficultyPreference}`);
+        matchingPoses = matchingPoses.filter(pose => 
+          pose.difficultyLevel === analysis.difficultyPreference
+        );
+        
+        // If no poses match the exact difficulty, try to get poses with the requested difficulty
+        if (matchingPoses.length === 0) {
+          console.log(`No poses match the exact difficulty ${analysis.difficultyPreference}, fetching from database`);
+          matchingPoses = await storage.getPosesByDifficulty(analysis.difficultyPreference);
+        }
+      }
+      
       res.json({
         analysis,
         poses: matchingPoses

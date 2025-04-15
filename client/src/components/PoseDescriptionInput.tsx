@@ -72,7 +72,7 @@ export default function PoseDescriptionInput({ onDescriptionProcessed }: PoseDes
         <Textarea
           value={description}
           onChange={handleDescriptionChange}
-          placeholder="Enter your pose description here..."
+          placeholder="Enter your pose description here... (e.g., 'standing pose with easy difficulty to hold' or 'dramatic lighting with medium difficulty')"
           className={`w-full min-h-[100px] ${isMobile ? 'text-base' : 'text-sm'} border-gray-300 focus:border-primary focus:ring-primary rounded-md p-3`}
           disabled={isAnalyzing}
         />
@@ -105,7 +105,15 @@ export default function PoseDescriptionInput({ onDescriptionProcessed }: PoseDes
           <p className={`${isMobile ? 'text-sm' : 'text-xs'} text-gray-400 italic mt-1`}>
             Examples: "dramatic lighting and strong shadows", "twisted torso with arms extended", "three-quarter view with contemplative expression"
           </p>
-          <p className={`${isMobile ? 'text-sm' : 'text-xs'} text-blue-600 mt-1 flex items-center`}>
+          <div className="mt-3 p-2 bg-blue-50 border border-blue-100 rounded-md">
+            <p className={`${isMobile ? 'text-sm' : 'text-xs'} text-blue-800 font-medium`}>
+              <span className="font-bold">New!</span> You can now specify difficulty levels for models to hold the pose:
+            </p>
+            <p className={`${isMobile ? 'text-sm' : 'text-xs'} text-blue-600 mt-1`}>
+              Examples: "Give me easy poses to hold", "I need medium difficulty standing poses", "Show hard poses with dramatic lighting"
+            </p>
+          </div>
+          <p className={`${isMobile ? 'text-sm' : 'text-xs'} text-blue-600 mt-2 flex items-center`}>
             <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
