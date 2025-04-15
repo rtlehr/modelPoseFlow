@@ -87,16 +87,18 @@ export async function generatePoseImage(prompt: string): Promise<string> {
     
     console.log(`Selected placeholder image: ${imageUrl}`);
     
-    // Download the image and convert to base64
+    // Download the image 
     const imageResponse = await fetch(imageUrl);
-    const imageBuffer = await imageResponse.buffer();
-    const base64Image = imageBuffer.toString('base64');
+    
+    // Instead of converting to base64, just return the image URL directly
+    // This avoids potential encoding/decoding issues with large base64 strings
+    console.log("Returning direct image URL instead of base64 data");
     
     // Add a small delay to simulate AI generation time
     await new Promise(resolve => setTimeout(resolve, 2000));
     
-    // Return as a data URL that can be directly used in <img> tags
-    return `data:image/jpeg;base64,${base64Image}`;
+    // Return the URL directly - the client will display this
+    return imageUrl;
     
   } catch (error) {
     console.error("Error generating placeholder pose image:", error);

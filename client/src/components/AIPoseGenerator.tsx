@@ -260,6 +260,14 @@ export default function AIPoseGenerator({ onSavePose, onCancel, open }: AIPoseGe
                   src={generatedImageUrl} 
                   alt="Generated pose" 
                   className="w-full h-full object-cover"
+                  onError={(e) => {
+                    console.error("Error loading image:", e);
+                    toast({
+                      title: "Image loading error",
+                      description: "Failed to load the generated image. Please try again.",
+                      variant: "destructive"
+                    });
+                  }}
                 />
               </div>
             ) : (
