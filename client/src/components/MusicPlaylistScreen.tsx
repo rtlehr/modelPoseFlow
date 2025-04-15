@@ -1,12 +1,12 @@
-import { useState, useRef, useEffect } from "react";
+import React, { useState, useEffect, useRef, useCallback } from "react";
+import { Music, Plus, Play, Pause, ArrowLeft, Trash2, Edit, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Separator } from "@/components/ui/separator";
-import { useToast } from "@/hooks/use-toast";
+import { Label } from "@/components/ui/label";
+import { toast } from "@/hooks/use-toast";
 import { useIsMobile } from "@/hooks/use-mobile";
-import { ArrowLeft, Plus, X, Save, Play, Pause, Music, Edit, Trash2 } from "lucide-react";
 import { apiRequest } from "@/lib/queryClient";
 import { MusicTrack, Playlist } from "@shared/schema";
 
@@ -15,38 +15,29 @@ interface MusicPlaylistScreenProps {
 }
 
 export default function MusicPlaylistScreen({ onBack }: MusicPlaylistScreenProps) {
-  const { toast } = useToast();
-  const isMobile = useIsMobile();
-  const fileInputRef = useRef<HTMLInputElement>(null);
-  const audioRef = useRef<HTMLAudioElement>(null);
-  
   const [tracks, setTracks] = useState<MusicTrack[]>([]);
   const [playlists, setPlaylists] = useState<Playlist[]>([]);
   const [selectedPlaylist, setSelectedPlaylist] = useState<Playlist | null>(null);
-  const [editingPlaylist, setEditingPlaylist] = useState<boolean>(false);
-  
+  const [editingPlaylist, setEditingPlaylist] = useState(false);
   const [newPlaylistName, setNewPlaylistName] = useState("");
   const [newPlaylistDescription, setNewPlaylistDescription] = useState("");
-  
-  const [currentAudioSrc, setCurrentAudioSrc] = useState<string | null>(null);
   const [isPlaying, setIsPlaying] = useState(false);
+  const [currentAudioSrc, setCurrentAudioSrc] = useState<string | null>(null);
   
-  // Load tracks and playlists on mount
+  const audioRef = useRef<HTMLAudioElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const isMobile = useIsMobile();
+  
   useEffect(() => {
     loadTracks();
     loadPlaylists();
   }, []);
   
-  // Handle audio playback control
   useEffect(() => {
     if (audioRef.current) {
       if (isPlaying) {
         audioRef.current.play().catch(error => {
-          toast({
-            title: "Playback Error",
-            description: "Could not play the audio file. Please try again.",
-            variant: "destructive"
-          });
+          console.error("Error playing audio:", error);
           setIsPlaying(false);
         });
       } else {
@@ -57,8 +48,9 @@ export default function MusicPlaylistScreen({ onBack }: MusicPlaylistScreenProps
   
   const loadTracks = async () => {
     try {
-      const response = await apiRequest("/api/music-tracks");
-      setTracks(response || []);
+      const response = await apiRequest("GET", "/api/music-tracks");
+      const data = await response.json();
+      setTracks(data || []);
     } catch (error) {
       console.error("Error loading tracks:", error);
       toast({
@@ -71,8 +63,9 @@ export default function MusicPlaylistScreen({ onBack }: MusicPlaylistScreenProps
   
   const loadPlaylists = async () => {
     try {
-      const response = await apiRequest("/api/playlists");
-      setPlaylists(response || []);
+      const response = await apiRequest("GET", "/api/playlists");
+      const data = await response.json();
+      setPlaylists(data || []);
     } catch (error) {
       console.error("Error loading playlists:", error);
       toast({
@@ -123,16 +116,13 @@ export default function MusicPlaylistScreen({ onBack }: MusicPlaylistScreenProps
               fileData: event.target.result
             };
             
-            const response = await apiRequest<MusicTrack>({
-              url: "/api/music-tracks",
-              method: "POST",
-              data: newTrack
-            });
+            const response = await apiRequest("POST", "/api/music-tracks", newTrack);
+            const data = await response.json();
             
-            if (response) {
+            if (data) {
               toast({
                 title: "Success",
-                description: `Added track: ${response.name}`,
+                description: `Added track: ${data.name}`,
               });
               
               // Reload tracks
@@ -178,16 +168,13 @@ export default function MusicPlaylistScreen({ onBack }: MusicPlaylistScreenProps
         trackIds: []
       };
       
-      const response = await apiRequest<Playlist>({
-        url: "/api/playlists",
-        method: "POST",
-        data: newPlaylist
-      });
+      const response = await apiRequest("POST", "/api/playlists", newPlaylist);
+      const data = await response.json();
       
-      if (response) {
+      if (data) {
         toast({
           title: "Success",
-          description: `Created playlist: ${response.name}`,
+          description: `Created playlist: ${data.name}`,
         });
         
         // Reset form and reload playlists
@@ -196,7 +183,7 @@ export default function MusicPlaylistScreen({ onBack }: MusicPlaylistScreenProps
         loadPlaylists();
         
         // Select the new playlist
-        setSelectedPlaylist(response);
+        setSelectedPlaylist(data);
       }
     } catch (error) {
       console.error("Error creating playlist:", error);
@@ -217,23 +204,20 @@ export default function MusicPlaylistScreen({ onBack }: MusicPlaylistScreenProps
         ? [...selectedPlaylist.trackIds, trackId] 
         : [trackId];
       
-      const updatedPlaylist = await apiRequest<Playlist>({
-        url: `/api/playlists/${selectedPlaylist.id}`,
-        method: "PUT",
-        data: {
-          ...selectedPlaylist,
-          trackIds
-        }
+      const response = await apiRequest("PUT", `/api/playlists/${selectedPlaylist.id}`, {
+        ...selectedPlaylist,
+        trackIds
       });
+      const data = await response.json();
       
-      if (updatedPlaylist) {
+      if (data) {
         toast({
           title: "Success",
           description: "Track added to playlist",
         });
         
         // Update the selected playlist and reload playlists
-        setSelectedPlaylist(updatedPlaylist);
+        setSelectedPlaylist(data);
         loadPlaylists();
       }
     } catch (error) {
@@ -253,23 +237,20 @@ export default function MusicPlaylistScreen({ onBack }: MusicPlaylistScreenProps
       // Filter out the track to remove
       const trackIds = selectedPlaylist.trackIds.filter(id => id !== trackId);
       
-      const updatedPlaylist = await apiRequest<Playlist>({
-        url: `/api/playlists/${selectedPlaylist.id}`,
-        method: "PUT",
-        data: {
-          ...selectedPlaylist,
-          trackIds
-        }
+      const response = await apiRequest("PUT", `/api/playlists/${selectedPlaylist.id}`, {
+        ...selectedPlaylist,
+        trackIds
       });
+      const data = await response.json();
       
-      if (updatedPlaylist) {
+      if (data) {
         toast({
           title: "Success",
           description: "Track removed from playlist",
         });
         
         // Update the selected playlist and reload playlists
-        setSelectedPlaylist(updatedPlaylist);
+        setSelectedPlaylist(data);
         loadPlaylists();
       }
     } catch (error) {
@@ -284,10 +265,7 @@ export default function MusicPlaylistScreen({ onBack }: MusicPlaylistScreenProps
   
   const deleteTrack = async (trackId: number) => {
     try {
-      await apiRequest({
-        url: `/api/music-tracks/${trackId}`,
-        method: "DELETE"
-      });
+      await apiRequest("DELETE", `/api/music-tracks/${trackId}`);
       
       toast({
         title: "Success",
@@ -315,10 +293,7 @@ export default function MusicPlaylistScreen({ onBack }: MusicPlaylistScreenProps
   
   const deletePlaylist = async (playlistId: number) => {
     try {
-      await apiRequest({
-        url: `/api/playlists/${playlistId}`,
-        method: "DELETE"
-      });
+      await apiRequest("DELETE", `/api/playlists/${playlistId}`);
       
       toast({
         title: "Success",
