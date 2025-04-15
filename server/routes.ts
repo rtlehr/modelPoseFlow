@@ -5,6 +5,7 @@ import path from "path";
 import fs from "fs";
 import { analyzePoseDescription } from "./openai";
 import { generatePoseSet, generateOpenPoseImage } from "./replicate";
+import { enhanceImagePrompt } from "./openai-image-prompt";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // API endpoint to get all poses
@@ -55,7 +56,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // API endpoint to generate AI poses based on description
   app.post("/api/poses/generate", async (req: Request, res: Response) => {
     try {
-      const { description, categories, count } = req.body;
+      const { description, categories, count, poseLength } = req.body;
       
       if (!description || typeof description !== 'string') {
         return res.status(400).json({ message: "Description is required and must be a string" });
@@ -67,6 +68,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       // Limit the number of poses to generate to prevent timeouts
       const poseCount = count && count > 0 ? Math.min(count, 5) : 3; 
+      const poseDuration = poseLength || 30; // Default to 30 seconds if not provided
       
       // Return a loading status immediately to let the client know we're processing
       res.status(202).json({ 
@@ -79,7 +81,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
       (async () => {
         try {
           console.log(`Starting generation of ${poseCount} poses for categories: ${categories.join(', ')}`);
-          console.log(`Description: ${description}`);
+          console.log(`Original description: ${description}`);
+          
+          // First, use OpenAI to enhance the image prompt
+          const enhancedPrompt = await enhanceImagePrompt(
+            description,
+            poseCount,
+            poseDuration,
+            categories
+          );
+          
+          console.log(`Enhanced prompt: ${enhancedPrompt}`);
           
           // Generate poses one by one instead of in parallel to avoid rate limits
           const generatedPoses = [];
@@ -88,8 +100,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
             console.log(`Generating pose ${i+1}/${poseCount} for category: ${category}`);
             
             // Add variation to description for variety
-            const variationText = i > 0 ? `, variation ${i + 1}` : '';
-            const imageUrl = await generateOpenPoseImage(`${description}${variationText}`, category);
+            const variationText = i > 0 ? ` variation ${i + 1}` : '';
+            const imagePrompt = `${enhancedPrompt}${variationText}`;
+            const imageUrl = await generateOpenPoseImage(imagePrompt, category);
             
             if (imageUrl) {
               console.log(`Successfully generated pose ${i+1}: ${imageUrl}`);

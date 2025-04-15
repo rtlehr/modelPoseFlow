@@ -8,6 +8,7 @@ interface PoseGeneratorProps {
   description: string;
   categories: PoseCategory[];
   poseCount?: number;
+  poseLength?: number;
   onGenerationComplete: () => void;
 }
 
@@ -15,6 +16,7 @@ export default function PoseGenerator({
   description, 
   categories,
   poseCount = 10,
+  poseLength = 30,
   onGenerationComplete 
 }: PoseGeneratorProps) {
   const [isGenerating, setIsGenerating] = useState(false);
@@ -37,7 +39,9 @@ export default function PoseGenerator({
         description,
         categories,
         // Use the requested pose count but limit to avoid timeouts
-        count: Math.min(5, poseCount)
+        count: Math.min(5, poseCount),
+        // Pass the pose length for better prompt generation
+        poseLength: 30 // Default to 30 seconds for now
       });
       
       if (!response.ok) {
