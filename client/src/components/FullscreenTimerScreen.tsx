@@ -66,7 +66,10 @@ export default function FullscreenTimerScreen({
     }, isTouchDevice ? 4000 : 3000);
     
     setHideTimer(timer);
-  }, [hideTimer, isTouchDevice]);
+    
+    // Return the timer to allow cleanup
+    return timer;
+  }, [isTouchDevice]); // Remove hideTimer from dependencies to avoid infinite loop
 
   // Handle user interaction (mouse or touch)
   const handleUserInteraction = useCallback(() => {
@@ -121,8 +124,8 @@ export default function FullscreenTimerScreen({
       document.addEventListener("touchend", handleTouchEnd);
     }
     
-    // Show controls initially
-    showControls();
+    // Show controls initially and get the initial timer
+    const initialTimer = showControls();
     
     return () => {
       document.removeEventListener("mousemove", handleUserInteraction);
@@ -130,11 +133,15 @@ export default function FullscreenTimerScreen({
         document.removeEventListener("touchstart", handleTouchStart);
         document.removeEventListener("touchend", handleTouchEnd);
       }
-      if (hideTimer) {
+      
+      // Clear the initial timer (if it exists) or the current hideTimer
+      if (initialTimer) {
+        clearTimeout(initialTimer);
+      } else if (hideTimer) {
         clearTimeout(hideTimer);
       }
     };
-  }, [handleUserInteraction, hideTimer, isTouchDevice, handleTouchStart, handleTouchEnd, showControls]);
+  }, [handleUserInteraction, isTouchDevice, handleTouchStart, handleTouchEnd, showControls]); // Removed hideTimer
 
   // Handle keyboard shortcuts
   useEffect(() => {

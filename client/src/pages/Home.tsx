@@ -1,33 +1,158 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import SetupScreen from "@/components/SetupScreen";
 import TimerScreen from "@/components/TimerScreen";
+import LoadingScreen from "@/components/LoadingScreen";
+import MainMenu from "@/components/MainMenu";
+import PlaceholderScreen from "@/components/PlaceholderScreen";
 import { PoseSessionConfig } from "@/types";
 import { useQuery } from "@tanstack/react-query";
 
+// Define the screens we can show
+type Screen = 
+  | 'loading'
+  | 'mainMenu'
+  | 'setup'
+  | 'timer'
+  | 'poseCatalog'
+  | 'userPreferences'
+  | 'modelBlog';
+
 export default function Home() {
-  const [showSetupScreen, setShowSetupScreen] = useState(true);
+  // Track which screen is currently displayed
+  const [currentScreen, setCurrentScreen] = useState<Screen>('loading');
   const [sessionConfig, setSessionConfig] = useState<PoseSessionConfig | null>(null);
 
+  // Fetch poses from the API
   const { data: poses = [] } = useQuery({
     queryKey: ['/api/poses'],
   });
 
+  // Simulating initial app loading
+  useEffect(() => {
+    // Data is already loading through React Query
+    // This is just to ensure the loading screen is shown for a minimum time
+    const timer = setTimeout(() => {
+      if (currentScreen === 'loading') {
+        setCurrentScreen('mainMenu');
+      }
+    }, 2000);
+    
+    return () => clearTimeout(timer);
+  }, [currentScreen]);
+
+  // Handler functions for navigation
+  const handleBeginApp = () => {
+    setCurrentScreen('mainMenu');
+  };
+  
+  const handleGoToSetupScreen = () => {
+    setCurrentScreen('setup');
+  };
+  
+  const handleGoToMainMenu = () => {
+    setCurrentScreen('mainMenu');
+  };
+  
   const handleStartSession = (config: PoseSessionConfig) => {
     setSessionConfig(config);
-    setShowSetupScreen(false);
+    setCurrentScreen('timer');
+  };
+  
+  const handleBackToMainMenu = () => {
+    setCurrentScreen('mainMenu');
   };
 
-  const handleBackToSetup = () => {
-    setShowSetupScreen(true);
+  const handleGoToPoseCatalog = () => {
+    setCurrentScreen('poseCatalog');
+  };
+  
+  const handleGoToUserPreferences = () => {
+    setCurrentScreen('userPreferences');
+  };
+  
+  const handleGoToModelBlog = () => {
+    setCurrentScreen('modelBlog');
+  };
+
+  // Render different components based on the current screen
+  const renderScreen = () => {
+    switch (currentScreen) {
+      case 'loading':
+        return <LoadingScreen onBegin={handleBeginApp} />;
+        
+      case 'mainMenu':
+        return (
+          <MainMenu 
+            onStartSession={handleGoToSetupScreen}
+            onPoseCatalog={handleGoToPoseCatalog}
+            onUserPreferences={handleGoToUserPreferences}
+            onModelBlog={handleGoToModelBlog}
+          />
+        );
+        
+      case 'setup':
+        return (
+          <div className="container mx-auto px-4 py-8 max-w-md">
+            <SetupScreen 
+              onStartSession={handleStartSession} 
+              poses={poses} 
+              onBack={handleBackToMainMenu}
+            />
+          </div>
+        );
+        
+      case 'timer':
+        return (
+          <div className="container mx-auto px-4 py-8 max-w-md">
+            <TimerScreen 
+              onBackToSetup={handleGoToSetupScreen} 
+              sessionConfig={sessionConfig!} 
+              poses={poses} 
+            />
+          </div>
+        );
+        
+      case 'poseCatalog':
+        return (
+          <div className="container mx-auto px-4 py-8">
+            <PlaceholderScreen
+              title="Pose Catalog"
+              description="This feature will allow you to browse and download additional poses for your drawing sessions."
+              onBack={handleBackToMainMenu}
+            />
+          </div>
+        );
+        
+      case 'userPreferences':
+        return (
+          <div className="container mx-auto px-4 py-8">
+            <PlaceholderScreen
+              title="User Preferences"
+              description="This feature will allow you to customize your app settings and session defaults."
+              onBack={handleBackToMainMenu}
+            />
+          </div>
+        );
+        
+      case 'modelBlog':
+        return (
+          <div className="container mx-auto px-4 py-8">
+            <PlaceholderScreen
+              title="Model Blog"
+              description="This feature will provide articles and resources about modeling and figure drawing techniques."
+              onBack={handleBackToMainMenu}
+            />
+          </div>
+        );
+        
+      default:
+        return <LoadingScreen onBegin={handleBeginApp} />;
+    }
   };
 
   return (
-    <div className="container mx-auto px-4 py-8 max-w-md">
-      {showSetupScreen ? (
-        <SetupScreen onStartSession={handleStartSession} poses={poses} />
-      ) : (
-        <TimerScreen onBackToSetup={handleBackToSetup} sessionConfig={sessionConfig!} poses={poses} />
-      )}
-    </div>
+    <>
+      {renderScreen()}
+    </>
   );
 }
