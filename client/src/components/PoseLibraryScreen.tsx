@@ -231,8 +231,17 @@ export default function PoseLibraryScreen({ onBack }: PoseLibraryScreenProps) {
       // After uploading the pose, generate keywords using our helper function
       const poseWithKeywords = await generateKeywordsForPose(newPose);
       
-      // Update the selected pose to show keywords
+      // Force a refresh of the poses list to ensure we see the updated keywords
+      await refetch();
+      
+      // Now select the pose with keywords to show the details view
       setSelectedPose(poseWithKeywords);
+      
+      // Show a toast to confirm keywords were generated
+      toast({
+        title: "Keywords generated",
+        description: `Generated ${poseWithKeywords.keywords?.length || 0} keywords for this pose`
+      });
       
     } catch (error: any) {
       console.error("Error uploading pose:", error);
@@ -433,13 +442,20 @@ export default function PoseLibraryScreen({ onBack }: PoseLibraryScreenProps) {
                           <span className="text-xs font-medium capitalize">{pose.category}</span>
                           <span className="text-xs text-gray-500">ID: {pose.id}</span>
                         </div>
-                        {pose.keywords && pose.keywords.length > 0 && (
-                          <div className="mt-1 overflow-hidden line-clamp-1">
-                            <span className="text-xs text-gray-500">
+                        <div className="mt-1 overflow-hidden line-clamp-1">
+                          {pose.keywords && pose.keywords.length > 0 ? (
+                            <span className="text-xs text-green-600 font-medium flex items-center">
+                              <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3 mr-1" viewBox="0 0 20 20" fill="currentColor">
+                                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                              </svg>
                               {pose.keywords.length} keywords
                             </span>
-                          </div>
-                        )}
+                          ) : (
+                            <span className="text-xs text-gray-400 italic">
+                              No keywords
+                            </span>
+                          )}
+                        </div>
                       </div>
                     </Card>
                   ))}

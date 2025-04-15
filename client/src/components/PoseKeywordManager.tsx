@@ -24,6 +24,9 @@ export default function PoseKeywordManager({ pose, onUpdate }: PoseKeywordManage
 
   // Update keywords when pose changes
   useEffect(() => {
+    // Ensure we're always using the most up-to-date keywords
+    console.log("Pose updated in PoseKeywordManager:", pose);
+    // Set default empty array if keywords is undefined
     setKeywords(pose.keywords || []);
   }, [pose]);
 
