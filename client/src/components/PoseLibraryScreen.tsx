@@ -343,9 +343,18 @@ export default function PoseLibraryScreen({ onBack }: PoseLibraryScreenProps) {
                 className="w-full h-auto rounded-lg shadow-md object-cover aspect-[3/4]"
               />
               <div className="mt-2">
-                <p className="text-sm font-medium text-gray-600">Category: 
-                  <span className="ml-1 capitalize">{selectedPose.category}</span>
-                </p>
+                <p className="text-sm font-medium text-gray-600">Keywords:</p>
+                <div className="flex flex-wrap gap-1 mt-1">
+                  {selectedPose.keywords && selectedPose.keywords.length > 0 ? (
+                    selectedPose.keywords.map((keyword, index) => (
+                      <span key={index} className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-primary/10 text-primary">
+                        {keyword}
+                      </span>
+                    ))
+                  ) : (
+                    <span className="text-xs text-gray-500">No keywords available</span>
+                  )}
+                </div>
               </div>
               <Button 
                 variant="outline" 
@@ -439,7 +448,11 @@ export default function PoseLibraryScreen({ onBack }: PoseLibraryScreenProps) {
                       </div>
                       <div className="p-2">
                         <div className="flex items-center justify-between">
-                          <span className="text-xs font-medium capitalize">{pose.category}</span>
+                          <span className="text-xs font-medium">
+                            {pose.keywords && pose.keywords.length > 0 
+                              ? pose.keywords[0].charAt(0).toUpperCase() + pose.keywords[0].slice(1)
+                              : "No keyword"}
+                          </span>
                           <span className="text-xs text-gray-500">ID: {pose.id}</span>
                         </div>
                         <div className="mt-1 overflow-hidden line-clamp-1">
@@ -477,24 +490,19 @@ export default function PoseLibraryScreen({ onBack }: PoseLibraryScreenProps) {
           
           <div className="space-y-4 py-4">
             <div className="flex flex-col space-y-2">
-              <label htmlFor="category" className="text-sm font-medium flex items-center">
-                <span>Basic Pose Category</span>
-                <span className="ml-2 text-xs text-gray-500 italic">(Keywords are auto-generated)</span>
-              </label>
-              <select
-                id="category"
-                value={selectedCategory}
-                onChange={(e) => setSelectedCategory(e.target.value)}
-                className="rounded-md border border-gray-300 p-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
-              >
-                <option value="standing">Standing</option>
-                <option value="sitting">Sitting</option>
-                <option value="reclining">Reclining</option>
-                <option value="action">Action</option>
-              </select>
-              <p className="text-xs text-gray-500">
-                After upload, AI will analyze the image and generate keywords for enhanced matching.
-              </p>
+              <div className="text-sm font-medium flex items-center">
+                <span>Automatic Keyword Generation</span>
+              </div>
+              <div className="flex items-center gap-2 bg-blue-50 p-3 rounded-md border border-blue-100">
+                <div className="text-blue-500">
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                    <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
+                  </svg>
+                </div>
+                <p className="text-xs text-blue-700">
+                  After upload, AI will analyze the image and automatically generate keywords for enhanced pose matching.
+                </p>
+              </div>
             </div>
             
             <div className="flex flex-col space-y-2">
@@ -603,7 +611,13 @@ export default function PoseLibraryScreen({ onBack }: PoseLibraryScreenProps) {
               </div>
               <div>
                 <p className="text-sm font-medium">Pose ID: {poseToDelete.id}</p>
-                <p className="text-sm text-gray-500 capitalize">Category: {poseToDelete.category}</p>
+                <p className="text-sm text-gray-500">
+                  {poseToDelete.keywords && poseToDelete.keywords.length > 0 ? (
+                    <>Primary keyword: <span className="capitalize">{poseToDelete.keywords[0]}</span></>
+                  ) : (
+                    "No keywords available"
+                  )}
+                </p>
                 {poseToDelete.keywords && (
                   <p className="text-sm text-gray-500">
                     Has {poseToDelete.keywords.length} keywords

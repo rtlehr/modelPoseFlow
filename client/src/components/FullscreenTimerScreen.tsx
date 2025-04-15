@@ -221,7 +221,9 @@ export default function FullscreenTimerScreen({
             <span className="font-bold">{currentPoseIndex + 1}</span>
             <span className="mx-1">/</span>
             <span>{totalPoses}</span>
-            <span className="ml-2 capitalize">{currentPose.category}</span>
+            {currentPose.keywords && currentPose.keywords.length > 0 && (
+              <span className="ml-2 capitalize">{currentPose.keywords[0]}</span>
+            )}
           </div>
         </div>
         

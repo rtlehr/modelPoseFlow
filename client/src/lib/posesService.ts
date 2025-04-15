@@ -1,34 +1,35 @@
-import { Pose, PoseCategory } from "@/types";
+import { Pose } from "@/types";
 import { shuffleArray } from "./utils";
 
 /**
- * Selects poses for a session - keywords are now the primary matching method
- * but we still use categories as a fallback for compatibility
+ * Selects poses for a session based on keywords
  */
 export function getPosesForSession(
   allPoses: Pose[],
-  categories: PoseCategory[],
+  keywords: string[],
   count: number,
   randomize: boolean = true
 ): Pose[] {
-  // Check if random category is selected
-  const isRandom = categories.includes("random");
-  
-  // Get available poses based on selection criteria
+  // Get available poses based on keywords
   let filteredPoses = allPoses;
   
-  // Only filter by categories if:
-  // 1. Random is not selected
-  // 2. We have specific categories to filter by
-  if (!isRandom && categories.length > 0) {
-    // NOTE: This is now a fallback method - in most cases, poses come pre-filtered
-    // by keywords from the API, but we keep this for compatibility
-    filteredPoses = allPoses.filter(pose => categories.includes(pose.category));
+  // Filter by keywords if specified
+  if (keywords.length > 0) {
+    filteredPoses = allPoses.filter(pose => {
+      if (!pose.keywords || pose.keywords.length === 0) return false;
+      
+      // Match if any pose keyword contains or matches any of the requested keywords
+      return pose.keywords.some(poseKeyword => 
+        keywords.some(requestedKeyword => 
+          poseKeyword.toLowerCase().includes(requestedKeyword.toLowerCase())
+        )
+      );
+    });
   }
   
   // If no poses match, use all available poses as a fallback
   if (filteredPoses.length === 0) {
-    console.log("No matching poses found, using all available poses");
+    console.log("No matching poses found by keywords, using all available poses");
     filteredPoses = allPoses;
   }
   
