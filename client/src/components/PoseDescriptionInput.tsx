@@ -20,8 +20,10 @@ export default function PoseDescriptionInput({ onDescriptionProcessed }: PoseDes
     setError(null);
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleSubmit = async (e?: React.FormEvent) => {
+    if (e) {
+      e.preventDefault();
+    }
     
     if (!description.trim()) {
       setError("Please enter a pose description.");
