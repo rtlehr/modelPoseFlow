@@ -199,6 +199,7 @@ export default function Home() {
             onUserPreferences={handleGoToUserPreferences}
             onModelBlog={handleGoToModelBlog}
             onPoseKeywords={handleGoToPoseKeywords}
+            onModelingSessions={handleGoToModelingSessions}
           />
         );
         
@@ -326,7 +327,7 @@ export default function Home() {
             onBack={() => currentHostId ? handleBackToHostDetail() : handleBackToModelingSessions()}
             onEdit={handleEditSession}
             onDeleted={handleSessionDeleted}
-            onSelectHost={handleViewHost}
+            onSelectHost={handleSelectHost}
           />
         );
         
