@@ -245,16 +245,22 @@ export default function ModelingSessionDetailScreen({
                   </div>
                 )}
                 
-                {/* Session Time (this would require adding a time field to the model) */}
-                {/*
-                <div className="flex items-center justify-between">
-                  <span className="text-gray-600">Time:</span>
-                  <div className="flex items-center">
-                    <FiClock className="mr-1 text-gray-500" /> 
-                    {session.startTime} - {session.endTime}
+                {/* Session Time */}
+                {(session.startTime || session.endTime) && (
+                  <div className="flex items-center justify-between">
+                    <span className="text-gray-600">Time:</span>
+                    <div className="flex items-center">
+                      <FiClock className="mr-1 text-gray-500" /> 
+                      {session.startTime && session.endTime ? (
+                        `${session.startTime} - ${session.endTime}`
+                      ) : session.startTime ? (
+                        `Starting at ${session.startTime}`
+                      ) : (
+                        `Ending at ${session.endTime}`
+                      )}
+                    </div>
                   </div>
-                </div>
-                */}
+                )}
                 
                 <div className="flex items-center justify-between">
                   <span className="text-gray-600">Your Rating:</span>

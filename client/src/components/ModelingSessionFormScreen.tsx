@@ -142,6 +142,8 @@ export default function ModelingSessionFormScreen({
         hostName: selectedHost.name,
         hostContactInfo: selectedHost.contactNumber || selectedHost.email || null,
         sessionDate,
+        startTime: startTime || null,
+        endTime: endTime || null,
         pay: payValue,
         notes: notes || null,
         rating
@@ -194,6 +196,8 @@ export default function ModelingSessionFormScreen({
         <li><strong>Title</strong> - Required. A descriptive name for the session (e.g., "Three-hour Portrait Session")</li>
         <li><strong>Host</strong> - Required. The studio, organization, or individual that hosted this session</li>
         <li><strong>Date</strong> - Required. When the modeling session took place</li>
+        <li><strong>Start Time</strong> - Optional. When the session began</li>
+        <li><strong>End Time</strong> - Optional. When the session ended</li>
         <li><strong>Pay</strong> - Optional. The amount you were paid for this session</li>
         <li><strong>Notes</strong> - Optional. Any details about the session you want to remember</li>
         <li><strong>Rating</strong> - Your personal rating for this session (1-5 stars)</li>
@@ -319,6 +323,37 @@ export default function ModelingSessionFormScreen({
               {errors.sessionDate && (
                 <p className="mt-1 text-sm text-red-500">{errors.sessionDate}</p>
               )}
+            </div>
+
+            {/* Time Fields */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {/* Start Time Field */}
+              <div>
+                <label htmlFor="startTime" className="block text-sm font-medium mb-1">
+                  Start Time (optional)
+                </label>
+                <input
+                  id="startTime"
+                  type="time"
+                  value={startTime}
+                  onChange={(e) => setStartTime(e.target.value)}
+                  className="w-full p-2 border border-gray-300 rounded-md"
+                />
+              </div>
+
+              {/* End Time Field */}
+              <div>
+                <label htmlFor="endTime" className="block text-sm font-medium mb-1">
+                  End Time (optional)
+                </label>
+                <input
+                  id="endTime"
+                  type="time"
+                  value={endTime}
+                  onChange={(e) => setEndTime(e.target.value)}
+                  className="w-full p-2 border border-gray-300 rounded-md"
+                />
+              </div>
             </div>
 
             {/* Pay Field */}

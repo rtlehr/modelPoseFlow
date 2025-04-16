@@ -6,7 +6,8 @@ import HelpModal from "./HelpModal";
 import { format } from "date-fns";
 import { 
   FiPlusCircle, FiEdit, FiTrash2, FiInfo, 
-  FiStar, FiDollarSign, FiUser, FiHelpCircle, FiFilter, FiCalendar
+  FiStar, FiDollarSign, FiUser, FiHelpCircle, FiFilter, FiCalendar,
+  FiClock
 } from "react-icons/fi";
 
 interface ModelingSessionScreenProps {
