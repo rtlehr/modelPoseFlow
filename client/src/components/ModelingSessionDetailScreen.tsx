@@ -187,9 +187,20 @@ export default function ModelingSessionDetailScreen({
                 </button>
               </div>
               <div className="flex flex-col items-end">
-                <div className="text-gray-500 flex items-center mb-2">
+                <div className="text-gray-500 flex items-center mb-1">
                   <FiCalendar className="mr-1" /> {formattedDate}
                 </div>
+                {(session.startTime || session.endTime) && (
+                  <div className="text-gray-500 flex items-center mb-2 text-sm">
+                    <FiClock className="mr-1" /> 
+                    {session.startTime && session.endTime 
+                      ? `${session.startTime} - ${session.endTime}`
+                      : session.startTime 
+                        ? `Starting at ${session.startTime}` 
+                        : `Ending at ${session.endTime}`
+                    }
+                  </div>
+                )}
                 <div>{renderRating(session.rating)}</div>
               </div>
             </div>
