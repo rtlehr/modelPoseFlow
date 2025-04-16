@@ -128,18 +128,18 @@ export default function ModelingSessionDetailScreen({
 
   return (
     <div className="flex flex-col h-full">
-      {/* Header */}
-      <div className="flex justify-between items-center p-4 border-b">
-        <div className="flex items-center">
+      {/* Header - Responsive Design */}
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center p-4 border-b space-y-3 sm:space-y-0">
+        <div className="flex items-center w-full sm:w-auto">
           <button
             onClick={onBack}
             className="mr-4 text-gray-500 hover:text-gray-700"
           >
             ← Back
           </button>
-          <h1 className="text-2xl font-bold">{session.title}</h1>
+          <h1 className="text-xl sm:text-2xl font-bold truncate">{session.title}</h1>
         </div>
-        <div className="flex items-center">
+        <div className="flex flex-wrap items-center gap-2 w-full sm:w-auto">
           <button
             onClick={() => setShowHelp(true)}
             className="p-2 text-gray-500 hover:text-primary"
@@ -149,13 +149,13 @@ export default function ModelingSessionDetailScreen({
           </button>
           <button
             onClick={() => onEdit(session.id)}
-            className="ml-2 flex items-center px-4 py-2 bg-gray-200 text-gray-800 rounded-md hover:bg-gray-300"
+            className="flex items-center px-4 py-2 bg-gray-200 text-gray-800 rounded-md hover:bg-gray-300"
           >
             <FiEdit className="mr-1" /> Edit
           </button>
           <button
             onClick={handleDeleteSession}
-            className="ml-2 flex items-center px-4 py-2 bg-red-500 text-white rounded-md hover:bg-red-600"
+            className="flex items-center px-4 py-2 bg-red-500 text-white rounded-md hover:bg-red-600"
           >
             <FiTrash2 className="mr-1" /> Delete
           </button>
@@ -172,13 +172,13 @@ export default function ModelingSessionDetailScreen({
       )}
 
       {/* Session Details */}
-      <div className="flex-1 overflow-auto p-6">
+      <div className="flex-1 overflow-auto p-3 sm:p-6">
         <div className="max-w-4xl mx-auto">
-          {/* Session Header */}
-          <div className="bg-gray-50 p-6 rounded-lg shadow-sm mb-8">
-            <div className="flex justify-between items-start">
+          {/* Session Header - Responsive */}
+          <div className="bg-gray-50 p-4 sm:p-6 rounded-lg shadow-sm mb-6 sm:mb-8">
+            <div className="flex flex-col sm:flex-row justify-between items-start gap-4 sm:gap-0">
               <div>
-                <h2 className="text-2xl font-bold mb-1">{session.title}</h2>
+                <h2 className="text-xl sm:text-2xl font-bold mb-1">{session.title}</h2>
                 <button
                   onClick={() => onSelectHost(session.hostId)}
                   className="text-primary hover:underline flex items-center"
@@ -186,12 +186,12 @@ export default function ModelingSessionDetailScreen({
                   <FiUser className="mr-1" /> {session.hostName}
                 </button>
               </div>
-              <div className="flex flex-col items-end">
-                <div className="text-gray-500 flex items-center mb-1">
+              <div className="flex flex-col items-start sm:items-end w-full sm:w-auto">
+                <div className="text-gray-500 flex items-center mb-1 text-sm">
                   <FiCalendar className="mr-1" /> {formattedDate}
                 </div>
                 {(session.startTime || session.endTime) && (
-                  <div className="text-gray-500 flex items-center mb-2 text-sm">
+                  <div className="text-gray-500 flex items-center mb-2 text-xs sm:text-sm">
                     <FiClock className="mr-1" /> 
                     {session.startTime && session.endTime 
                       ? `${session.startTime} - ${session.endTime}`
@@ -207,47 +207,50 @@ export default function ModelingSessionDetailScreen({
             
             {session.pay && (
               <div className="mt-4 bg-white p-3 rounded-md inline-block">
-                <span className="text-green-600 font-semibold flex items-center text-lg">
+                <span className="text-green-600 font-semibold flex items-center text-base sm:text-lg">
                   <FiDollarSign className="mr-1" /> {session.pay.toFixed(2)}
                 </span>
               </div>
             )}
           </div>
           
-          {/* Session Details */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+          {/* Session Details - Responsive */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-8">
             {/* Host Contact Info */}
-            <div className="bg-white p-6 rounded-lg border">
-              <h3 className="text-lg font-semibold mb-4 flex items-center">
+            <div className="bg-white p-4 sm:p-6 rounded-lg border">
+              <h3 className="text-base sm:text-lg font-semibold mb-3 sm:mb-4 flex items-center">
                 <FiUser className="mr-2" /> Host Information
               </h3>
               
-              <div className="space-y-3">
-                <div className="flex items-center justify-between">
-                  <span className="text-gray-600">Name:</span>
+              <div className="space-y-2 sm:space-y-3 text-sm sm:text-base">
+                <div className="flex flex-wrap items-center justify-between">
+                  <span className="text-gray-600 text-sm">Name:</span>
                   <button
                     onClick={() => onSelectHost(session.hostId)}
-                    className="text-primary hover:underline"
+                    className="text-primary hover:underline text-sm"
                   >
                     {session.hostName}
                   </button>
                 </div>
                 
                 {session.hostContactInfo && (
-                  <div className="flex items-center justify-between">
-                    <span className="text-gray-600">Contact:</span>
+                  <div className="flex flex-wrap items-center justify-between">
+                    <span className="text-gray-600 text-sm">Contact:</span>
                     <div>
                       {session.hostContactInfo.includes('@') ? (
                         <a 
                           href={`mailto:${session.hostContactInfo}`}
-                          className="text-primary hover:underline flex items-center"
+                          className="text-primary hover:underline flex items-center text-sm"
                         >
-                          <FiMail className="mr-1" /> {session.hostContactInfo}
+                          <FiMail className="mr-1" /> 
+                          <span className="truncate max-w-[150px] sm:max-w-none">
+                            {session.hostContactInfo}
+                          </span>
                         </a>
                       ) : (
                         <a 
                           href={`tel:${session.hostContactInfo}`}
-                          className="text-primary hover:underline flex items-center"
+                          className="text-primary hover:underline flex items-center text-sm"
                         >
                           <FiPhone className="mr-1" /> {session.hostContactInfo}
                         </a>
@@ -258,9 +261,9 @@ export default function ModelingSessionDetailScreen({
                 
                 {/* Session Time */}
                 {(session.startTime || session.endTime) && (
-                  <div className="flex items-center justify-between">
-                    <span className="text-gray-600">Time:</span>
-                    <div className="flex items-center">
+                  <div className="flex flex-wrap items-center justify-between">
+                    <span className="text-gray-600 text-sm">Time:</span>
+                    <div className="flex items-center text-sm">
                       <FiClock className="mr-1 text-gray-500" /> 
                       {session.startTime && session.endTime ? (
                         `${session.startTime} - ${session.endTime}`
@@ -273,8 +276,8 @@ export default function ModelingSessionDetailScreen({
                   </div>
                 )}
                 
-                <div className="flex items-center justify-between">
-                  <span className="text-gray-600">Your Rating:</span>
+                <div className="flex flex-wrap items-center justify-between">
+                  <span className="text-gray-600 text-sm">Your Rating:</span>
                   <div>
                     {renderRating(session.rating)}
                   </div>
@@ -283,39 +286,39 @@ export default function ModelingSessionDetailScreen({
               
               <button
                 onClick={() => onSelectHost(session.hostId)}
-                className="mt-4 w-full px-4 py-2 border border-primary text-primary rounded-md hover:bg-primary-50 flex items-center justify-center"
+                className="mt-4 w-full px-4 py-2 border border-primary text-primary rounded-md hover:bg-primary-50 flex items-center justify-center text-sm sm:text-base"
               >
                 <FiUser className="mr-1" /> View Host Details
               </button>
             </div>
             
             {/* Session Notes */}
-            <div className="bg-white p-6 rounded-lg border">
-              <h3 className="text-lg font-semibold mb-4">Session Notes</h3>
+            <div className="bg-white p-4 sm:p-6 rounded-lg border">
+              <h3 className="text-base sm:text-lg font-semibold mb-3 sm:mb-4">Session Notes</h3>
               
               {session.notes ? (
-                <div className="bg-gray-50 p-4 rounded-md whitespace-pre-line text-gray-700">
+                <div className="bg-gray-50 p-3 sm:p-4 rounded-md whitespace-pre-line text-gray-700 text-sm sm:text-base">
                   {session.notes}
                 </div>
               ) : (
-                <div className="bg-gray-50 p-4 rounded-md text-gray-500 italic">
+                <div className="bg-gray-50 p-3 sm:p-4 rounded-md text-gray-500 italic text-sm sm:text-base">
                   No notes recorded for this session.
                 </div>
               )}
             </div>
           </div>
           
-          {/* Action Buttons */}
-          <div className="flex justify-end mt-8 space-x-3">
+          {/* Action Buttons - Responsive */}
+          <div className="flex flex-col sm:flex-row sm:justify-end mt-6 sm:mt-8 gap-2 sm:space-x-3">
             <button
               onClick={onBack}
-              className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50"
+              className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 text-sm sm:text-base"
             >
               Back to List
             </button>
             <button
               onClick={() => onEdit(session.id)}
-              className="px-4 py-2 bg-primary text-white rounded-md hover:bg-primary-dark flex items-center"
+              className="px-4 py-2 bg-primary text-white rounded-md hover:bg-primary-dark flex items-center justify-center text-sm sm:text-base"
             >
               <FiEdit className="mr-1" /> Edit Session
             </button>
