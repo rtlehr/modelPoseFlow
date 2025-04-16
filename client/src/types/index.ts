@@ -1,9 +1,9 @@
 export interface Pose {
   id: number;
   url: string;
-  keywords?: string[] | null;
-  difficultyLevel?: number;
-  difficultyReason?: string;
+  keywords: string[] | null;
+  difficultyLevel: number | null;
+  difficultyReason: string | null;
 }
 
 export interface PoseSessionConfig {
