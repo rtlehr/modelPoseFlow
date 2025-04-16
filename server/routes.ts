@@ -4,7 +4,7 @@ import { storage } from "./storage";
 import path from "path";
 import fs from "fs";
 import { analyzePoseDescription, generatePoseKeywords, analyzePoseDifficulty } from "./openai";
-import { Pose, BlogArticle } from "../shared/schema";
+import { Pose, BlogArticle, Host, ModelingSession } from "../shared/schema";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Initialize database with seed data
