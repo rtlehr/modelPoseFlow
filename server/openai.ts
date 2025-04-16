@@ -15,8 +15,20 @@ interface PoseDifficultyResult {
 }
 
 /**
- * Generates keywords for a pose based on its visual characteristics
+ * Represents a keyword with its weight
+ * - Primary pose descriptors (standing, sitting, kneeling) have weight 3
+ * - Secondary descriptors (arms raised, legs bent) have weight 2
+ * - Detail descriptors (finger position, slight angle) have weight 1
+ */
+export interface WeightedKeyword {
+  keyword: string;
+  weight: number; // 3=Primary, 2=Secondary, 1=Tertiary
+}
+
+/**
+ * Generates weighted keywords for a pose based on its visual characteristics
  * These keywords are now the primary method for matching poses to user descriptions
+ * Keywords are weighted by importance (primary whole-body pose, secondary limb positions, tertiary details)
  */
 export async function generatePoseKeywords(imageUrl: string): Promise<string[]> {
   try {
@@ -30,17 +42,21 @@ export async function generatePoseKeywords(imageUrl: string): Promise<string[]> 
             "Extract DETAILED and SPECIFIC keywords that ONLY describe the physical pose and body positioning of the model. " +
             "IMPORTANT: Focus EXCLUSIVELY on the model's physical pose - do NOT include keywords about background, lighting, mood, appearance, " +
             "clothing, setting, photographic style, or any other elements not directly related to the physical pose itself. " +
-            "These keywords will be the PRIMARY METHOD for matching poses to user descriptions, so be thorough and precise about the pose only. " +
+            "These keywords should be organized into three categories with different weights:\n\n" +
+            "1. PRIMARY KEYWORDS (weight=3): Fundamental whole-body pose descriptors (e.g., standing, sitting, lying, kneeling, crouching).\n" +
+            "2. SECONDARY KEYWORDS (weight=2): Major limb positions and body orientations (e.g., arms raised, legs crossed, torso twisted).\n" +
+            "3. TERTIARY KEYWORDS (weight=1): Specific details and minor elements (e.g., head tilted, fingers spread, weight on left foot).\n\n" +
+            "These weighted keywords will be the PRIMARY METHOD for matching poses to user descriptions, with primary keywords given the most importance when matching. " +
             "Include ONLY terms related to: body position, limb placement, angle of limbs, weight distribution, orientation, balance, " +
             "head position, torso alignment, physical gesture, anatomical details of the pose. " +
-            "You should return a JSON object with a 'keywords' property containing an array of 15-20 specific pose-only keywords."
+            "You should return a JSON object with a 'weightedKeywords' property containing an array of 15-20 objects, each with 'keyword' and 'weight' properties."
         },
         {
           role: "user",
           content: [
             {
               type: "text", 
-              text: "Generate descriptive keywords ONLY for the physical pose in this image. Focus exclusively on body position, limb placement, weight distribution, and pose mechanics. Do NOT include keywords about background, setting, lighting, mood, expression, clothing, or the person's appearance."
+              text: "Generate descriptive keywords ONLY for the physical pose in this image, with weights based on importance. Focus exclusively on body position, limb placement, weight distribution, and pose mechanics. Do NOT include keywords about background, setting, lighting, mood, expression, clothing, or the person's appearance."
             },
             {
               type: "image_url",
@@ -60,7 +76,19 @@ export async function generatePoseKeywords(imageUrl: string): Promise<string[]> 
     }
     
     const result = JSON.parse(messageContent);
-    if (Array.isArray(result.keywords)) {
+    
+    // Handle the weighted keywords format
+    if (Array.isArray(result.weightedKeywords)) {
+      // Sort by weight (highest first) and convert to regular array of strings
+      // We'll store the weights in the database separately
+      const sortedKeywords = result.weightedKeywords
+        .sort((a: WeightedKeyword, b: WeightedKeyword) => b.weight - a.weight)
+        .map((item: WeightedKeyword) => item.keyword);
+      
+      return sortedKeywords;
+    } 
+    // Handle fallbacks
+    else if (Array.isArray(result.keywords)) {
       return result.keywords;
     } else if (Array.isArray(result)) {
       return result;
@@ -87,9 +115,13 @@ export async function analyzePoseDescription(description: string): Promise<PoseA
             "DO NOT include keywords about background, lighting, mood, appearance, clothing, or any other elements " +
             "not directly related to the physical pose itself. " +
             "Also identify if the user has specified a difficulty preference for the pose (how easy/hard it would be for a live model to hold). " +
+            "These keywords should be organized into three categories with different weights:\n\n" +
+            "1. PRIMARY KEYWORDS (weight=3): Fundamental whole-body pose descriptors (e.g., standing, sitting, lying, kneeling, crouching).\n" +
+            "2. SECONDARY KEYWORDS (weight=2): Major limb positions and body orientations (e.g., arms raised, legs crossed, torso twisted).\n" +
+            "3. TERTIARY KEYWORDS (weight=1): Specific details and minor elements (e.g., head tilted, fingers spread, weight on left foot).\n\n" +
             "You should return a JSON object with three properties: " +
-            "1. 'keywords': An array of 12-15 specific keywords that ONLY relate to physical pose (body position, limb placement, weight distribution, " +
-            "head position, torso alignment, etc.). Exclude any non-pose aspects like mood, setting, style, etc. " +
+            "1. 'weightedKeywords': An array of 12-15 objects with 'keyword' and 'weight' properties, where keywords ONLY relate to physical pose. " +
+            "   Prioritize PRIMARY keywords that describe the fundamental pose (standing, sitting, etc.) with weight=3. " +
             "2. 'description': A brief summary of the physical pose in 10 words or less (only about the pose itself) " +
             "3. 'difficultyPreference': A number representing the difficulty level (1=Easy, 2=Medium, 3=Hard), or null if no preference specified " +
             "For difficulty, look for phrases like 'easy poses', 'medium difficulty', 'challenging poses', etc."
@@ -106,11 +138,31 @@ export async function analyzePoseDescription(description: string): Promise<PoseA
     if (!messageContent) {
       throw new Error("Empty response from OpenAI");
     }
-    const result = JSON.parse(messageContent) as PoseAnalysisResult;
     
-    // Ensure we have keywords
-    if (!result.keywords || result.keywords.length === 0) {
-      // Generate some basic keywords
+    const parsedResult = JSON.parse(messageContent);
+    
+    // Create a result object conforming to our PoseAnalysisResult interface
+    const result: PoseAnalysisResult = {
+      keywords: [],
+      description: parsedResult.description || "Default pose",
+      difficultyPreference: parsedResult.difficultyPreference || null
+    };
+    
+    // Handle the weighted keywords if available
+    if (Array.isArray(parsedResult.weightedKeywords) && parsedResult.weightedKeywords.length > 0) {
+      // Sort by weight (highest first) and extract keywords
+      const sortedKeywords = parsedResult.weightedKeywords
+        .sort((a: WeightedKeyword, b: WeightedKeyword) => b.weight - a.weight)
+        .map((item: WeightedKeyword) => item.keyword);
+      
+      result.keywords = sortedKeywords;
+    }
+    // Fallback to regular keywords if weightedKeywords is not available
+    else if (Array.isArray(parsedResult.keywords) && parsedResult.keywords.length > 0) {
+      result.keywords = parsedResult.keywords;
+    }
+    else {
+      // Generate some basic keywords if none were returned
       result.keywords = ["figure", "pose", "drawing"];
     }
     
