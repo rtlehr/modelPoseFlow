@@ -1,4 +1,4 @@
-import { pgTable, text, serial, integer, varchar, jsonb, timestamp } from "drizzle-orm/pg-core";
+import { pgTable, text, serial, integer, varchar, jsonb, timestamp, real, date } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
@@ -114,3 +114,59 @@ export const insertBlogArticleSchema = createInsertSchema(blogArticles).pick({
 
 export type InsertBlogArticle = z.infer<typeof insertBlogArticleSchema>;
 export type BlogArticle = typeof blogArticles.$inferSelect;
+
+// Hosts table for modeling sessions
+export const hosts = pgTable("hosts", {
+  id: serial("id").primaryKey(),
+  name: text("name").notNull(),
+  address: text("address"),
+  contactNumber: text("contact_number"),
+  email: text("email"),
+  website: text("website"),
+  notes: text("notes"),
+  rating: integer("rating").notNull().default(5), // 1-5 star rating
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const insertHostSchema = createInsertSchema(hosts).pick({
+  name: true,
+  address: true,
+  contactNumber: true,
+  email: true,
+  website: true,
+  notes: true,
+  rating: true,
+});
+
+export type InsertHost = z.infer<typeof insertHostSchema>;
+export type Host = typeof hosts.$inferSelect;
+
+// Modeling sessions table
+export const modelingSessions = pgTable("modeling_sessions", {
+  id: serial("id").primaryKey(),
+  title: text("title").notNull(),
+  hostId: integer("host_id").notNull(), // Foreign key to hosts table
+  hostName: text("host_name").notNull(), // Denormalized for convenience
+  hostContactInfo: text("host_contact_info"),
+  sessionDate: date("session_date").notNull(),
+  pay: real("pay"), // Payment amount (optional)
+  notes: text("notes"),
+  rating: integer("rating").notNull().default(5), // 1-5 star rating
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const insertModelingSessionSchema = createInsertSchema(modelingSessions).pick({
+  title: true,
+  hostId: true,
+  hostName: true,
+  hostContactInfo: true,
+  sessionDate: true,
+  pay: true,
+  notes: true,
+  rating: true,
+});
+
+export type InsertModelingSession = z.infer<typeof insertModelingSessionSchema>;
+export type ModelingSession = typeof modelingSessions.$inferSelect;
