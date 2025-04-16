@@ -164,6 +164,12 @@ export default function ModelingSessionScreen({
             <FiHelpCircle size={20} />
           </button>
           <button
+            onClick={onGoToHostList}
+            className="ml-2 flex items-center px-4 py-2 bg-gray-100 text-gray-700 rounded-md hover:bg-gray-200"
+          >
+            <FiUser className="mr-1" /> Manage Hosts
+          </button>
+          <button
             onClick={() => onAddSession()}
             className="ml-2 flex items-center px-4 py-2 bg-primary text-white rounded-md hover:bg-primary-dark"
           >
