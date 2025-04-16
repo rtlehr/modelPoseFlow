@@ -2,6 +2,7 @@ import { BlogArticle } from "@/types";
 import { useQuery } from "@tanstack/react-query";
 import { format } from "date-fns";
 import ReactMarkdown from "react-markdown";
+import HelpModal from "./HelpModal";
 
 interface BlogArticleScreenProps {
   slug: string;

@@ -2,6 +2,7 @@ import { BlogArticle } from "@/types";
 import { useQuery } from "@tanstack/react-query";
 import { Link } from "wouter";
 import { format } from "date-fns";
+import HelpModal from "./HelpModal";
 
 interface BlogListScreenProps {
   onBack: () => void;
@@ -14,10 +15,33 @@ export default function BlogListScreen({ onBack, onSelectArticle }: BlogListScre
     queryKey: ['/api/blog-articles'],
   });
 
+  const helpInstructions = `
+This screen displays our blog with articles for figure models.
+
+Features:
+• Featured Article section highlights our most important content
+• Latest Articles section shows all other published articles
+• Click on any article to read its full content
+• Articles are tagged by topic for easy reference
+
+Tips:
+• Articles provide valuable information about posing techniques, model health, and tips for successful sessions
+• Use the Back button to return to the main menu
+• Click "Read Article →" on any card to view the full article
+`;
+
   return (
     <div className="container mx-auto px-4 py-8 max-w-4xl">
       <div className="flex justify-between items-center mb-8">
-        <h1 className="text-3xl font-bold">Model Blog</h1>
+        <div className="flex items-center">
+          <h1 className="text-3xl font-bold">Model Blog</h1>
+          <div className="ml-3 relative">
+            <HelpModal 
+              title="Model Blog Help" 
+              instructions={helpInstructions}
+            />
+          </div>
+        </div>
         <button 
           onClick={onBack}
           className="px-4 py-2 bg-gray-200 rounded-md hover:bg-gray-300 transition-colors"

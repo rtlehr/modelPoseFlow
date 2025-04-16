@@ -316,6 +316,23 @@ export default function PoseLibraryScreen({ onBack }: PoseLibraryScreenProps) {
     setPoseToDelete(pose);
     setDeleteDialogOpen(true);
   };
+
+  const helpInstructions = `
+This screen allows you to manage and organize your figure poses.
+
+Main Features:
+• Browse, search, and filter poses by category or difficulty
+• Upload new pose images (max size: 2MB)
+• View and edit pose keywords for better matching with descriptions
+• Set pose difficulty levels for live models
+• Delete poses you no longer need
+
+Tips:
+• Filtering by model holding difficulty helps find appropriate poses for your models
+• Adding detailed keywords to poses improves their match rate with natural language descriptions
+• You can generate AI keywords or manually edit them for each pose
+• Difficulties are rated from Easy (poses that can be held for longer periods) to Hard (poses that are physically challenging)
+`;
   
   return (
     <div className={`bg-white rounded-xl shadow-lg ${isMobile ? 'p-4' : 'p-6'} max-w-4xl mx-auto`}>
@@ -335,8 +352,13 @@ export default function PoseLibraryScreen({ onBack }: PoseLibraryScreenProps) {
           Pose Library
         </h1>
         
-        {/* Empty div to balance the layout */}
-        <div className="w-6"></div>
+        {/* Help button */}
+        <div className="relative">
+          <HelpModal 
+            title="Pose Library Help" 
+            instructions={helpInstructions}
+          />
+        </div>
       </div>
       
       {/* Main content - conditional rendering based on whether a pose is selected */}
