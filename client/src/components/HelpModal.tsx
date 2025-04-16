@@ -5,7 +5,6 @@ import { useIsMobile } from '../hooks/use-mobile';
 import {
   Dialog,
   DialogContent,
-  DialogDescription,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
@@ -23,7 +22,7 @@ export default function HelpModal({ title, instructions }: HelpModalProps) {
     <>
       <button
         onClick={() => setIsOpen(true)}
-        className="absolute top-4 right-4 p-1 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+        className="p-1 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
         aria-label="Show help instructions"
       >
         <HelpCircle size={isMobile ? 22 : 18} className="text-gray-500" />
@@ -34,15 +33,15 @@ export default function HelpModal({ title, instructions }: HelpModalProps) {
           <DialogHeader>
             <DialogTitle>{title}</DialogTitle>
           </DialogHeader>
-          <DialogDescription className="space-y-2">
+          <div className="mt-4 text-sm text-gray-600 space-y-2">
             {typeof instructions === 'string' ? (
               instructions.split('\n').map((paragraph, i) => (
-                <p key={i} className="my-2">{paragraph}</p>
+                paragraph.trim() ? <p key={i} className="my-2">{paragraph}</p> : null
               ))
             ) : (
               instructions
             )}
-          </DialogDescription>
+          </div>
         </DialogContent>
       </Dialog>
     </>

@@ -60,34 +60,35 @@ Tips:
   }
 
   return (
-    <div className="container mx-auto px-4 py-8 max-w-3xl relative">
-      <div className="absolute top-8 right-4">
-        <HelpModal
-          title="Article View Help"
-          instructions={helpInstructions}
-        />
-      </div>
-      
-      <button
-        onClick={onBack}
-        className="mb-6 flex items-center text-blue-600 hover:underline"
-      >
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          className="h-5 w-5 mr-1"
-          fill="none"
-          viewBox="0 0 24 24"
-          stroke="currentColor"
+    <div className="container mx-auto px-4 py-8 max-w-3xl">
+      <div className="flex justify-between items-center mb-6">
+        <button
+          onClick={onBack}
+          className="flex items-center text-blue-600 hover:underline"
         >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth={2}
-            d="M15 19l-7-7 7-7"
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            className="h-5 w-5 mr-1"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M15 19l-7-7 7-7"
+            />
+          </svg>
+          Back to Articles
+        </button>
+        <div>
+          <HelpModal
+            title="Article View Help"
+            instructions={helpInstructions}
           />
-        </svg>
-        Back to Articles
-      </button>
+        </div>
+      </div>
 
       <article className="bg-white rounded-lg shadow-md overflow-hidden">
         {article.coverImage && (
