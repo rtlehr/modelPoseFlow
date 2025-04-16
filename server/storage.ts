@@ -90,22 +90,62 @@ export class DatabaseStorage implements IStorage {
     // We could use SQL fragments for more efficiency in a production app
     const allPoses = await this.getAllPoses();
     
-    // Filter poses that have at least one of the keywords
-    return allPoses.filter(pose => {
-      const poseKeywords = pose.keywords || [];
-      
-      if (!Array.isArray(poseKeywords) || poseKeywords.length === 0) {
-        return false;
-      }
-      
-      // Check if any of the search keywords match any of the pose's keywords
-      // Using case-insensitive comparison
-      return keywords.some(keyword => 
-        poseKeywords.some(poseKeyword => 
-          poseKeyword.toLowerCase().includes(keyword.toLowerCase())
-        )
-      );
-    });
+    // These are primary pose descriptors (weight=3)
+    const primaryPoseWords = [
+      "standing", "sitting", "lying", "prone", "supine", 
+      "kneeling", "crouching", "squatting", "bending",
+      "reclining", "leaning", "balancing"
+    ];
+    
+    // Calculate a relevance score for each pose based on keyword matches
+    // This implements a weighted scoring system that prioritizes:
+    // 1. Primary pose keywords (standing, sitting) - highest weight
+    // 2. Secondary pose parts (arms raised, legs bent) - medium weight 
+    // 3. Details (fingers spread, slight angle) - lowest weight
+    const scoredPoses = allPoses
+      .map(pose => {
+        const poseKeywords = pose.keywords || [];
+        if (!Array.isArray(poseKeywords) || poseKeywords.length === 0) {
+          return { pose, score: 0 };
+        }
+        
+        let score = 0;
+        
+        // Calculate score based on keyword matches
+        for (const searchKeyword of keywords) {
+          const searchTerm = searchKeyword.toLowerCase();
+          
+          for (const poseKeyword of poseKeywords) {
+            const poseWord = poseKeyword.toLowerCase();
+            
+            // Exact match gets higher score than partial match
+            if (poseWord === searchTerm) {
+              // Primary pose descriptors get highest weight (3x normal score)
+              if (primaryPoseWords.some(primary => poseWord.includes(primary))) {
+                score += 9; // 3x weight for primary pose words
+              } else {
+                score += 3; // Normal weight for exact match
+              }
+            }
+            // Partial match (keyword is contained within pose keyword)
+            else if (poseWord.includes(searchTerm) || searchTerm.includes(poseWord)) {
+              // Primary pose descriptors get higher weight even for partial matches
+              if (primaryPoseWords.some(primary => poseWord.includes(primary) || primary.includes(poseWord))) {
+                score += 6; // 2x weight for primary pose words
+              } else {
+                score += 1; // Lowest weight for partial match
+              }
+            }
+          }
+        }
+        
+        return { pose, score };
+      })
+      .filter(item => item.score > 0) // Only keep poses with matches
+      .sort((a, b) => b.score - a.score); // Sort by score (highest first)
+    
+    // Return poses sorted by relevance score
+    return scoredPoses.map(item => item.pose);
   }
   
   async createPose(pose: { url: string }): Promise<Pose> {
