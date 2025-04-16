@@ -30,22 +30,7 @@ export default function MainMenu({
 
   const menuItems = [
     {
-      title: "Begin Session",
-      description: "Start a new figure drawing session",
-      icon: <ArrowRight className="w-5 h-5" />,
-      onClick: onStartSession,
-      primary: true,
-    },
-
-    {
-      title: "Manage Pose Library",
-      description: "Upload, tag, and organize your pose collection",
-      icon: <Images className="w-5 h-5" />,
-      onClick: onPoseKeywords,
-      primary: false,
-    },
-    {
-      title: "Modeling Sessions",
+      title: "Modeling Assignments",
       description:
         "Track and manage your modeling sessions with different hosts",
       icon: <Calendar className="w-5 h-5" />,
@@ -53,17 +38,17 @@ export default function MainMenu({
       primary: false,
     },
     {
-      title: "Pose Catalog",
+      title: "Begin Pose Session",
+      description: "Start a new pose session",
+      icon: <ArrowRight className="w-5 h-5" />,
+      onClick: onStartSession,
+      primary: true,
+    },
+    {
+      title: "My Pose Catalog",
       description: "Browse and download new poses for your sessions",
       icon: <Palette className="w-5 h-5" />,
       onClick: onPoseCatalog,
-      primary: false,
-    },
-    {
-      title: "User Preferences",
-      description: "Customize your app settings and session defaults",
-      icon: <Settings className="w-5 h-5" />,
-      onClick: onUserPreferences,
       primary: false,
     },
     {
@@ -71,6 +56,20 @@ export default function MainMenu({
       description: "Read articles about modeling and figure drawing techniques",
       icon: <Book className="w-5 h-5" />,
       onClick: onModelBlog,
+      primary: false,
+    },
+    {
+      title: "My Preferences",
+      description: "Customize your app settings and session defaults",
+      icon: <Settings className="w-5 h-5" />,
+      onClick: onUserPreferences,
+      primary: false,
+    },
+    {
+      title: "Manage Pose Library",
+      description: "Upload, tag, and organize your pose collection",
+      icon: <Images className="w-5 h-5" />,
+      onClick: onPoseKeywords,
       primary: false,
     },
   ];
