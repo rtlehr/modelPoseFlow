@@ -70,10 +70,13 @@ Tips:
 
   return (
     <div className={`bg-white rounded-xl shadow-lg ${isMobile ? 'p-4' : 'p-6'} max-w-xl mx-auto relative`}>
-      <HelpModal 
-        title="Session Setup Help" 
-        instructions={helpInstructions}
-      />
+      {/* Standalone Help Button */}
+      <div className="absolute right-4 top-4 z-10">
+        <HelpModal 
+          title="Session Setup Help" 
+          instructions={helpInstructions}
+        />
+      </div>
       <div className="flex justify-between items-center mb-4">
         <Button
           variant="ghost"

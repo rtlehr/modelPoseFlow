@@ -31,16 +31,18 @@ Tips:
 `;
 
   return (
-    <div className="container mx-auto px-4 py-8 max-w-4xl">
+    <div className="container mx-auto px-4 py-8 max-w-4xl relative">
+      {/* Standalone Help Button */}
+      <div className="absolute right-16 top-8 z-10">
+        <HelpModal 
+          title="Model Blog Help" 
+          instructions={helpInstructions}
+        />
+      </div>
+      
       <div className="flex justify-between items-center mb-8">
         <div className="flex items-center">
           <h1 className="text-3xl font-bold">Model Blog</h1>
-          <div className="ml-3 relative">
-            <HelpModal 
-              title="Model Blog Help" 
-              instructions={helpInstructions}
-            />
-          </div>
         </div>
         <button 
           onClick={onBack}

@@ -60,7 +60,15 @@ Tips:
   }
 
   return (
-    <div className="container mx-auto px-4 py-8 max-w-3xl">
+    <div className="container mx-auto px-4 py-8 max-w-3xl relative">
+      {/* Standalone Help Button */}
+      <div className="absolute right-4 top-4 z-10">
+        <HelpModal
+          title="Article View Help"
+          instructions={helpInstructions}
+        />
+      </div>
+      
       <div className="flex justify-between items-center mb-6">
         <button
           onClick={onBack}
@@ -82,12 +90,6 @@ Tips:
           </svg>
           Back to Articles
         </button>
-        <div>
-          <HelpModal
-            title="Article View Help"
-            instructions={helpInstructions}
-          />
-        </div>
       </div>
 
       <article className="bg-white rounded-lg shadow-md overflow-hidden">
