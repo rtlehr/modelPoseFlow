@@ -4,6 +4,7 @@ import usePoseSession from "@/hooks/usePoseSession";
 import { formatTime } from "@/lib/timerService";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useTouchDevice } from "@/hooks/useTouchDevice";
+import HelpModal from "./HelpModal";
 
 interface FullscreenTimerScreenProps {
   sessionConfig: PoseSessionConfig;
@@ -174,6 +175,26 @@ export default function FullscreenTimerScreen({
     };
   }, [isPlaying, startTimer, pauseTimer, nextPose, previousPose, onExitFullscreen]);
 
+  const helpInstructions = `
+This is the fullscreen mode for distraction-free pose practice.
+
+Controls:
+• Tap anywhere on screen: Toggle play/pause (mouse devices)
+• Touch and swipe left: Go to next pose (touch devices)
+• Touch and swipe right: Go to previous pose (touch devices)
+
+Keyboard shortcuts:
+• Space: Play/Pause timer
+• Right Arrow: Next pose
+• Left Arrow: Previous pose
+• Escape: Exit fullscreen mode
+
+Tips:
+• Controls will appear when you move your mouse or touch the screen
+• Controls will automatically hide after a few seconds of inactivity
+• You can see your progress and remaining time at the bottom of the screen
+`;
+
   if (!currentPose) return null;
 
   return (
@@ -223,6 +244,20 @@ export default function FullscreenTimerScreen({
             {currentPose.keywords && currentPose.keywords.length > 0 && (
               <span className="ml-2 capitalize">{currentPose.keywords[0]}</span>
             )}
+          </div>
+          
+          <div 
+            className="flex justify-center"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="relative">
+              <div style={{ filter: "invert(1)" }}>
+                <HelpModal 
+                  title="Fullscreen Pose Timer Help" 
+                  instructions={helpInstructions}
+                />
+              </div>
+            </div>
           </div>
         </div>
         

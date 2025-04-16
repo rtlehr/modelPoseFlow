@@ -124,9 +124,37 @@ export default function TimerScreen({ onBackToSetup, sessionConfig, poses }: Tim
     );
   }
 
+  const helpInstructions = `
+This screen shows the current pose and controls the pose timer.
+
+Controls:
+• Play/Pause: Start or stop the timer
+• Previous: Go to the previous pose
+• Next: Skip to the next pose
+• Fullscreen: Toggle fullscreen mode for distraction-free practice
+• X: Exit the session and return to setup
+
+Keyboard shortcuts (in fullscreen mode):
+• Space: Play/Pause timer
+• Right Arrow: Next pose
+• Left Arrow: Previous pose
+• Escape: Exit fullscreen mode
+
+Touch gestures (in fullscreen mode):
+• Tap: Show/hide controls
+• Swipe Left: Next pose
+• Swipe Right: Previous pose
+
+The timer will automatically advance to the next pose when time runs out.
+`;
+
   // Render the regular UI if not in fullscreen mode
   return (
-    <div className={`bg-white rounded-xl shadow-lg ${isMobile ? 'p-4' : 'p-6'} max-w-4xl mx-auto`}>
+    <div className={`bg-white rounded-xl shadow-lg ${isMobile ? 'p-4' : 'p-6'} max-w-4xl mx-auto relative`}>
+      <HelpModal 
+        title="Pose Timer Help" 
+        instructions={helpInstructions}
+      />
       <div className={`flex justify-between items-center ${isMobile ? 'mb-3' : 'mb-4'}`}>
         <h1 className={`${isMobile ? 'text-xl' : 'text-2xl'} font-bold text-gray-800`}>
           {isMobile ? 'Pose Timer' : 'Figure Model Pose Timer'}
