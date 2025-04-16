@@ -14,6 +14,23 @@ export default function BlogArticleScreen({ slug, onBack }: BlogArticleScreenPro
   const { data: article, isLoading, error } = useQuery<BlogArticle>({
     queryKey: [`/api/blog-articles/slug/${slug}`],
   });
+  
+  const helpInstructions = `
+This screen shows the full content of a blog article.
+
+Features:
+• Complete article content with formatting and images
+• Article metadata including author and publication date
+• Topic tags for easy categorization
+
+Navigation:
+• Use the "Back to Articles" button to return to the blog list
+• Use the help icon (?) for instructions on any screen
+
+Tips:
+• These articles provide helpful information for live models about posing techniques, health considerations, and industry tips
+• Articles may contain specific guidance for difficult poses or pose sequencing
+`;
 
   if (isLoading) {
     return (
@@ -43,7 +60,14 @@ export default function BlogArticleScreen({ slug, onBack }: BlogArticleScreenPro
   }
 
   return (
-    <div className="container mx-auto px-4 py-8 max-w-3xl">
+    <div className="container mx-auto px-4 py-8 max-w-3xl relative">
+      <div className="absolute top-8 right-4">
+        <HelpModal
+          title="Article View Help"
+          instructions={helpInstructions}
+        />
+      </div>
+      
       <button
         onClick={onBack}
         className="mb-6 flex items-center text-blue-600 hover:underline"
