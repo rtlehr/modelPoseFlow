@@ -112,23 +112,58 @@ export default function PoseLibraryScreen({ onBack }: PoseLibraryScreenProps) {
     setSelectedPose(null);
   };
 
-  // Helper function to generate keywords for a pose
+  // Helper function to generate keywords for a pose with retry logic
   const generateKeywordsForPose = async (pose: Pose): Promise<Pose> => {
+    // Maximum number of retry attempts
+    const MAX_RETRIES = 2;
+    let retryCount = 0;
+    let lastError = null;
+    
     try {
-      console.log(`Attempting to generate keywords for pose ID: ${pose.id}`);
-      const keywordsResponse = await apiRequest("POST", `/api/poses/${pose.id}/generate-keywords`);
-      
-      if (keywordsResponse.ok) {
-        const keywordsResult = await keywordsResponse.json();
-        console.log("Keywords generated successfully:", keywordsResult);
-        return keywordsResult.pose;
-      } else {
-        console.error("Failed to generate keywords:", await keywordsResponse.text());
-        return pose;
+      // Use a retry loop for more reliability
+      while (retryCount <= MAX_RETRIES) {
+        try {
+          console.log(`Attempting to generate keywords for pose ID: ${pose.id} (Attempt ${retryCount + 1}/${MAX_RETRIES + 1})`);
+          const keywordsResponse = await apiRequest("POST", `/api/poses/${pose.id}/generate-keywords`);
+          
+          if (keywordsResponse.ok) {
+            const keywordsResult = await keywordsResponse.json();
+            console.log("Keywords generated successfully:", keywordsResult);
+            return keywordsResult.pose;
+          } else {
+            // Get error message for logging
+            const errorText = await keywordsResponse.text();
+            console.error(`Failed to generate keywords (Attempt ${retryCount + 1}/${MAX_RETRIES + 1}):`, errorText);
+            lastError = new Error(errorText);
+            
+            // If we get a 404 or 400, no point retrying as the pose doesn't exist or is invalid
+            if (keywordsResponse.status === 404 || keywordsResponse.status === 400) {
+              break;
+            }
+          }
+        } catch (attemptError) {
+          console.error(`Error during keyword generation attempt ${retryCount + 1}/${MAX_RETRIES + 1}:`, attemptError);
+          lastError = attemptError;
+        }
+        
+        // Increment retry counter
+        retryCount++;
+        
+        // Only wait if we're going to retry
+        if (retryCount <= MAX_RETRIES) {
+          // Exponential backoff: 1s, 2s
+          const delay = retryCount * 1000;
+          console.log(`Retrying in ${delay}ms...`);
+          await new Promise(resolve => setTimeout(resolve, delay));
+        }
       }
+      
+      // If we got here, all retries failed
+      console.error(`Failed to generate keywords after ${MAX_RETRIES + 1} attempts`);
+      throw lastError || new Error("Failed to generate keywords");
     } catch (error) {
       console.error("Error generating keywords:", error);
-      return pose;
+      return pose; // Return the original pose
     }
   };
   
@@ -233,23 +268,43 @@ export default function PoseLibraryScreen({ onBack }: PoseLibraryScreenProps) {
       resetUploadForm();
       setUploadDialogOpen(false);
       
-      // Refresh poses
-      refetch();
+      // Important: Keep a reference to the newly uploaded pose
+      const uploadedPose = {...newPose};
       
-      // After uploading the pose, generate keywords using our helper function
-      const poseWithKeywords = await generateKeywordsForPose(newPose);
-      
-      // Force a refresh of the poses list to ensure we see the updated keywords
+      // Refresh poses and wait for completion
       await refetch();
       
-      // Now select the pose with keywords to show the details view
-      setSelectedPose(poseWithKeywords);
-      
-      // Show a toast to confirm keywords were generated
-      toast({
-        title: "Keywords generated",
-        description: `Generated ${poseWithKeywords.keywords?.length || 0} keywords for this pose`
-      });
+      try {
+        // After uploading the pose, generate keywords using our helper function
+        console.log("Starting keyword generation for newly uploaded pose:", uploadedPose.id);
+        const poseWithKeywords = await generateKeywordsForPose(uploadedPose);
+        
+        // Force a refresh of the poses list to ensure we see the updated keywords
+        await refetch();
+        
+        console.log("Setting selected pose with keywords:", poseWithKeywords);
+        
+        // Now select the pose with keywords to show the details view
+        // Explicitly setting this AFTER all async operations are complete
+        setSelectedPose(poseWithKeywords);
+        
+        // Show a toast to confirm keywords were generated
+        toast({
+          title: "Keywords generated",
+          description: `Generated ${poseWithKeywords.keywords?.length || 0} keywords for this pose`
+        });
+      } catch (error) {
+        console.error("Error during keyword generation:", error);
+        
+        // Even if keyword generation fails, still show the pose detail view
+        console.log("Fallback: Setting selected pose without keywords:", uploadedPose);
+        setSelectedPose(uploadedPose);
+        
+        toast({
+          title: "Pose upload complete",
+          description: "The pose was uploaded but keyword generation failed. You can generate keywords manually."
+        });
+      }
       
     } catch (error: any) {
       console.error("Error uploading pose:", error);
