@@ -8,6 +8,7 @@ interface MainMenuProps {
   onUserPreferences: () => void;
   onModelBlog: () => void;
   onPoseKeywords?: () => void;
+  onModelingSessions?: () => void;
 }
 
 export default function MainMenu({ 

@@ -591,6 +591,253 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
   
+  // Host routes
+  app.get("/api/hosts", async (_req: Request, res: Response) => {
+    try {
+      const hosts = await storage.getAllHosts();
+      res.json(hosts);
+    } catch (error) {
+      console.error("Error fetching hosts:", error);
+      res.status(500).json({ message: "Failed to fetch hosts" });
+    }
+  });
+  
+  app.get("/api/hosts/:id", async (req: Request, res: Response) => {
+    try {
+      const id = parseInt(req.params.id);
+      if (isNaN(id)) {
+        return res.status(400).json({ message: "Invalid host ID" });
+      }
+      
+      const host = await storage.getHost(id);
+      if (!host) {
+        return res.status(404).json({ message: "Host not found" });
+      }
+      
+      res.json(host);
+    } catch (error) {
+      console.error("Error fetching host:", error);
+      res.status(500).json({ message: "Failed to fetch host" });
+    }
+  });
+  
+  app.post("/api/hosts", async (req: Request, res: Response) => {
+    try {
+      const { name, address, contactNumber, email, website, notes, rating } = req.body;
+      
+      if (!name) {
+        return res.status(400).json({ message: "Host name is required" });
+      }
+      
+      // Default rating to 3 (middle value) if not provided
+      const validatedRating = rating !== undefined ? rating : 3;
+      
+      const host = await storage.createHost({
+        name,
+        address,
+        contactNumber,
+        email,
+        website,
+        notes,
+        rating: validatedRating
+      });
+      
+      res.status(201).json(host);
+    } catch (error) {
+      console.error("Error creating host:", error);
+      res.status(500).json({ message: "Failed to create host" });
+    }
+  });
+  
+  app.put("/api/hosts/:id", async (req: Request, res: Response) => {
+    try {
+      const id = parseInt(req.params.id);
+      if (isNaN(id)) {
+        return res.status(400).json({ message: "Invalid host ID" });
+      }
+      
+      const { name, address, contactNumber, email, website, notes, rating } = req.body;
+      
+      if (!name) {
+        return res.status(400).json({ message: "Host name is required" });
+      }
+      
+      const updatedHost = await storage.updateHost(id, {
+        name,
+        address,
+        contactNumber,
+        email,
+        website,
+        notes,
+        rating
+      });
+      
+      if (!updatedHost) {
+        return res.status(404).json({ message: "Host not found" });
+      }
+      
+      res.json(updatedHost);
+    } catch (error) {
+      console.error("Error updating host:", error);
+      res.status(500).json({ message: "Failed to update host" });
+    }
+  });
+  
+  app.delete("/api/hosts/:id", async (req: Request, res: Response) => {
+    try {
+      const id = parseInt(req.params.id);
+      if (isNaN(id)) {
+        return res.status(400).json({ message: "Invalid host ID" });
+      }
+      
+      const success = await storage.deleteHost(id);
+      if (!success) {
+        return res.status(404).json({ message: "Host not found" });
+      }
+      
+      res.status(204).end();
+    } catch (error) {
+      console.error("Error deleting host:", error);
+      res.status(500).json({ message: "Failed to delete host" });
+    }
+  });
+  
+  // Modeling session routes
+  app.get("/api/modeling-sessions", async (_req: Request, res: Response) => {
+    try {
+      const sessions = await storage.getAllModelingSessions();
+      res.json(sessions);
+    } catch (error) {
+      console.error("Error fetching modeling sessions:", error);
+      res.status(500).json({ message: "Failed to fetch modeling sessions" });
+    }
+  });
+  
+  app.get("/api/modeling-sessions/:id", async (req: Request, res: Response) => {
+    try {
+      const id = parseInt(req.params.id);
+      if (isNaN(id)) {
+        return res.status(400).json({ message: "Invalid session ID" });
+      }
+      
+      const session = await storage.getModelingSession(id);
+      if (!session) {
+        return res.status(404).json({ message: "Modeling session not found" });
+      }
+      
+      res.json(session);
+    } catch (error) {
+      console.error("Error fetching modeling session:", error);
+      res.status(500).json({ message: "Failed to fetch modeling session" });
+    }
+  });
+  
+  app.get("/api/hosts/:hostId/modeling-sessions", async (req: Request, res: Response) => {
+    try {
+      const hostId = parseInt(req.params.hostId);
+      if (isNaN(hostId)) {
+        return res.status(400).json({ message: "Invalid host ID" });
+      }
+      
+      const sessions = await storage.getModelingSessionsByHostId(hostId);
+      res.json(sessions);
+    } catch (error) {
+      console.error("Error fetching modeling sessions by host:", error);
+      res.status(500).json({ message: "Failed to fetch modeling sessions by host" });
+    }
+  });
+  
+  app.post("/api/modeling-sessions", async (req: Request, res: Response) => {
+    try {
+      const { title, hostId, hostName, hostContactInfo, sessionDate, pay, notes, rating } = req.body;
+      
+      if (!title) {
+        return res.status(400).json({ message: "Session title is required" });
+      }
+      
+      if (!hostId || !hostName) {
+        return res.status(400).json({ message: "Host information is required" });
+      }
+      
+      if (!sessionDate) {
+        return res.status(400).json({ message: "Session date is required" });
+      }
+      
+      // Default rating to 3 (middle value) if not provided
+      const validatedRating = rating !== undefined ? rating : 3;
+      
+      const session = await storage.createModelingSession({
+        title,
+        hostId,
+        hostName,
+        hostContactInfo,
+        sessionDate,
+        pay,
+        notes,
+        rating: validatedRating
+      });
+      
+      res.status(201).json(session);
+    } catch (error) {
+      console.error("Error creating modeling session:", error);
+      res.status(500).json({ message: "Failed to create modeling session" });
+    }
+  });
+  
+  app.put("/api/modeling-sessions/:id", async (req: Request, res: Response) => {
+    try {
+      const id = parseInt(req.params.id);
+      if (isNaN(id)) {
+        return res.status(400).json({ message: "Invalid session ID" });
+      }
+      
+      const { title, hostId, hostName, hostContactInfo, sessionDate, pay, notes, rating } = req.body;
+      
+      if (!title) {
+        return res.status(400).json({ message: "Session title is required" });
+      }
+      
+      const updatedSession = await storage.updateModelingSession(id, {
+        title,
+        hostId,
+        hostName,
+        hostContactInfo,
+        sessionDate,
+        pay,
+        notes,
+        rating
+      });
+      
+      if (!updatedSession) {
+        return res.status(404).json({ message: "Modeling session not found" });
+      }
+      
+      res.json(updatedSession);
+    } catch (error) {
+      console.error("Error updating modeling session:", error);
+      res.status(500).json({ message: "Failed to update modeling session" });
+    }
+  });
+  
+  app.delete("/api/modeling-sessions/:id", async (req: Request, res: Response) => {
+    try {
+      const id = parseInt(req.params.id);
+      if (isNaN(id)) {
+        return res.status(400).json({ message: "Invalid session ID" });
+      }
+      
+      const success = await storage.deleteModelingSession(id);
+      if (!success) {
+        return res.status(404).json({ message: "Modeling session not found" });
+      }
+      
+      res.status(204).end();
+    } catch (error) {
+      console.error("Error deleting modeling session:", error);
+      res.status(500).json({ message: "Failed to delete modeling session" });
+    }
+  });
+  
   const httpServer = createServer(app);
 
   return httpServer;
