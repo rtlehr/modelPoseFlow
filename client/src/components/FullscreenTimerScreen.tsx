@@ -251,7 +251,7 @@ Tips:
             onClick={(e) => e.stopPropagation()}
           >
             <div className="relative">
-              <div style={{ filter: "invert(1)" }}>
+              <div style={{ filter: "invert(1)" }} className="z-50">
                 <HelpModal 
                   title="Fullscreen Pose Timer Help" 
                   instructions={helpInstructions}
