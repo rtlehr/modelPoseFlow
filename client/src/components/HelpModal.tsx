@@ -13,9 +13,10 @@ import {
 interface HelpModalProps {
   title: string;
   instructions: string | React.ReactNode;
+  onClose?: () => void;
 }
 
-export default function HelpModal({ title, instructions }: HelpModalProps) {
+export default function HelpModal({ title, instructions, onClose }: HelpModalProps) {
   const [isOpen, setIsOpen] = React.useState(false);
   const isMobile = useIsMobile();
   
@@ -38,7 +39,15 @@ export default function HelpModal({ title, instructions }: HelpModalProps) {
         <HelpCircle size={isMobile ? 22 : 18} className="text-gray-500" />
       </button>
 
-      <Dialog open={isOpen} onOpenChange={setIsOpen}>
+      <Dialog
+        open={isOpen}
+        onOpenChange={(open) => {
+          setIsOpen(open);
+          if (!open && onClose) {
+            onClose();
+          }
+        }}
+      >
         <DialogContent className="sm:max-w-lg">
           <DialogHeader>
             <DialogTitle>{title}</DialogTitle>

@@ -1,4 +1,4 @@
-import { apiRequest } from "@lib/queryClient";
+import { apiRequest, queryClient } from "../lib/queryClient";
 import type { Host, ModelingSession } from "@shared/schema";
 
 // Host operations

@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { useIsMobile } from "@/hooks/use-mobile";
-import { ArrowRight, Palette, Book, Settings, Images } from "lucide-react";
+import { ArrowRight, Palette, Book, Settings, Images, Calendar } from "lucide-react";
 
 interface MainMenuProps {
   onStartSession: () => void;
@@ -16,7 +16,8 @@ export default function MainMenu({
   onPoseCatalog, 
   onUserPreferences, 
   onModelBlog,
-  onPoseKeywords
+  onPoseKeywords,
+  onModelingSessions
 }: MainMenuProps) {
   const isMobile = useIsMobile();
   
@@ -34,6 +35,13 @@ export default function MainMenu({
       description: "Upload, tag, and organize your pose collection",
       icon: <Images className="w-5 h-5" />,
       onClick: onPoseKeywords,
+      primary: false
+    },
+    {
+      title: "Modeling Sessions",
+      description: "Track and manage your modeling sessions with different hosts",
+      icon: <Calendar className="w-5 h-5" />,
+      onClick: onModelingSessions,
       primary: false
     },
     {
