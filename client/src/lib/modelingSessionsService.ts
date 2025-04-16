@@ -1,75 +1,76 @@
-import { apiRequest, queryClient } from "../lib/queryClient";
+import { apiRequest } from "./queryClient";
 import type { Host, ModelingSession } from "@shared/schema";
 
 // Host operations
 export async function getAllHosts(): Promise<Host[]> {
-  return apiRequest({ url: "/api/hosts" });
+  return apiRequest("/api/hosts");
 }
 
 export async function getHost(id: number): Promise<Host> {
-  return apiRequest({ url: `/api/hosts/${id}` });
+  return apiRequest(`/api/hosts/${id}`);
 }
 
-export async function createHost(host: Omit<Host, "id" | "createdAt" | "updatedAt">): Promise<Host> {
-  return apiRequest({
-    url: "/api/hosts",
+export async function createHost(host: Partial<Host>): Promise<Host> {
+  return apiRequest("/api/hosts", {
     method: "POST",
-    data: host
+    body: JSON.stringify(host),
+    headers: {
+      "Content-Type": "application/json",
+    },
   });
 }
 
-export async function updateHost(id: number, host: Partial<Omit<Host, "id" | "createdAt" | "updatedAt">>): Promise<Host> {
-  return apiRequest({
-    url: `/api/hosts/${id}`,
+export async function updateHost(id: number, host: Partial<Host>): Promise<Host> {
+  return apiRequest(`/api/hosts/${id}`, {
     method: "PUT",
-    data: host
+    body: JSON.stringify(host),
+    headers: {
+      "Content-Type": "application/json",
+    },
   });
 }
 
 export async function deleteHost(id: number): Promise<void> {
-  return apiRequest({
-    url: `/api/hosts/${id}`,
-    method: "DELETE"
+  return apiRequest(`/api/hosts/${id}`, {
+    method: "DELETE",
   });
 }
 
 // Modeling session operations
 export async function getAllModelingSessions(): Promise<ModelingSession[]> {
-  return apiRequest({ url: "/api/modeling-sessions" });
+  return apiRequest("/api/modeling-sessions");
 }
 
 export async function getModelingSession(id: number): Promise<ModelingSession> {
-  return apiRequest({ url: `/api/modeling-sessions/${id}` });
+  return apiRequest(`/api/modeling-sessions/${id}`);
 }
 
 export async function getModelingSessionsByHostId(hostId: number): Promise<ModelingSession[]> {
-  return apiRequest({ url: `/api/hosts/${hostId}/modeling-sessions` });
+  return apiRequest(`/api/hosts/${hostId}/modeling-sessions`);
 }
 
-export async function createModelingSession(
-  session: Omit<ModelingSession, "id" | "createdAt" | "updatedAt">
-): Promise<ModelingSession> {
-  return apiRequest({
-    url: "/api/modeling-sessions",
+export async function createModelingSession(session: Partial<ModelingSession>): Promise<ModelingSession> {
+  return apiRequest("/api/modeling-sessions", {
     method: "POST",
-    data: session
+    body: JSON.stringify(session),
+    headers: {
+      "Content-Type": "application/json",
+    },
   });
 }
 
-export async function updateModelingSession(
-  id: number, 
-  session: Partial<Omit<ModelingSession, "id" | "createdAt" | "updatedAt">>
-): Promise<ModelingSession> {
-  return apiRequest({
-    url: `/api/modeling-sessions/${id}`,
+export async function updateModelingSession(id: number, session: Partial<ModelingSession>): Promise<ModelingSession> {
+  return apiRequest(`/api/modeling-sessions/${id}`, {
     method: "PUT",
-    data: session
+    body: JSON.stringify(session),
+    headers: {
+      "Content-Type": "application/json",
+    },
   });
 }
 
 export async function deleteModelingSession(id: number): Promise<void> {
-  return apiRequest({
-    url: `/api/modeling-sessions/${id}`,
-    method: "DELETE"
+  return apiRequest(`/api/modeling-sessions/${id}`, {
+    method: "DELETE",
   });
 }

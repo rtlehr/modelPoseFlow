@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { getAllModelingSessions, deleteModelingSession } from "@lib/modelingSessionsService";
+import { getAllModelingSessions, deleteModelingSession } from "../lib/modelingSessionsService";
 import type { ModelingSession } from "@shared/schema";
 import HelpModal from "./HelpModal";
 import { format } from "date-fns";
@@ -12,15 +12,15 @@ import {
 interface ModelingSessionScreenProps {
   onBack: () => void;
   onSelectSession: (sessionId: number) => void;
-  onSelectHost: (hostId: number) => void;
-  onAddNewSession: () => void;
+  onGoToHostList: () => void;
+  onAddSession: (hostId?: number) => void;
 }
 
 export default function ModelingSessionScreen({ 
   onBack, 
   onSelectSession, 
-  onSelectHost,
-  onAddNewSession 
+  onGoToHostList,
+  onAddSession 
 }: ModelingSessionScreenProps): JSX.Element {
   const [showHelp, setShowHelp] = useState(false);
   const [sortBy, setSortBy] = useState<'date' | 'host' | 'pay'>('date');
@@ -164,7 +164,7 @@ export default function ModelingSessionScreen({
             <FiHelpCircle size={20} />
           </button>
           <button
-            onClick={onAddNewSession}
+            onClick={() => onAddSession()}
             className="ml-2 flex items-center px-4 py-2 bg-primary text-white rounded-md hover:bg-primary-dark"
           >
             <FiPlusCircle className="mr-1" /> Add Session
@@ -259,7 +259,7 @@ export default function ModelingSessionScreen({
               <p className="text-xl text-gray-500 mb-4">No modeling sessions found</p>
               <p className="text-gray-400 mb-6">Track your modeling work by adding sessions</p>
               <button
-                onClick={onAddNewSession}
+                onClick={() => onAddSession()}
                 className="flex items-center px-4 py-2 bg-primary text-white rounded-md hover:bg-primary-dark"
               >
                 <FiPlusCircle className="mr-1" /> Add Your First Session
@@ -282,7 +282,7 @@ export default function ModelingSessionScreen({
                         <button
                           onClick={(e) => {
                             e.stopPropagation();
-                            onSelectHost(session.hostId);
+                            onGoToHostList();
                           }}
                           className="text-primary hover:underline text-sm mt-1"
                         >

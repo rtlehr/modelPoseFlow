@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { getHost, getModelingSessionsByHostId } from "@lib/modelingSessionsService";
+import { getHost, getModelingSessionsByHostId } from "../lib/modelingSessionsService";
 import type { Host, ModelingSession } from "@shared/schema";
 import HelpModal from "./HelpModal";
 import { format } from "date-fns";

@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { getAllHosts, createHost, deleteHost } from "@lib/modelingSessionsService";
+import { getAllHosts, createHost, deleteHost } from "../lib/modelingSessionsService";
 import type { Host } from "@shared/schema";
 import HelpModal from "./HelpModal";
 import { FiPlusCircle, FiEdit, FiTrash2, FiInfo, FiStar, FiPhone, FiMail, FiGlobe, FiHelpCircle } from "react-icons/fi";

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { getHost, createHost, updateHost } from "@lib/modelingSessionsService";
+import { getHost, createHost, updateHost } from "../lib/modelingSessionsService";
 import type { Host } from "@shared/schema";
 import HelpModal from "./HelpModal";
 import { FiHelpCircle, FiStar } from "react-icons/fi";

@@ -5,7 +5,7 @@ import {
   createModelingSession, 
   updateModelingSession, 
   getAllHosts 
-} from "@lib/modelingSessionsService";
+} from "../lib/modelingSessionsService";
 import type { ModelingSession, Host } from "@shared/schema";
 import HelpModal from "./HelpModal";
 import { FiHelpCircle, FiStar, FiDollarSign } from "react-icons/fi";

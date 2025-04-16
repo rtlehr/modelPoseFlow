@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { getModelingSession, deleteModelingSession } from "@lib/modelingSessionsService";
+import { getModelingSession, deleteModelingSession } from "../lib/modelingSessionsService";
 import type { ModelingSession } from "@shared/schema";
 import HelpModal from "./HelpModal";
 import { format } from "date-fns";

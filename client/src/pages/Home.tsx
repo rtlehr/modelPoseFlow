@@ -7,6 +7,12 @@ import PlaceholderScreen from "@/components/PlaceholderScreen";
 import PoseLibraryScreen from "@/components/PoseLibraryScreen";
 import BlogListScreen from "@/components/BlogListScreen";
 import BlogArticleScreen from "@/components/BlogArticleScreen";
+import ModelingSessionScreen from "@/components/ModelingSessionScreen";
+import HostListScreen from "@/components/HostListScreen";
+import HostDetailScreen from "@/components/HostDetailScreen";
+import HostFormScreen from "@/components/HostFormScreen";
+import ModelingSessionFormScreen from "@/components/ModelingSessionFormScreen";
+import ModelingSessionDetailScreen from "@/components/ModelingSessionDetailScreen";
 import { PoseSessionConfig, Pose } from "@/types";
 import { useQuery } from "@tanstack/react-query";
 
@@ -20,13 +26,25 @@ type Screen =
   | 'userPreferences'
   | 'modelBlog'
   | 'blogArticle'
-  | 'poseKeywords';
+  | 'poseKeywords'
+  | 'modelingSessions'
+  | 'hostList'
+  | 'hostDetail'
+  | 'hostForm'
+  | 'sessionForm'
+  | 'sessionDetail';
 
 export default function Home() {
   // Track which screen is currently displayed
   const [currentScreen, setCurrentScreen] = useState<Screen>('loading');
   const [sessionConfig, setSessionConfig] = useState<PoseSessionConfig | null>(null);
   const [currentArticleSlug, setCurrentArticleSlug] = useState<string>('');
+  
+  // State for modeling sessions feature
+  const [currentHostId, setCurrentHostId] = useState<number | null>(null);
+  const [currentSessionId, setCurrentSessionId] = useState<number | null>(null);
+  const [isEditingHost, setIsEditingHost] = useState<boolean>(false);
+  const [isEditingSession, setIsEditingSession] = useState<boolean>(false);
 
   // Fetch poses from the API
   const { data: poses = [] as Pose[] } = useQuery<Pose[]>({
@@ -91,6 +109,80 @@ export default function Home() {
 
   const handleBackToBlogList = () => {
     setCurrentScreen('modelBlog');
+  };
+  
+  // Modeling Sessions handlers
+  const handleGoToModelingSessions = () => {
+    setCurrentScreen('modelingSessions');
+  };
+  
+  const handleGoToHostList = () => {
+    setCurrentScreen('hostList');
+  };
+  
+  const handleSelectHost = (hostId: number) => {
+    setCurrentHostId(hostId);
+    setCurrentScreen('hostDetail');
+  };
+  
+  const handleAddHost = () => {
+    setIsEditingHost(false);
+    setCurrentHostId(null);
+    setCurrentScreen('hostForm');
+  };
+  
+  const handleEditHost = (hostId: number) => {
+    setCurrentHostId(hostId);
+    setIsEditingHost(true);
+    setCurrentScreen('hostForm');
+  };
+  
+  const handleHostSaved = (hostId: number) => {
+    setCurrentHostId(hostId);
+    setCurrentScreen('hostDetail');
+  };
+  
+  const handleBackToHostList = () => {
+    setCurrentScreen('hostList');
+  };
+  
+  const handleBackToHostDetail = () => {
+    setCurrentScreen('hostDetail');
+  };
+  
+  const handleBackToModelingSessions = () => {
+    setCurrentScreen('modelingSessions');
+  };
+  
+  const handleSelectSession = (sessionId: number) => {
+    setCurrentSessionId(sessionId);
+    setCurrentScreen('sessionDetail');
+  };
+  
+  const handleAddSession = (hostId?: number) => {
+    setIsEditingSession(false);
+    setCurrentHostId(hostId || null);
+    setCurrentSessionId(null);
+    setCurrentScreen('sessionForm');
+  };
+  
+  const handleEditSession = (sessionId: number) => {
+    setCurrentSessionId(sessionId);
+    setIsEditingSession(true);
+    setCurrentScreen('sessionForm');
+  };
+  
+  const handleSessionSaved = (sessionId: number) => {
+    setCurrentSessionId(sessionId);
+    setCurrentScreen('sessionDetail');
+  };
+  
+  const handleSessionDeleted = () => {
+    if (currentHostId) {
+      setCurrentScreen('hostDetail');
+    } else {
+      setCurrentScreen('modelingSessions');
+    }
   };
 
   // Render different components based on the current screen
@@ -174,6 +266,67 @@ export default function Home() {
         return (
           <PoseLibraryScreen 
             onBack={handleBackToMainMenu}
+          />
+        );
+        
+      case 'modelingSessions':
+        return (
+          <ModelingSessionScreen
+            onBack={handleBackToMainMenu}
+            onSelectSession={handleSelectSession}
+            onGoToHostList={handleGoToHostList}
+            onAddSession={handleAddSession}
+          />
+        );
+        
+      case 'hostList':
+        return (
+          <HostListScreen
+            onBack={handleBackToModelingSessions}
+            onSelectHost={handleSelectHost}
+            onAddNewHost={handleAddHost}
+            onEditHost={handleEditHost}
+          />
+        );
+        
+      case 'hostDetail':
+        return (
+          <HostDetailScreen
+            hostId={currentHostId!}
+            onBack={handleBackToHostList}
+            onEditHost={handleEditHost}
+            onSelectSession={handleSelectSession}
+            onAddSession={(hostId) => handleAddSession(hostId)}
+          />
+        );
+        
+      case 'hostForm':
+        return (
+          <HostFormScreen
+            hostId={isEditingHost ? currentHostId! : undefined}
+            onBack={isEditingHost ? handleBackToHostDetail : handleBackToHostList}
+            onSaved={handleHostSaved}
+          />
+        );
+        
+      case 'sessionForm':
+        return (
+          <ModelingSessionFormScreen
+            sessionId={isEditingSession ? currentSessionId! : undefined}
+            preselectedHostId={currentHostId || undefined}
+            onBack={isEditingSession ? handleBackToHostDetail : (currentHostId ? handleBackToHostDetail : handleBackToModelingSessions)}
+            onSaved={handleSessionSaved}
+          />
+        );
+        
+      case 'sessionDetail':
+        return (
+          <ModelingSessionDetailScreen
+            sessionId={currentSessionId!}
+            onBack={() => currentHostId ? handleBackToHostDetail() : handleBackToModelingSessions()}
+            onEdit={handleEditSession}
+            onDeleted={handleSessionDeleted}
+            onSelectHost={handleViewHost}
           />
         );
         
