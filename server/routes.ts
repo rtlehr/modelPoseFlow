@@ -749,7 +749,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   
   app.post("/api/modeling-sessions", async (req: Request, res: Response) => {
     try {
-      const { title, hostId, hostName, hostContactInfo, sessionDate, pay, notes, rating } = req.body;
+      const { title, hostId, hostName, hostContactInfo, sessionDate, startTime, endTime, pay, notes, rating } = req.body;
       
       if (!title) {
         return res.status(400).json({ message: "Session title is required" });
@@ -772,6 +772,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         hostName,
         hostContactInfo,
         sessionDate,
+        startTime,
+        endTime,
         pay,
         notes,
         rating: validatedRating
@@ -791,7 +793,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "Invalid session ID" });
       }
       
-      const { title, hostId, hostName, hostContactInfo, sessionDate, pay, notes, rating } = req.body;
+      const { title, hostId, hostName, hostContactInfo, sessionDate, startTime, endTime, pay, notes, rating } = req.body;
       
       if (!title) {
         return res.status(400).json({ message: "Session title is required" });
@@ -803,6 +805,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         hostName,
         hostContactInfo,
         sessionDate,
+        startTime,
+        endTime,
         pay,
         notes,
         rating
