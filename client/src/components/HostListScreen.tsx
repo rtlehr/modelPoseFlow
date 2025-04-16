@@ -117,8 +117,8 @@ export default function HostListScreen({
 
   return (
     <div className="flex flex-col h-full">
-      {/* Header */}
-      <div className="flex justify-between items-center p-4 border-b">
+      {/* Header - Responsive Design */}
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center p-4 border-b space-y-3 sm:space-y-0">
         <div className="flex items-center">
           <button
             onClick={onBack}
@@ -126,9 +126,9 @@ export default function HostListScreen({
           >
             ← Back
           </button>
-          <h1 className="text-2xl font-bold">Host Management</h1>
+          <h1 className="text-xl sm:text-2xl font-bold">Host Management</h1>
         </div>
-        <div className="flex items-center">
+        <div className="flex flex-wrap items-center gap-2 w-full sm:w-auto">
           <button
             onClick={() => setShowHelp(true)}
             className="p-2 text-gray-500 hover:text-primary"
@@ -138,7 +138,7 @@ export default function HostListScreen({
           </button>
           <button
             onClick={onAddNewHost}
-            className="ml-2 flex items-center px-4 py-2 bg-primary text-white rounded-md hover:bg-primary-dark"
+            className="flex items-center px-4 py-2 bg-primary text-white rounded-md hover:bg-primary-dark"
           >
             <FiPlusCircle className="mr-1" /> Add Host
           </button>
@@ -168,49 +168,49 @@ export default function HostListScreen({
             </button>
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-4">
             {hosts.map((host) => (
               <div
                 key={host.id}
                 className="border rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-shadow"
               >
                 <div 
-                  className="p-4 cursor-pointer"
+                  className="p-3 md:p-4 cursor-pointer"
                   onClick={() => onSelectHost(host.id)}
                 >
-                  <div className="flex justify-between items-start">
-                    <h2 className="text-xl font-semibold truncate">{host.name}</h2>
+                  <div className="flex justify-between items-center">
+                    <h2 className="text-lg md:text-xl font-semibold truncate">{host.name}</h2>
                     {renderRating(host.rating)}
                   </div>
                   
-                  <div className="mt-3 space-y-1 text-sm text-gray-600">
+                  <div className="mt-2 md:mt-3 space-y-1 text-xs md:text-sm text-gray-600">
                     {host.address && (
                       <p className="truncate">{host.address}</p>
                     )}
                     
-                    <div className="flex flex-wrap gap-3 mt-2">
+                    <div className="flex flex-wrap gap-2 md:gap-3 mt-1 md:mt-2">
                       {host.contactNumber && (
-                        <span className="flex items-center">
+                        <span className="flex items-center text-xs md:text-sm">
                           <FiPhone className="mr-1" />
                           {host.contactNumber}
                         </span>
                       )}
                       
                       {host.email && (
-                        <span className="flex items-center">
+                        <span className="flex items-center text-xs md:text-sm">
                           <FiMail className="mr-1" />
-                          {host.email}
+                          <span className="truncate max-w-[120px] md:max-w-[150px]">{host.email}</span>
                         </span>
                       )}
                       
                       {host.website && (
-                        <span className="flex items-center">
+                        <span className="flex items-center text-xs md:text-sm">
                           <FiGlobe className="mr-1" />
                           <a 
                             href={host.website.startsWith('http') ? host.website : `https://${host.website}`}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="text-primary hover:underline"
+                            className="text-primary hover:underline truncate max-w-[80px] md:max-w-[120px]"
                             onClick={(e) => e.stopPropagation()}
                           >
                             Website
@@ -221,7 +221,7 @@ export default function HostListScreen({
                   </div>
                   
                   {host.notes && (
-                    <p className="mt-3 text-sm text-gray-500 line-clamp-2">
+                    <p className="mt-2 md:mt-3 text-xs md:text-sm text-gray-500 line-clamp-2">
                       {host.notes}
                     </p>
                   )}

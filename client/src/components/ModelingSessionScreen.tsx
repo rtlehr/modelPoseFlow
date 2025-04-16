@@ -145,8 +145,8 @@ export default function ModelingSessionScreen({
 
   return (
     <div className="flex flex-col h-full">
-      {/* Header */}
-      <div className="flex justify-between items-center p-4 border-b">
+      {/* Header - Responsive Design */}
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center p-4 border-b space-y-3 sm:space-y-0">
         <div className="flex items-center">
           <button
             onClick={onBack}
@@ -156,7 +156,7 @@ export default function ModelingSessionScreen({
           </button>
           <h1 className="text-2xl font-bold">Modeling Sessions</h1>
         </div>
-        <div className="flex items-center">
+        <div className="flex flex-wrap items-center gap-2 w-full sm:w-auto">
           <button
             onClick={() => setShowHelp(true)}
             className="p-2 text-gray-500 hover:text-primary"
@@ -166,13 +166,13 @@ export default function ModelingSessionScreen({
           </button>
           <button
             onClick={onGoToHostList}
-            className="ml-2 flex items-center px-4 py-2 bg-gray-100 text-gray-700 rounded-md hover:bg-gray-200"
+            className="flex items-center px-4 py-2 bg-gray-100 text-gray-700 rounded-md hover:bg-gray-200"
           >
             <FiUser className="mr-1" /> Manage Hosts
           </button>
           <button
             onClick={() => onAddSession()}
-            className="ml-2 flex items-center px-4 py-2 bg-primary text-white rounded-md hover:bg-primary-dark"
+            className="flex items-center px-4 py-2 bg-primary text-white rounded-md hover:bg-primary-dark"
           >
             <FiPlusCircle className="mr-1" /> Add Session
           </button>
@@ -191,26 +191,26 @@ export default function ModelingSessionScreen({
       {/* Content */}
       <div className="flex flex-col md:flex-row flex-1 overflow-hidden">
         {/* Summary Panel */}
-        <div className="w-full md:w-1/4 p-6 border-r bg-gray-50">
-          <h2 className="text-xl font-semibold mb-6">Summary</h2>
+        <div className="w-full md:w-1/4 p-4 md:p-6 border-b md:border-b-0 md:border-r bg-gray-50">
+          <h2 className="text-xl font-semibold mb-4">Summary</h2>
           
-          <div className="space-y-6">
-            <div className="bg-white rounded-lg p-4 shadow-sm">
-              <h3 className="text-sm font-medium text-gray-500 mb-2">Total Sessions</h3>
-              <p className="text-3xl font-bold">{totalSessions}</p>
+          <div className="grid grid-cols-3 md:grid-cols-1 gap-3 md:space-y-4">
+            <div className="bg-white rounded-lg p-3 md:p-4 shadow-sm">
+              <h3 className="text-xs md:text-sm font-medium text-gray-500 mb-1 md:mb-2">Total Sessions</h3>
+              <p className="text-xl md:text-3xl font-bold">{totalSessions}</p>
             </div>
             
-            <div className="bg-white rounded-lg p-4 shadow-sm">
-              <h3 className="text-sm font-medium text-gray-500 mb-2">Total Earnings</h3>
-              <p className="text-3xl font-bold text-green-600 flex items-center">
+            <div className="bg-white rounded-lg p-3 md:p-4 shadow-sm">
+              <h3 className="text-xs md:text-sm font-medium text-gray-500 mb-1 md:mb-2">Total Earnings</h3>
+              <p className="text-xl md:text-3xl font-bold text-green-600 flex items-center">
                 <FiDollarSign className="mr-1" />{totalEarnings.toFixed(2)}
               </p>
             </div>
             
-            <div className="bg-white rounded-lg p-4 shadow-sm">
-              <h3 className="text-sm font-medium text-gray-500 mb-2">Average Rating</h3>
+            <div className="bg-white rounded-lg p-3 md:p-4 shadow-sm">
+              <h3 className="text-xs md:text-sm font-medium text-gray-500 mb-1 md:mb-2">Average Rating</h3>
               <div className="flex items-center">
-                <p className="text-3xl font-bold mr-2">{averageRating.toFixed(1)}</p>
+                <p className="text-xl md:text-3xl font-bold mr-1 md:mr-2">{averageRating.toFixed(1)}</p>
                 {renderRating(Math.round(averageRating))}
               </div>
             </div>
@@ -218,15 +218,15 @@ export default function ModelingSessionScreen({
         </div>
 
         {/* Sessions List */}
-        <div className="flex-1 overflow-auto p-6">
+        <div className="flex-1 overflow-auto p-4 md:p-6">
           {/* Sort Controls */}
-          <div className="flex justify-between items-center mb-6">
-            <div className="flex items-center space-x-2">
-              <span className="text-gray-500 text-sm">Sort by:</span>
+          <div className="flex flex-wrap justify-between items-center mb-4 md:mb-6">
+            <div className="flex items-center space-x-2 mb-2 w-full sm:w-auto sm:mb-0">
+              <span className="text-gray-500 text-xs md:text-sm">Sort by:</span>
               <div className="flex bg-gray-100 rounded-md p-1">
                 <button
                   onClick={() => setSortBy('date')}
-                  className={`px-3 py-1 text-sm rounded-md flex items-center ${
+                  className={`px-2 md:px-3 py-1 text-xs md:text-sm rounded-md flex items-center ${
                     sortBy === 'date' 
                       ? 'bg-white shadow-sm' 
                       : 'text-gray-500 hover:text-gray-700'
@@ -237,7 +237,7 @@ export default function ModelingSessionScreen({
                 </button>
                 <button
                   onClick={() => setSortBy('host')}
-                  className={`px-3 py-1 text-sm rounded-md flex items-center ${
+                  className={`px-2 md:px-3 py-1 text-xs md:text-sm rounded-md flex items-center ${
                     sortBy === 'host' 
                       ? 'bg-white shadow-sm' 
                       : 'text-gray-500 hover:text-gray-700'
@@ -248,7 +248,7 @@ export default function ModelingSessionScreen({
                 </button>
                 <button
                   onClick={() => setSortBy('pay')}
-                  className={`px-3 py-1 text-sm rounded-md flex items-center ${
+                  className={`px-2 md:px-3 py-1 text-xs md:text-sm rounded-md flex items-center ${
                     sortBy === 'pay' 
                       ? 'bg-white shadow-sm' 
                       : 'text-gray-500 hover:text-gray-700'
@@ -283,9 +283,9 @@ export default function ModelingSessionScreen({
                     className="p-4 cursor-pointer"
                     onClick={() => onSelectSession(session.id)}
                   >
-                    <div className="flex justify-between items-start">
-                      <div>
-                        <h2 className="text-xl font-semibold">{session.title}</h2>
+                    <div className="flex flex-col sm:flex-row justify-between sm:items-start gap-3">
+                      <div className="flex-1">
+                        <h2 className="text-lg sm:text-xl font-semibold">{session.title}</h2>
                         <button
                           onClick={(e) => {
                             e.stopPropagation();
@@ -296,12 +296,12 @@ export default function ModelingSessionScreen({
                           {session.hostName}
                         </button>
                       </div>
-                      <div className="flex flex-col items-end">
-                        <span className="text-gray-500 text-sm">
-                          {format(new Date(session.sessionDate), 'MMMM d, yyyy')}
+                      <div className="flex flex-row sm:flex-col justify-between sm:items-end w-full sm:w-auto">
+                        <span className="text-gray-500 text-xs sm:text-sm">
+                          {format(new Date(session.sessionDate), 'MMM d, yyyy')}
                         </span>
                         {(session.startTime || session.endTime) && (
-                          <span className="text-gray-500 text-sm flex items-center mt-1">
+                          <span className="text-gray-500 text-xs sm:text-sm flex items-center mt-0 sm:mt-1">
                             <FiClock className="mr-1" />
                             {session.startTime && session.endTime 
                               ? `${session.startTime} - ${session.endTime}`
@@ -311,21 +311,21 @@ export default function ModelingSessionScreen({
                             }
                           </span>
                         )}
-                        <div className="mt-1">{renderRating(session.rating)}</div>
+                        <div className="mt-0 sm:mt-1">{renderRating(session.rating)}</div>
                       </div>
                     </div>
                     
-                    <div className="mt-4 flex justify-between items-center">
+                    <div className="mt-3 sm:mt-4 flex flex-col sm:flex-row justify-between sm:items-center gap-2 sm:gap-0">
                       {session.pay ? (
-                        <span className="text-green-600 font-semibold flex items-center">
+                        <span className="text-green-600 font-semibold flex items-center text-sm sm:text-base">
                           <FiDollarSign className="mr-1" />{session.pay.toFixed(2)}
                         </span>
                       ) : (
-                        <span className="text-gray-400 text-sm">No payment recorded</span>
+                        <span className="text-gray-400 text-xs sm:text-sm">No payment recorded</span>
                       )}
                       
                       {session.notes && (
-                        <p className="text-sm text-gray-500 line-clamp-1 max-w-md">
+                        <p className="text-xs sm:text-sm text-gray-500 line-clamp-1 max-w-full sm:max-w-md">
                           {session.notes}
                         </p>
                       )}
