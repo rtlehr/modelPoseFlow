@@ -27,17 +27,20 @@ export async function generatePoseKeywords(imageUrl: string): Promise<string[]> 
           role: "system",
           content: 
             "You are an AI assistant that helps analyze figure drawing poses from images. " +
-            "Extract DETAILED and SPECIFIC keywords that describe the pose, body position, expression, mood, and any distinctive features. " +
-            "These keywords will be the PRIMARY METHOD for matching poses to user descriptions, so be thorough and precise. " +
-            "Include terms related to: body position, angle, perspective, gesture, expression, mood, pose dynamics, composition, etc. " +
-            "You should return a JSON array of 15-20 specific keywords that accurately describe the pose."
+            "Extract DETAILED and SPECIFIC keywords that ONLY describe the physical pose and body positioning of the model. " +
+            "IMPORTANT: Focus EXCLUSIVELY on the model's physical pose - do NOT include keywords about background, lighting, mood, appearance, " +
+            "clothing, setting, photographic style, or any other elements not directly related to the physical pose itself. " +
+            "These keywords will be the PRIMARY METHOD for matching poses to user descriptions, so be thorough and precise about the pose only. " +
+            "Include ONLY terms related to: body position, limb placement, angle of limbs, weight distribution, orientation, balance, " +
+            "head position, torso alignment, physical gesture, anatomical details of the pose. " +
+            "You should return a JSON object with a 'keywords' property containing an array of 15-20 specific pose-only keywords."
         },
         {
           role: "user",
           content: [
             {
               type: "text", 
-              text: "Generate comprehensive descriptive keywords for this figure pose. These keywords will be used to match this pose with user descriptions, so be specific and detailed."
+              text: "Generate descriptive keywords ONLY for the physical pose in this image. Focus exclusively on body position, limb placement, weight distribution, and pose mechanics. Do NOT include keywords about background, setting, lighting, mood, expression, clothing, or the person's appearance."
             },
             {
               type: "image_url",
@@ -79,13 +82,15 @@ export async function analyzePoseDescription(description: string): Promise<PoseA
           role: "system",
           content: 
             "You are an AI assistant that helps analyze figure drawing pose descriptions. " +
-            "Extract relevant keywords from the text description provided and detect if there's a difficulty preference for models holding the pose. " +
-            "Focus on aspects of the pose like body position, angle, mood, stance, posture, style, etc. " +
+            "Extract relevant keywords from the text description that ONLY relate to the physical pose of the model. " +
+            "IMPORTANT: Focus EXCLUSIVELY on keywords related to the physical body positioning and pose mechanics. " +
+            "DO NOT include keywords about background, lighting, mood, appearance, clothing, or any other elements " +
+            "not directly related to the physical pose itself. " +
             "Also identify if the user has specified a difficulty preference for the pose (how easy/hard it would be for a live model to hold). " +
-            "Keywords are the primary method used for matching poses to descriptions. " +
             "You should return a JSON object with three properties: " +
-            "1. 'keywords': An array of 12-15 specific relevant keywords from the description " +
-            "2. 'description': A brief summary of the pose in 10 words or less " +
+            "1. 'keywords': An array of 12-15 specific keywords that ONLY relate to physical pose (body position, limb placement, weight distribution, " +
+            "head position, torso alignment, etc.). Exclude any non-pose aspects like mood, setting, style, etc. " +
+            "2. 'description': A brief summary of the physical pose in 10 words or less (only about the pose itself) " +
             "3. 'difficultyPreference': A number representing the difficulty level (1=Easy, 2=Medium, 3=Hard), or null if no preference specified " +
             "For difficulty, look for phrases like 'easy poses', 'medium difficulty', 'challenging poses', etc."
         },
