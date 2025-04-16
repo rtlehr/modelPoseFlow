@@ -16,7 +16,7 @@ import {
 } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
 import { useIsMobile } from "@/hooks/use-mobile";
-import { Pose } from "@/types";
+import { Pose } from "@shared/schema";
 import PoseKeywordManager from "./PoseKeywordManager";
 import PoseDifficultyManager from "./PoseDifficultyManager";
 import HelpModal from "./HelpModal";

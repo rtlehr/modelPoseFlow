@@ -1,4 +1,4 @@
-import { Pose } from '@/types';
+import { Pose } from '@shared/schema';
 import { apiRequest } from './queryClient';
 import { queryClient } from './queryClient';
 
@@ -85,7 +85,7 @@ export async function getPosesByDifficulty(difficultyLevel: number): Promise<Pos
  * @param level The difficulty level (1-Easy, 2-Medium, 3-Hard)
  * @returns A string representation of the difficulty level
  */
-export function getDifficultyLabel(level: number | undefined): string {
+export function getDifficultyLabel(level: number | null | undefined): string {
   switch(level) {
     case 1: return 'Easy to Hold';
     case 2: return 'Medium to Hold';
@@ -99,7 +99,7 @@ export function getDifficultyLabel(level: number | undefined): string {
  * @param level The difficulty level (1-Easy, 2-Medium, 3-Hard)
  * @returns A CSS class for styling based on difficulty
  */
-export function getDifficultyClass(level: number | undefined): string {
+export function getDifficultyClass(level: number | null | undefined): string {
   switch(level) {
     case 1: return 'text-green-500 border-green-500';
     case 2: return 'text-orange-500 border-orange-500';

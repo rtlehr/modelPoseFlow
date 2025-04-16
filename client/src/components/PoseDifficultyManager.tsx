@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Pose } from '@/types';
+import { Pose } from '@shared/schema';
 import { 
   analyzePoseDifficulty, 
   updatePoseDifficulty, 
@@ -15,8 +15,8 @@ interface PoseDifficultyManagerProps {
 
 export default function PoseDifficultyManager({ pose, onUpdate }: PoseDifficultyManagerProps) {
   const [loading, setLoading] = useState(false);
-  const [selectedDifficulty, setSelectedDifficulty] = useState<number>(pose.difficultyLevel || 2);
-  const [reason, setReason] = useState<string>(pose.difficultyReason || '');
+  const [selectedDifficulty, setSelectedDifficulty] = useState<number>(pose.difficultyLevel !== null ? pose.difficultyLevel : 2);
+  const [reason, setReason] = useState<string>(pose.difficultyReason !== null ? pose.difficultyReason : '');
   const [isEditing, setIsEditing] = useState(false);
   const { toast } = useToast();
 
@@ -38,7 +38,7 @@ export default function PoseDifficultyManager({ pose, onUpdate }: PoseDifficulty
       
       toast({
         title: "Difficulty Analysis Complete",
-        description: `This pose is rated as ${getDifficultyLabel(updatedPose.difficultyLevel)}.`,
+        description: `This pose is rated as ${getDifficultyLabel(updatedPose.difficultyLevel !== null ? updatedPose.difficultyLevel : 2)}.`,
       });
     } catch (error) {
       console.error('Error analyzing pose difficulty:', error);
