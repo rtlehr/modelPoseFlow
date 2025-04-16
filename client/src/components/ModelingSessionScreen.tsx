@@ -300,6 +300,17 @@ export default function ModelingSessionScreen({
                         <span className="text-gray-500 text-sm">
                           {format(new Date(session.sessionDate), 'MMMM d, yyyy')}
                         </span>
+                        {(session.startTime || session.endTime) && (
+                          <span className="text-gray-500 text-sm flex items-center mt-1">
+                            <FiClock className="mr-1" />
+                            {session.startTime && session.endTime 
+                              ? `${session.startTime} - ${session.endTime}`
+                              : session.startTime 
+                                ? `Start: ${session.startTime}` 
+                                : `End: ${session.endTime}`
+                            }
+                          </span>
+                        )}
                         <div className="mt-1">{renderRating(session.rating)}</div>
                       </div>
                     </div>
