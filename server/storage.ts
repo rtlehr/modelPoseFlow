@@ -1,10 +1,13 @@
 import { 
   users, poses, 
   musicTracks, playlists, blogArticles,
+  hosts, modelingSessions,
   type User, type InsertUser, type Pose, type InsertPose,
   type MusicTrack, type InsertMusicTrack,
   type Playlist, type InsertPlaylist,
-  type BlogArticle, type InsertBlogArticle
+  type BlogArticle, type InsertBlogArticle,
+  type Host, type InsertHost,
+  type ModelingSession, type InsertModelingSession
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, or, inArray, desc } from "drizzle-orm";
@@ -52,6 +55,21 @@ export interface IStorage {
   updateBlogArticle(id: number, article: Partial<InsertBlogArticle>): Promise<BlogArticle | undefined>;
   deleteBlogArticle(id: number): Promise<boolean>;
   seedBlogArticles(): Promise<void>;
+  
+  // Host operations
+  getAllHosts(): Promise<Host[]>;
+  getHost(id: number): Promise<Host | undefined>;
+  createHost(host: InsertHost): Promise<Host>;
+  updateHost(id: number, host: Partial<InsertHost>): Promise<Host | undefined>;
+  deleteHost(id: number): Promise<boolean>;
+  
+  // Modeling session operations
+  getAllModelingSessions(): Promise<ModelingSession[]>;
+  getModelingSession(id: number): Promise<ModelingSession | undefined>;
+  getModelingSessionsByHostId(hostId: number): Promise<ModelingSession[]>;
+  createModelingSession(session: InsertModelingSession): Promise<ModelingSession>;
+  updateModelingSession(id: number, session: Partial<InsertModelingSession>): Promise<ModelingSession | undefined>;
+  deleteModelingSession(id: number): Promise<boolean>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -531,6 +549,100 @@ Understanding form and volume is a lifelong study for artists. Regular practice 
       console.error("Failed to seed blog articles:", error);
       throw error;
     }
+  }
+
+  // Host operations
+  async getAllHosts(): Promise<Host[]> {
+    return await db
+      .select()
+      .from(hosts)
+      .orderBy(desc(hosts.rating)); // Sort by rating (highest first)
+  }
+  
+  async getHost(id: number): Promise<Host | undefined> {
+    const [host] = await db
+      .select()
+      .from(hosts)
+      .where(eq(hosts.id, id));
+    return host || undefined;
+  }
+  
+  async createHost(host: InsertHost): Promise<Host> {
+    const [createdHost] = await db
+      .insert(hosts)
+      .values(host)
+      .returning();
+    return createdHost;
+  }
+  
+  async updateHost(id: number, host: Partial<InsertHost>): Promise<Host | undefined> {
+    const [updatedHost] = await db
+      .update(hosts)
+      .set({
+        ...host,
+        updatedAt: new Date()
+      })
+      .where(eq(hosts.id, id))
+      .returning();
+    return updatedHost || undefined;
+  }
+  
+  async deleteHost(id: number): Promise<boolean> {
+    const result = await db
+      .delete(hosts)
+      .where(eq(hosts.id, id));
+    return !!result;
+  }
+  
+  // Modeling session operations
+  async getAllModelingSessions(): Promise<ModelingSession[]> {
+    return await db
+      .select()
+      .from(modelingSessions)
+      .orderBy(desc(modelingSessions.sessionDate)); // Sort by date (newest first)
+  }
+  
+  async getModelingSession(id: number): Promise<ModelingSession | undefined> {
+    const [session] = await db
+      .select()
+      .from(modelingSessions)
+      .where(eq(modelingSessions.id, id));
+    return session || undefined;
+  }
+  
+  async getModelingSessionsByHostId(hostId: number): Promise<ModelingSession[]> {
+    return await db
+      .select()
+      .from(modelingSessions)
+      .where(eq(modelingSessions.hostId, hostId))
+      .orderBy(desc(modelingSessions.sessionDate));
+  }
+  
+  async createModelingSession(session: InsertModelingSession): Promise<ModelingSession> {
+    const [createdSession] = await db
+      .insert(modelingSessions)
+      .values(session)
+      .returning();
+    return createdSession;
+  }
+  
+  async updateModelingSession(id: number, session: Partial<InsertModelingSession>): Promise<ModelingSession | undefined> {
+    const [updatedSession] = await db
+      .update(modelingSessions)
+      .set({
+        ...session,
+        updatedAt: new Date()
+      })
+      .where(eq(modelingSessions.id, id))
+      .returning();
+    return updatedSession || undefined;
+  }
+  
+  async deleteModelingSession(id: number): Promise<boolean> {
+    const result = await db
+      .delete(modelingSessions)
+      .where(eq(modelingSessions.id, id));
+    return !!result;
   }
 }
 
