@@ -78,17 +78,9 @@ Tips:
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between">
-        <h2 className={`${isMobile ? 'text-xl' : 'text-lg'} font-semibold text-gray-700`}>
-          Pose Description
-        </h2>
-        <div>
-          <HelpModal 
-            title="Pose Description Help" 
-            instructions={helpInstructions}
-          />
-        </div>
-      </div>
+      <h2 className={`${isMobile ? 'text-xl' : 'text-lg'} font-semibold text-gray-700`}>
+        Pose Description
+      </h2>
       
       <div className="space-y-2">
         <p className={`${isMobile ? 'text-base' : 'text-sm'} text-gray-500`}>

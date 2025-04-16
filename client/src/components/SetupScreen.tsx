@@ -5,7 +5,8 @@ import { Button } from "@/components/ui/button";
 import { PoseSessionConfig, Pose } from "@/types";
 import { useToast } from "@/hooks/use-toast";
 import { useIsMobile } from "@/hooks/use-mobile";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, HelpCircle } from "lucide-react";
+import HelpModal from "./HelpModal";
 
 interface SetupScreenProps {
   onStartSession: (config: PoseSessionConfig) => void;
@@ -81,9 +82,33 @@ export default function SetupScreen({ onStartSession, poses, onBack }: SetupScre
     );
   }
 
+  // Help instructions for the pose description screen
+  const helpInstructions = `
+This screen allows you to find poses that match your description.
+
+How to use this feature:
+1. Enter a detailed description of the poses you're looking for in the text box
+2. You can specify body positions, angles, expressions, or difficulty levels
+3. Click "Find Matching Poses" to search for poses matching your description
+4. The system will analyze your description and find the most relevant poses
+
+Tips:
+• Be specific and detailed in your descriptions for better results
+• You can specify difficulty levels (easy, medium, hard) in your description
+• Examples: "standing pose with one arm raised", "seated pose with easy difficulty"
+`;
+
   // Otherwise, render the pose description input screen
   return (
-    <div className={`bg-white rounded-xl shadow-lg ${isMobile ? 'p-4' : 'p-6'} max-w-xl mx-auto`}>
+    <div className={`bg-white rounded-xl shadow-lg ${isMobile ? 'p-4' : 'p-6'} max-w-xl mx-auto relative`}>
+      {/* Standalone Help Button */}
+      <div className="absolute right-4 top-4 z-10">
+        <HelpModal 
+          title="Pose Description Help" 
+          instructions={helpInstructions}
+        />
+      </div>
+      
       <div className="flex justify-between items-center mb-4">
         {onBack && (
           <Button
