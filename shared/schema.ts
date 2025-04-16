@@ -150,6 +150,8 @@ export const modelingSessions = pgTable("modeling_sessions", {
   hostName: text("host_name").notNull(), // Denormalized for convenience
   hostContactInfo: text("host_contact_info"),
   sessionDate: date("session_date").notNull(),
+  startTime: text("start_time"), // Session start time (optional)
+  endTime: text("end_time"), // Session end time (optional)
   pay: real("pay"), // Payment amount (optional)
   notes: text("notes"),
   rating: integer("rating").notNull().default(5), // 1-5 star rating
@@ -163,6 +165,8 @@ export const insertModelingSessionSchema = createInsertSchema(modelingSessions).
   hostName: true,
   hostContactInfo: true,
   sessionDate: true,
+  startTime: true,
+  endTime: true,
   pay: true,
   notes: true,
   rating: true,

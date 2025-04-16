@@ -32,6 +32,8 @@ export default function ModelingSessionFormScreen({
   const [sessionDate, setSessionDate] = useState(
     new Date().toISOString().split('T')[0] // Default to today in YYYY-MM-DD format
   );
+  const [startTime, setStartTime] = useState("");
+  const [endTime, setEndTime] = useState("");
   const [pay, setPay] = useState("");
   const [notes, setNotes] = useState("");
   const [rating, setRating] = useState(3); // Default to middle rating
@@ -65,6 +67,8 @@ export default function ModelingSessionFormScreen({
       setHostId(existingSession.hostId);
       // Format date as YYYY-MM-DD for input
       setSessionDate(existingSession.sessionDate.split('T')[0]);
+      setStartTime(existingSession.startTime || "");
+      setEndTime(existingSession.endTime || "");
       setPay(existingSession.pay ? existingSession.pay.toString() : "");
       setNotes(existingSession.notes || "");
       setRating(existingSession.rating);
