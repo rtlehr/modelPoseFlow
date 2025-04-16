@@ -3,6 +3,7 @@ import { useIsMobile } from "@/hooks/use-mobile";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Loader2 } from "lucide-react";
+import HelpModal from "./HelpModal";
 
 interface PoseDescriptionInputProps {
   onDescriptionProcessed: (keywords: string[], description: string) => void;
@@ -58,8 +59,27 @@ export default function PoseDescriptionInput({ onDescriptionProcessed }: PoseDes
     }
   };
 
+  const helpInstructions = `
+This screen allows you to find poses that match your description.
+
+How to use this feature:
+1. Enter a detailed description of the poses you're looking for in the text box
+2. You can specify body positions, angles, expressions, or difficulty levels
+3. Click "Find Matching Poses" to search for poses matching your description
+4. The system will analyze your description and find the most relevant poses
+
+Tips:
+• Be specific and detailed in your descriptions for better results
+• You can specify difficulty levels (easy, medium, hard) in your description
+• Examples: "standing pose with one arm raised", "seated pose with easy difficulty"
+`;
+
   return (
-    <div className="space-y-4">
+    <div className="space-y-4 relative">
+      <HelpModal 
+        title="Pose Description Help" 
+        instructions={helpInstructions}
+      />
       <h2 className={`${isMobile ? 'text-xl' : 'text-lg'} font-semibold text-gray-700`}>
         Pose Description
       </h2>

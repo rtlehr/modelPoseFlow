@@ -7,6 +7,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { ArrowLeft } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
+import HelpModal from "./HelpModal";
 
 interface SessionSetupScreenProps {
   selectedKeywords: string[];
@@ -51,8 +52,28 @@ export default function SessionSetupScreen({
     });
   };
 
+  const helpInstructions = `
+This screen allows you to configure your pose practice session.
+
+How to configure your session:
+1. Set the length for each pose using the "Pose Length" slider
+2. Choose between a session with a specific number of poses ("Pose Count") or a specific total time ("Session Length")
+3. Adjust the number of poses or total session time based on your selection
+4. Click "Start Session" when you're ready to begin
+
+Tips:
+• Shorter pose times (15-45 seconds) are good for quick gesture drawings and warm-ups
+• Medium pose times (1-3 minutes) help practice capturing basic forms and proportions
+• Longer pose times (5+ minutes) allow for more detailed studies
+• You can return to the pose description screen to modify your pose selection
+`;
+
   return (
-    <div className={`bg-white rounded-xl shadow-lg ${isMobile ? 'p-4' : 'p-6'} max-w-xl mx-auto`}>
+    <div className={`bg-white rounded-xl shadow-lg ${isMobile ? 'p-4' : 'p-6'} max-w-xl mx-auto relative`}>
+      <HelpModal 
+        title="Session Setup Help" 
+        instructions={helpInstructions}
+      />
       <div className="flex justify-between items-center mb-4">
         <Button
           variant="ghost"

@@ -7,6 +7,7 @@ import FullscreenTimerScreen from "./FullscreenTimerScreen";
 import { Pose, PoseSessionConfig } from "@/types";
 import usePoseSession from "@/hooks/usePoseSession";
 import { useIsMobile } from "@/hooks/use-mobile";
+import HelpModal from "./HelpModal";
 
 interface TimerScreenProps {
   onBackToSetup: () => void;
