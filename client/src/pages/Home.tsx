@@ -13,6 +13,8 @@ import HostDetailScreen from "@/components/HostDetailScreen";
 import HostFormScreen from "@/components/HostFormScreen";
 import ModelingSessionFormScreen from "@/components/ModelingSessionFormScreen";
 import ModelingSessionDetailScreen from "@/components/ModelingSessionDetailScreen";
+import PoseCatalogScreen from "@/components/PoseCatalogScreen";
+import PosePackDetailScreen from "@/components/PosePackDetailScreen";
 import { PoseSessionConfig, Pose } from "@/types";
 import { useQuery } from "@tanstack/react-query";
 
@@ -23,6 +25,7 @@ type Screen =
   | 'setup'
   | 'timer'
   | 'poseCatalog'
+  | 'posePackDetail'
   | 'userPreferences'
   | 'modelBlog'
   | 'blogArticle'
@@ -39,6 +42,9 @@ export default function Home() {
   const [currentScreen, setCurrentScreen] = useState<Screen>('loading');
   const [sessionConfig, setSessionConfig] = useState<PoseSessionConfig | null>(null);
   const [currentArticleSlug, setCurrentArticleSlug] = useState<string>('');
+  
+  // State for pose pack catalog
+  const [currentPosePackId, setCurrentPosePackId] = useState<number | null>(null);
   
   // State for modeling sessions feature
   const [currentHostId, setCurrentHostId] = useState<number | null>(null);
@@ -109,6 +115,16 @@ export default function Home() {
 
   const handleBackToBlogList = () => {
     setCurrentScreen('modelBlog');
+  };
+  
+  // Pose Pack Catalog handlers
+  const handleSelectPosePack = (packId: number) => {
+    setCurrentPosePackId(packId);
+    setCurrentScreen('posePackDetail');
+  };
+  
+  const handleBackToPoseCatalog = () => {
+    setCurrentScreen('poseCatalog');
   };
   
   // Modeling Sessions handlers
@@ -227,13 +243,18 @@ export default function Home() {
         
       case 'poseCatalog':
         return (
-          <div className="container mx-auto px-4 py-8">
-            <PlaceholderScreen
-              title="Pose Catalog"
-              description="This feature will allow you to browse and download additional poses for your drawing sessions."
-              onBack={handleBackToMainMenu}
-            />
-          </div>
+          <PoseCatalogScreen
+            onBack={handleBackToMainMenu}
+            onSelectPack={handleSelectPosePack}
+          />
+        );
+        
+      case 'posePackDetail':
+        return (
+          <PosePackDetailScreen
+            packId={currentPosePackId!}
+            onBack={handleBackToPoseCatalog}
+          />
         );
         
       case 'userPreferences':

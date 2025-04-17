@@ -1,25 +1,33 @@
-import { apiRequest } from "./queryClient";
-import type { Pose, PosePack } from "@shared/schema";
+import { apiRequest } from './queryClient';
+import type { PosePack, Pose } from '@shared/schema';
 
 export interface PosePackDetail {
   pack: PosePack;
   poses: Pose[];
 }
 
+// Fetch all pose packs
 export async function fetchPosePacks(): Promise<PosePack[]> {
-  return apiRequest<PosePack[]>('/api/pose-packs');
+  const response = await apiRequest('/api/pose-packs');
+  return response.json();
 }
 
+// Search for pose packs by query
 export async function searchPosePacks(query: string): Promise<PosePack[]> {
-  return apiRequest<PosePack[]>(`/api/pose-packs/search?query=${encodeURIComponent(query)}`);
+  const response = await apiRequest(`/api/pose-packs/search?q=${encodeURIComponent(query)}`);
+  return response.json();
 }
 
+// Fetch details of a specific pose pack
 export async function fetchPosePackDetail(id: number): Promise<PosePackDetail> {
-  return apiRequest<PosePackDetail>(`/api/pose-packs/${id}`);
+  const response = await apiRequest(`/api/pose-packs/${id}`);
+  return response.json();
 }
 
+// Download a pose pack to add its poses to the user's library
 export async function downloadPosePack(id: number): Promise<{success: boolean; message: string; poses: Pose[]}> {
-  return apiRequest<{success: boolean; message: string; poses: Pose[]}>(`/api/pose-packs/${id}/download`, {
-    method: 'POST'
+  const response = await apiRequest(`/api/pose-packs/${id}/download`, {
+    method: 'POST',
   });
+  return response.json();
 }
