@@ -12,6 +12,8 @@ export const poses = pgTable("poses", {
   difficultyLevel: integer("difficulty_level").default(2),
   // Explanation for the difficulty classification
   difficultyReason: text("difficulty_reason"),
+  // Optional pack ID for poses that are part of a pack
+  packId: integer("pack_id"),
 });
 
 // Pose insert schema
@@ -20,11 +22,46 @@ export const insertPoseSchema = createInsertSchema(poses).pick({
   keywords: true,
   difficultyLevel: true,
   difficultyReason: true,
+  packId: true,
 });
 
 // Pose types
 export type InsertPose = z.infer<typeof insertPoseSchema>;
 export type Pose = typeof poses.$inferSelect;
+
+// Define schema for pose packs
+export const posePacks = pgTable("pose_packs", {
+  id: serial("id").primaryKey(),
+  name: text("name").notNull(),
+  description: text("description").notNull(),
+  // Thumbnail image for the pack
+  thumbnailUrl: text("thumbnail_url").notNull(),
+  // Number of poses in this pack
+  poseCount: integer("pose_count").notNull().default(0),
+  // Category/tags for filtering
+  categories: text("categories").array().default([]),
+  // Sample image URLs for preview (will show a few samples)
+  sampleImageUrls: text("sample_image_urls").array().default([]),
+  // Price in cents (0 for free packs)
+  price: integer("price").notNull().default(0),
+  // Creation timestamp
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// Pose pack insert schema
+export const insertPosePackSchema = createInsertSchema(posePacks).pick({
+  name: true,
+  description: true,
+  thumbnailUrl: true,
+  poseCount: true,
+  categories: true,
+  sampleImageUrls: true,
+  price: true,
+});
+
+// Pose pack types
+export type InsertPosePack = z.infer<typeof insertPosePackSchema>;
+export type PosePack = typeof posePacks.$inferSelect;
 
 // Keep the users table as it was
 export const users = pgTable("users", {

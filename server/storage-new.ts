@@ -1,8 +1,9 @@
 import { 
-  users, poses, 
+  users, poses, posePacks,
   musicTracks, playlists, blogArticles,
   hosts, modelingSessions,
   type User, type InsertUser, type Pose, type InsertPose,
+  type PosePack, type InsertPosePack,
   type MusicTrack, type InsertMusicTrack,
   type Playlist, type InsertPlaylist,
   type BlogArticle, type InsertBlogArticle,
@@ -27,11 +28,21 @@ export interface IStorage {
   getAllPoses(): Promise<Pose[]>;
   getPosesByKeywords(keywords: string[]): Promise<Pose[]>;
   getPosesByDifficulty(difficultyLevel: number): Promise<Pose[]>;
-  createPose(pose: { url: string }): Promise<Pose>;
+  getPosesByPackId(packId: number): Promise<Pose[]>;
+  createPose(pose: { url: string; packId?: number }): Promise<Pose>;
   updatePoseKeywords(id: number, keywords: string[]): Promise<Pose | undefined>;
   updatePoseDifficulty(id: number, difficultyLevel: number, difficultyReason: string): Promise<Pose | undefined>;
   deletePose(id: number): Promise<boolean>;
   seedPoses(): Promise<void>;
+  
+  // Pose Pack operations
+  getAllPosePacks(): Promise<PosePack[]>;
+  getPosePack(id: number): Promise<PosePack | undefined>;
+  searchPosePacks(query: string): Promise<PosePack[]>;
+  createPosePack(pack: InsertPosePack): Promise<PosePack>;
+  updatePosePack(id: number, pack: Partial<InsertPosePack>): Promise<PosePack | undefined>;
+  deletePosePack(id: number): Promise<boolean>;
+  seedPosePacks(): Promise<void>;
   
   // Music track operations
   getAllMusicTracks(): Promise<MusicTrack[]>;
