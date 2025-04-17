@@ -4,12 +4,13 @@ import { storage } from "./storage";
 import path from "path";
 import fs from "fs";
 import { analyzePoseDescription, generatePoseKeywords, analyzePoseDifficulty } from "./openai";
-import { Pose, BlogArticle, Host, ModelingSession } from "../shared/schema";
+import { Pose, PosePack, BlogArticle, Host, ModelingSession } from "../shared/schema";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Initialize database with seed data
   await storage.seedPoses();
   await storage.seedBlogArticles();
+  await storage.seedPosePacks();
   // API endpoint to get all poses
   app.get("/api/poses", async (req, res) => {
     try {
@@ -26,14 +27,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // API endpoint to create a new pose
   app.post("/api/poses", async (req: Request, res: Response) => {
     try {
-      const { url } = req.body;
+      const { url, packId } = req.body;
       
       if (!url) {
         return res.status(400).json({ message: "URL is required" });
       }
       
       // Create a new pose in storage
-      const newPose = await storage.createPose({ url });
+      const newPose = await storage.createPose({ url, packId });
       
       return res.status(200).json(newPose);
     } catch (error) {
@@ -462,6 +463,166 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error deleting playlist:", error);
       res.status(500).json({ message: "Failed to delete playlist" });
+    }
+  });
+  
+  // Pose Pack routes
+  app.get("/api/pose-packs", async (_req: Request, res: Response) => {
+    try {
+      const posePacks = await storage.getAllPosePacks();
+      res.json(posePacks);
+    } catch (error) {
+      console.error("Error fetching pose packs:", error);
+      res.status(500).json({ message: "Failed to fetch pose packs" });
+    }
+  });
+  
+  app.get("/api/pose-packs/search", async (req: Request, res: Response) => {
+    try {
+      const { query } = req.query;
+      
+      if (!query || typeof query !== 'string') {
+        const posePacks = await storage.getAllPosePacks();
+        return res.json(posePacks);
+      }
+      
+      const posePacks = await storage.searchPosePacks(query);
+      res.json(posePacks);
+    } catch (error) {
+      console.error("Error searching pose packs:", error);
+      res.status(500).json({ message: "Failed to search pose packs" });
+    }
+  });
+  
+  app.get("/api/pose-packs/:id", async (req: Request, res: Response) => {
+    try {
+      const id = parseInt(req.params.id);
+      if (isNaN(id)) {
+        return res.status(400).json({ message: "Invalid pose pack ID" });
+      }
+      
+      const posePack = await storage.getPosePack(id);
+      if (!posePack) {
+        return res.status(404).json({ message: "Pose pack not found" });
+      }
+      
+      // Also get the poses that belong to this pack
+      const poses = await storage.getPosesByPackId(id);
+      
+      res.json({
+        pack: posePack,
+        poses: poses
+      });
+    } catch (error) {
+      console.error("Error fetching pose pack:", error);
+      res.status(500).json({ message: "Failed to fetch pose pack" });
+    }
+  });
+  
+  app.post("/api/pose-packs", async (req: Request, res: Response) => {
+    try {
+      const { name, description, thumbnailUrl, poseCount, categories, sampleImageUrls, price } = req.body;
+      
+      if (!name || !description || !thumbnailUrl) {
+        return res.status(400).json({ 
+          message: "Name, description, and thumbnailUrl are required" 
+        });
+      }
+      
+      const posePack = await storage.createPosePack({
+        name,
+        description,
+        thumbnailUrl,
+        poseCount: poseCount || 0,
+        categories: categories || [],
+        sampleImageUrls: sampleImageUrls || [],
+        price: price || 0
+      });
+      
+      res.status(201).json(posePack);
+    } catch (error) {
+      console.error("Error creating pose pack:", error);
+      res.status(500).json({ message: "Failed to create pose pack" });
+    }
+  });
+  
+  app.put("/api/pose-packs/:id", async (req: Request, res: Response) => {
+    try {
+      const id = parseInt(req.params.id);
+      if (isNaN(id)) {
+        return res.status(400).json({ message: "Invalid pose pack ID" });
+      }
+      
+      const { name, description, thumbnailUrl, poseCount, categories, sampleImageUrls, price } = req.body;
+      const updatedPack = await storage.updatePosePack(id, {
+        name,
+        description,
+        thumbnailUrl,
+        poseCount,
+        categories,
+        sampleImageUrls,
+        price
+      });
+      
+      if (!updatedPack) {
+        return res.status(404).json({ message: "Pose pack not found" });
+      }
+      
+      res.json(updatedPack);
+    } catch (error) {
+      console.error("Error updating pose pack:", error);
+      res.status(500).json({ message: "Failed to update pose pack" });
+    }
+  });
+  
+  app.delete("/api/pose-packs/:id", async (req: Request, res: Response) => {
+    try {
+      const id = parseInt(req.params.id);
+      if (isNaN(id)) {
+        return res.status(400).json({ message: "Invalid pose pack ID" });
+      }
+      
+      const success = await storage.deletePosePack(id);
+      if (!success) {
+        return res.status(404).json({ message: "Pose pack not found" });
+      }
+      
+      res.status(204).end();
+    } catch (error) {
+      console.error("Error deleting pose pack:", error);
+      res.status(500).json({ message: "Failed to delete pose pack" });
+    }
+  });
+  
+  // Endpoint to download poses from a pack
+  app.post("/api/pose-packs/:id/download", async (req: Request, res: Response) => {
+    try {
+      const packId = parseInt(req.params.id);
+      if (isNaN(packId)) {
+        return res.status(400).json({ message: "Invalid pose pack ID" });
+      }
+      
+      // Get the pose pack to verify it exists
+      const posePack = await storage.getPosePack(packId);
+      if (!posePack) {
+        return res.status(404).json({ message: "Pose pack not found" });
+      }
+      
+      // Get all poses from this pack
+      const packPoses = await storage.getPosesByPackId(packId);
+      
+      // In a real app, we would verify payment here before allowing download
+      // For development, we're skipping that step
+      
+      // Return the poses from the pack
+      res.json({
+        success: true,
+        message: `Successfully downloaded ${packPoses.length} poses from "${posePack.name}"`,
+        poses: packPoses
+      });
+    } catch (error) {
+      console.error("Error downloading pose pack:", error);
+      res.status(500).json({ message: "Failed to download pose pack" });
     }
   });
   

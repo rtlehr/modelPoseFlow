@@ -178,9 +178,10 @@ export class DatabaseStorage implements IStorage {
     return scoredPoses.map(item => item.pose);
   }
   
-  async createPose(pose: { url: string }): Promise<Pose> {
+  async createPose(pose: { url: string; packId?: number }): Promise<Pose> {
     const insertData: InsertPose = {
-      url: pose.url
+      url: pose.url,
+      packId: pose.packId
     };
     
     const [createdPose] = await db
@@ -189,6 +190,13 @@ export class DatabaseStorage implements IStorage {
       .returning();
     
     return createdPose;
+  }
+  
+  async getPosesByPackId(packId: number): Promise<Pose[]> {
+    return await db
+      .select()
+      .from(poses)
+      .where(eq(poses.packId, packId));
   }
   
   async updatePoseKeywords(id: number, keywords: string[]): Promise<Pose | undefined> {
@@ -623,6 +631,141 @@ By following these guidelines, you'll create a respectful, productive environmen
       .delete(modelingSessions)
       .where(eq(modelingSessions.id, id));
     return !!result;
+  }
+
+  // Pose Pack operations
+  async getAllPosePacks(): Promise<PosePack[]> {
+    return await db.select().from(posePacks);
+  }
+  
+  async getPosePack(id: number): Promise<PosePack | undefined> {
+    const [pack] = await db
+      .select()
+      .from(posePacks)
+      .where(eq(posePacks.id, id));
+    return pack || undefined;
+  }
+  
+  async searchPosePacks(query: string): Promise<PosePack[]> {
+    if (!query || query.trim() === '') {
+      return this.getAllPosePacks();
+    }
+    
+    // Case-insensitive search in name and description
+    const searchTerm = query.toLowerCase();
+    const allPacks = await this.getAllPosePacks();
+    
+    return allPacks.filter(pack => 
+      pack.name.toLowerCase().includes(searchTerm) || 
+      pack.description.toLowerCase().includes(searchTerm) ||
+      (pack.categories && pack.categories.some(cat => 
+        cat.toLowerCase().includes(searchTerm)
+      ))
+    );
+  }
+  
+  async createPosePack(pack: InsertPosePack): Promise<PosePack> {
+    const [createdPack] = await db
+      .insert(posePacks)
+      .values(pack)
+      .returning();
+    return createdPack;
+  }
+  
+  async updatePosePack(id: number, pack: Partial<InsertPosePack>): Promise<PosePack | undefined> {
+    const [updatedPack] = await db
+      .update(posePacks)
+      .set(pack)
+      .where(eq(posePacks.id, id))
+      .returning();
+    return updatedPack || undefined;
+  }
+  
+  async deletePosePack(id: number): Promise<boolean> {
+    // First update any poses that belong to this pack
+    await db
+      .update(poses)
+      .set({ packId: null })
+      .where(eq(poses.packId, id));
+      
+    // Then delete the pack
+    const result = await db
+      .delete(posePacks)
+      .where(eq(posePacks.id, id));
+    return !!result;
+  }
+  
+  async seedPosePacks(): Promise<void> {
+    try {
+      // Check if there are already pose packs in the database
+      const existingPacks = await db.select().from(posePacks);
+      
+      if (existingPacks.length === 0) {
+        // Sample pose packs with sample images from existing poses
+        const samplePoses = await db.select().from(poses).limit(12);
+        const poseSamples = samplePoses.map(p => p.url);
+        
+        // Create sample pack data
+        const samplePacks = [
+          {
+            name: "Martial Arts Poses",
+            description: "A collection of dynamic martial arts poses perfect for action drawing and combat sequences.",
+            thumbnailUrl: poseSamples[0] || "",
+            poseCount: 12,
+            categories: ["action", "standing", "martial arts"],
+            sampleImageUrls: poseSamples.slice(0, 4),
+            price: 0 // Free pack for now
+          },
+          {
+            name: "Classical Poses",
+            description: "Traditional figure drawing poses inspired by classical art and sculpture.",
+            thumbnailUrl: poseSamples[4] || "",
+            poseCount: 10,
+            categories: ["classical", "traditional", "sculpture"],
+            sampleImageUrls: poseSamples.slice(4, 8),
+            price: 0
+          },
+          {
+            name: "Dynamic Movement",
+            description: "Poses capturing a range of human movement, great for gesture drawing practice.",
+            thumbnailUrl: poseSamples[8] || "",
+            poseCount: 8,
+            categories: ["movement", "gesture", "action"],
+            sampleImageUrls: poseSamples.slice(8, 12),
+            price: 0
+          }
+        ];
+        
+        // Insert pose packs
+        for (const pack of samplePacks) {
+          const [createdPack] = await db
+            .insert(posePacks)
+            .values(pack)
+            .returning();
+            
+          // Assign some existing poses to this pack
+          const posesToAssign = await db
+            .select()
+            .from(poses)
+            .limit(4)
+            .offset((createdPack.id - 1) * 4);
+            
+          for (const pose of posesToAssign) {
+            await db
+              .update(poses)
+              .set({ packId: createdPack.id })
+              .where(eq(poses.id, pose.id));
+          }
+        }
+        
+        console.log("Database seeded with pose packs successfully");
+      } else {
+        console.log("Database already contains pose packs, skipping seed");
+      }
+    } catch (error) {
+      console.error("Failed to seed pose packs:", error);
+      throw error;
+    }
   }
 }
 
