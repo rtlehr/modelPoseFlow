@@ -11,16 +11,24 @@ import {
   Tag, 
   Check,
   Image as ImageIcon, 
-  AlertCircle 
+  AlertCircle,
+  X
 } from 'lucide-react';
 import {
   Alert,
   AlertDescription,
   AlertTitle,
 } from "@/components/ui/alert";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { useToast } from '@/hooks/use-toast';
 import { queryClient } from '@/lib/queryClient';
-import HelpModal from './HelpModal';
 import type { Pose } from '@shared/schema';
 
 interface PosePackDetailScreenProps {
@@ -307,11 +315,30 @@ export default function PosePackDetailScreen({ packId, onBack }: PosePackDetailS
 
       {/* Help modal */}
       {showHelp && (
-        <HelpModal
-          title="Pose Pack Detail Help"
-          instructions={helpInstructions}
-          onClose={() => setShowHelp(false)}
-        />
+        <Dialog open={showHelp} onOpenChange={(open) => !open && setShowHelp(false)}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle>Pose Pack Detail Help</DialogTitle>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="absolute right-4 top-4"
+                onClick={() => setShowHelp(false)}
+              >
+                <X className="h-4 w-4" />
+                <span className="sr-only">Close</span>
+              </Button>
+            </DialogHeader>
+            <DialogDescription asChild>
+              <div className="text-sm text-muted-foreground">
+                {helpInstructions}
+              </div>
+            </DialogDescription>
+            <DialogFooter>
+              <Button onClick={() => setShowHelp(false)}>Close</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
       )}
     </div>
   );

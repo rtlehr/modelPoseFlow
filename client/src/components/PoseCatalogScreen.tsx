@@ -6,8 +6,15 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
-import { ArrowLeft, Search, Download, Tag } from 'lucide-react';
-import HelpModal from './HelpModal';
+import { ArrowLeft, Search, Download, Tag, X } from 'lucide-react';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import type { PosePack } from '@shared/schema';
 
 interface PoseCatalogScreenProps {
@@ -199,11 +206,30 @@ export default function PoseCatalogScreen({ onBack, onSelectPack }: PoseCatalogS
 
       {/* Help modal */}
       {showHelp && (
-        <HelpModal
-          title="Pose Catalog Help"
-          instructions={helpInstructions}
-          onClose={() => setShowHelp(false)}
-        />
+        <Dialog open={showHelp} onOpenChange={(open) => !open && setShowHelp(false)}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle>Pose Catalog Help</DialogTitle>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="absolute right-4 top-4"
+                onClick={() => setShowHelp(false)}
+              >
+                <X className="h-4 w-4" />
+                <span className="sr-only">Close</span>
+              </Button>
+            </DialogHeader>
+            <DialogDescription asChild>
+              <div className="text-sm text-muted-foreground">
+                {helpInstructions}
+              </div>
+            </DialogDescription>
+            <DialogFooter>
+              <Button onClick={() => setShowHelp(false)}>Close</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
       )}
     </div>
   );

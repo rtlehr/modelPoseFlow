@@ -456,10 +456,36 @@ Tips:
 
         {/* Help button */}
         <div className="relative">
-          <HelpModal
-            title="Pose Library Help"
-            instructions={helpInstructions}
-          />
+          <Button
+            variant="ghost"
+            size="sm"
+            className="h-8 w-8 rounded-full p-0"
+            onClick={() => {
+              const modalElement = document.createElement('div');
+              modalElement.innerHTML = `
+                <div class="fixed inset-0 flex items-center justify-center bg-black/50 z-50">
+                  <div class="bg-white rounded-lg p-6 max-w-md w-full max-h-[80vh] overflow-y-auto">
+                    <h2 class="text-xl font-bold mb-4">Pose Library Help</h2>
+                    <div class="text-sm text-gray-600 space-y-4 whitespace-pre-line">
+                      ${helpInstructions}
+                    </div>
+                    <button class="mt-6 px-4 py-2 bg-primary text-white rounded-md w-full">Close</button>
+                  </div>
+                </div>
+              `;
+              document.body.appendChild(modalElement);
+              
+              // Add event listener to close button
+              const closeButton = modalElement.querySelector('button');
+              if (closeButton) {
+                closeButton.addEventListener('click', () => {
+                  document.body.removeChild(modalElement);
+                });
+              }
+            }}
+          >
+            ?
+          </Button>
         </div>
       </div>
 
