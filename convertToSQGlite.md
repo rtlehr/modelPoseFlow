@@ -1,24 +1,36 @@
-Step-by-Step SQLite Migration Guide
-Step 1: Install Required Packages
+# Step-by-Step SQLite Migration Guide
+
+## Step 1: Install Required Packages
+
+```bash
 npm install better-sqlite3 drizzle-orm @types/better-sqlite3
-Step 2: Create SQLite Database Adapter File (server/db-sqlite.ts)
+```
+
+## Step 2: Create SQLite Database Adapter File (server/db-sqlite.ts)
+
+```typescript
 import { drizzle } from 'drizzle-orm/better-sqlite3';
 import Database from 'better-sqlite3';
 import * as schema from '@shared/schema';
 import { migrate } from 'drizzle-orm/better-sqlite3/migrator';
 import { join } from 'path';
 import { existsSync, mkdirSync } from 'fs';
+
 // Create the data directory if it doesn't exist
 const dataDir = join(process.cwd(), 'data');
 if (!existsSync(dataDir)) {
   mkdirSync(dataDir, { recursive: true });
 }
+
 // Path to the SQLite database file
 const dbPath = join(dataDir, 'app.db');
+
 // Create or connect to the SQLite database
 export const sqlite = new Database(dbPath);
+
 // Create the Drizzle ORM instance
 export const db = drizzle(sqlite, { schema });
+
 // Function to run migrations
 export async function runMigrations() {
   try {
@@ -30,11 +42,16 @@ export async function runMigrations() {
     throw error;
   }
 }
-Step 3: Create SQLite-compatible Schema File (shared/sqlite-schema.ts)
+```
+
+## Step 3: Create SQLite-compatible Schema File (shared/sqlite-schema.ts)
+
+```typescript
 import { sqliteTable, text, integer, real } from "drizzle-orm/sqlite-core";
 import { sql } from "drizzle-orm";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
+
 // Define the base schema for a pose
 export const poses = sqliteTable("poses", {
   id: integer("id").primaryKey({ autoIncrement: true }),
@@ -48,6 +65,7 @@ export const poses = sqliteTable("poses", {
   // Optional pack ID for poses that are part of a pack
   packId: integer("pack_id"),
 });
+
 // Pose insert schema
 export const insertPoseSchema = createInsertSchema(poses).pick({
   url: true,
@@ -56,9 +74,11 @@ export const insertPoseSchema = createInsertSchema(poses).pick({
   difficultyReason: true,
   packId: true,
 });
+
 // Pose types
 export type InsertPose = z.infer<typeof insertPoseSchema>;
 export type Pose = typeof poses.$inferSelect;
+
 // Define schema for pose packs
 export const posePacks = sqliteTable("pose_packs", {
   id: integer("id").primaryKey({ autoIncrement: true }),
@@ -77,6 +97,7 @@ export const posePacks = sqliteTable("pose_packs", {
   // Creation timestamp (stored as ISO string)
   createdAt: text("created_at").default(sql`CURRENT_TIMESTAMP`),
 });
+
 // Pose pack insert schema
 export const insertPosePackSchema = createInsertSchema(posePacks).pick({
   name: true,
@@ -87,21 +108,26 @@ export const insertPosePackSchema = createInsertSchema(posePacks).pick({
   sampleImageUrls: true,
   price: true,
 });
+
 // Pose pack types
 export type InsertPosePack = z.infer<typeof insertPosePackSchema>;
 export type PosePack = typeof posePacks.$inferSelect;
+
 // Keep the users table as it was
 export const users = sqliteTable("users", {
   id: integer("id").primaryKey({ autoIncrement: true }),
   username: text("username").notNull().unique(),
   password: text("password").notNull(),
 });
+
 export const insertUserSchema = createInsertSchema(users).pick({
   username: true,
   password: true,
 });
+
 export type InsertUser = z.infer<typeof insertUserSchema>;
 export type User = typeof users.$inferSelect;
+
 // Music tracks table - will store references to user's local files
 export const musicTracks = sqliteTable("music_tracks", {
   id: integer("id").primaryKey({ autoIncrement: true }),
@@ -113,6 +139,7 @@ export const musicTracks = sqliteTable("music_tracks", {
   fileData: text("file_data"), // For storing small audio files directly (optional)
   createdAt: text("created_at").default(sql`CURRENT_TIMESTAMP`),
 });
+
 export const insertMusicTrackSchema = createInsertSchema(musicTracks).pick({
   name: true,
   artist: true,
@@ -120,8 +147,10 @@ export const insertMusicTrackSchema = createInsertSchema(musicTracks).pick({
   filePath: true,
   fileData: true,
 });
+
 export type InsertMusicTrack = z.infer<typeof insertMusicTrackSchema>;
 export type MusicTrack = typeof musicTracks.$inferSelect;
+
 // Playlists table
 export const playlists = sqliteTable("playlists", {
   id: integer("id").primaryKey({ autoIncrement: true }),
@@ -132,13 +161,16 @@ export const playlists = sqliteTable("playlists", {
   createdAt: text("created_at").default(sql`CURRENT_TIMESTAMP`),
   updatedAt: text("updated_at").default(sql`CURRENT_TIMESTAMP`),
 });
+
 export const insertPlaylistSchema = createInsertSchema(playlists).pick({
   name: true,
   description: true,
   trackIds: true,
 });
+
 export type InsertPlaylist = z.infer<typeof insertPlaylistSchema>;
 export type Playlist = typeof playlists.$inferSelect;
+
 // Blog articles table
 export const blogArticles = sqliteTable("blog_articles", {
   id: integer("id").primaryKey({ autoIncrement: true }),
@@ -153,6 +185,7 @@ export const blogArticles = sqliteTable("blog_articles", {
   featured: integer("featured").default(0), // 0 = not featured, 1 = featured
   tags: text("tags").default('[]'), // For filtering/categorizing articles
 });
+
 export const insertBlogArticleSchema = createInsertSchema(blogArticles).pick({
   title: true, 
   slug: true,
@@ -164,8 +197,10 @@ export const insertBlogArticleSchema = createInsertSchema(blogArticles).pick({
   featured: true,
   tags: true,
 });
+
 export type InsertBlogArticle = z.infer<typeof insertBlogArticleSchema>;
 export type BlogArticle = typeof blogArticles.$inferSelect;
+
 // Hosts table for modeling sessions
 export const hosts = sqliteTable("hosts", {
   id: integer("id").primaryKey({ autoIncrement: true }),
@@ -179,6 +214,7 @@ export const hosts = sqliteTable("hosts", {
   createdAt: text("created_at").default(sql`CURRENT_TIMESTAMP`),
   updatedAt: text("updated_at").default(sql`CURRENT_TIMESTAMP`),
 });
+
 export const insertHostSchema = createInsertSchema(hosts).pick({
   name: true,
   address: true,
@@ -188,8 +224,10 @@ export const insertHostSchema = createInsertSchema(hosts).pick({
   notes: true,
   rating: true,
 });
+
 export type InsertHost = z.infer<typeof insertHostSchema>;
 export type Host = typeof hosts.$inferSelect;
+
 // Modeling sessions table
 export const modelingSessions = sqliteTable("modeling_sessions", {
   id: integer("id").primaryKey({ autoIncrement: true }),
@@ -206,6 +244,7 @@ export const modelingSessions = sqliteTable("modeling_sessions", {
   createdAt: text("created_at").default(sql`CURRENT_TIMESTAMP`),
   updatedAt: text("updated_at").default(sql`CURRENT_TIMESTAMP`),
 });
+
 export const insertModelingSessionSchema = createInsertSchema(modelingSessions).pick({
   title: true,
   hostId: true,
@@ -218,16 +257,23 @@ export const insertModelingSessionSchema = createInsertSchema(modelingSessions).
   notes: true,
   rating: true,
 });
+
 export type InsertModelingSession = z.infer<typeof insertModelingSessionSchema>;
 export type ModelingSession = typeof modelingSessions.$inferSelect;
-Step 4: Create a Data Migration Script (server/migrate.ts)
+```
+
+## Step 4: Create a Data Migration Script (server/migrate.ts)
+
+```typescript
 import { db as pgDb } from './db'; // PostgreSQL connection
 import { db as sqliteDb } from './db-sqlite'; // SQLite connection
 import * as pgSchema from '@shared/schema'; // PostgreSQL schema
 import * as sqliteSchema from '@shared/sqlite-schema'; // SQLite schema
 import { eq } from 'drizzle-orm';
+
 async function migrateData() {
   console.log('Starting data migration from PostgreSQL to SQLite...');
+
   try {
     // 1. Migrate users
     console.log('Migrating users...');
@@ -239,6 +285,7 @@ async function migrateData() {
         password: user.password
       });
     }
+
     // 2. Migrate poses
     console.log('Migrating poses...');
     const poses = await pgDb.select().from(pgSchema.poses);
@@ -252,6 +299,7 @@ async function migrateData() {
         packId: pose.packId
       });
     }
+
     // 3. Migrate pose packs
     console.log('Migrating pose packs...');
     const posePacks = await pgDb.select().from(pgSchema.posePacks);
@@ -268,6 +316,7 @@ async function migrateData() {
         createdAt: pack.createdAt ? new Date(pack.createdAt).toISOString() : new Date().toISOString()
       });
     }
+
     // 4. Migrate music tracks
     console.log('Migrating music tracks...');
     const musicTracks = await pgDb.select().from(pgSchema.musicTracks);
@@ -282,6 +331,7 @@ async function migrateData() {
         createdAt: track.createdAt ? new Date(track.createdAt).toISOString() : new Date().toISOString()
       });
     }
+
     // 5. Migrate playlists
     console.log('Migrating playlists...');
     const playlists = await pgDb.select().from(pgSchema.playlists);
@@ -295,6 +345,7 @@ async function migrateData() {
         updatedAt: playlist.updatedAt ? new Date(playlist.updatedAt).toISOString() : new Date().toISOString()
       });
     }
+
     // 6. Migrate blog articles
     console.log('Migrating blog articles...');
     const blogArticles = await pgDb.select().from(pgSchema.blogArticles);
@@ -313,6 +364,7 @@ async function migrateData() {
         tags: JSON.stringify(article.tags)
       });
     }
+
     // 7. Migrate hosts
     console.log('Migrating hosts...');
     const hosts = await pgDb.select().from(pgSchema.hosts);
@@ -330,6 +382,7 @@ async function migrateData() {
         updatedAt: host.updatedAt ? new Date(host.updatedAt).toISOString() : new Date().toISOString()
       });
     }
+
     // 8. Migrate modeling sessions
     console.log('Migrating modeling sessions...');
     const modelingSessions = await pgDb.select().from(pgSchema.modelingSessions);
@@ -350,38 +403,49 @@ async function migrateData() {
         updatedAt: session.updatedAt ? new Date(session.updatedAt).toISOString() : new Date().toISOString()
       });
     }
+
     console.log('Data migration completed successfully!');
   } catch (error) {
     console.error('Error during data migration:', error);
     throw error;
   }
 }
+
 export async function runMigration() {
   await migrateData();
 }
-Step 5: Update Storage Service (server/storage.ts)
+```
+
+## Step 5: Update Storage Service (server/storage.ts)
+
+```typescript
 import { IStorage } from './storage-new';
 import { db } from './db-sqlite';
 import * as schema from '@shared/sqlite-schema';
 import { eq, like, ilike, or, and } from 'drizzle-orm';
+
 export class DatabaseStorage implements IStorage {
   // User operations
   async getUser(id: number): Promise<schema.User | undefined> {
     const [user] = await db.select().from(schema.users).where(eq(schema.users.id, id));
     return user;
   }
+
   async getUserByUsername(username: string): Promise<schema.User | undefined> {
     const [user] = await db.select().from(schema.users).where(eq(schema.users.username, username));
     return user;
   }
+
   async createUser(insertUser: schema.InsertUser): Promise<schema.User> {
     const [user] = await db.insert(schema.users).values(insertUser).returning();
     return user;
   }
+
   // Pose operations
   async getAllPoses(): Promise<schema.Pose[]> {
     return await db.select().from(schema.poses);
   }
+
   async getPosesByKeywords(keywords: string[]): Promise<schema.Pose[]> {
     const poses = await db.select().from(schema.poses);
     // For SQLite we have to do the filtering in JavaScript
@@ -392,14 +456,17 @@ export class DatabaseStorage implements IStorage {
       );
     });
   }
+
   async getPosesByDifficulty(difficultyLevel: number): Promise<schema.Pose[]> {
     return await db.select().from(schema.poses)
       .where(eq(schema.poses.difficultyLevel, difficultyLevel));
   }
+
   async getPosesByPackId(packId: number): Promise<schema.Pose[]> {
     return await db.select().from(schema.poses)
       .where(eq(schema.poses.packId, packId));
   }
+
   async createPose(pose: { url: string; packId?: number }): Promise<schema.Pose> {
     const insertData: schema.InsertPose = {
       url: pose.url,
@@ -410,6 +477,7 @@ export class DatabaseStorage implements IStorage {
     const [newPose] = await db.insert(schema.poses).values(insertData).returning();
     return newPose;
   }
+
   async updatePoseKeywords(id: number, keywords: string[]): Promise<schema.Pose | undefined> {
     const [updatedPose] = await db.update(schema.poses)
       .set({ keywords: JSON.stringify(keywords) })
@@ -417,6 +485,7 @@ export class DatabaseStorage implements IStorage {
       .returning();
     return updatedPose;
   }
+
   async updatePoseDifficulty(id: number, difficultyLevel: number, difficultyReason: string): Promise<schema.Pose | undefined> {
     const [updatedPose] = await db.update(schema.poses)
       .set({ 
@@ -427,16 +496,19 @@ export class DatabaseStorage implements IStorage {
       .returning();
     return updatedPose;
   }
+
   async deletePose(id: number): Promise<boolean> {
     const result = await db.delete(schema.poses)
       .where(eq(schema.poses.id, id))
       .returning({ id: schema.poses.id });
     return result.length > 0;
   }
+
   async seedPoses(): Promise<void> {
     // Implementation for seeding poses in SQLite
     // ...
   }
+
   // Continue implementing the rest of the storage methods
   // using the same pattern for all entities:
   // - Music tracks
@@ -445,15 +517,18 @@ export class DatabaseStorage implements IStorage {
   // - Hosts
   // - Modeling sessions
   // - Pose packs
+
   // Here's another example for pose packs:
   async getAllPosePacks(): Promise<schema.PosePack[]> {
     return await db.select().from(schema.posePacks);
   }
+
   async getPosePack(id: number): Promise<schema.PosePack | undefined> {
     const [posePack] = await db.select().from(schema.posePacks)
       .where(eq(schema.posePacks.id, id));
     return posePack;
   }
+
   async searchPosePacks(query: string): Promise<schema.PosePack[]> {
     // For SQLite we'll use JavaScript filtering
     const posePacks = await db.select().from(schema.posePacks);
@@ -466,6 +541,7 @@ export class DatabaseStorage implements IStorage {
         .some((cat: string) => cat.toLowerCase().includes(lowerQuery))
     );
   }
+
   async createPosePack(pack: schema.InsertPosePack): Promise<schema.PosePack> {
     // Convert array props to JSON strings
     const insertData = {
@@ -480,10 +556,16 @@ export class DatabaseStorage implements IStorage {
     
     return newPack;
   }
+
   // Implement the rest of the methods...
 }
+
 export const storage = new DatabaseStorage();
-Step 6: Update Main Server Index File (server/index.ts)
+```
+
+## Step 6: Update Main Server Index File (server/index.ts)
+
+```typescript
 import express from 'express';
 import { json, urlencoded } from 'body-parser';
 import path from 'path';
@@ -491,18 +573,22 @@ import { fileURLToPath } from 'url';
 import { registerRoutes } from './routes';
 import { setupVite, serveStatic, log } from './vite';
 import { Server } from 'http';
+
 // For SQLite, make sure data directory exists
 import { existsSync, mkdirSync } from 'fs';
 const dataDir = path.join(process.cwd(), 'data');
 if (!existsSync(dataDir)) {
   mkdirSync(dataDir, { recursive: true });
 }
+
 // Use db-sqlite instead of db
 import './db-sqlite';
+
 // Create express app
 const app = express();
 app.use(json({ limit: '5mb' }));
 app.use(urlencoded({ extended: true }));
+
 // Register API routes
 let server: Server;
 async function main() {
@@ -516,10 +602,12 @@ async function main() {
     await setupVite(app, server);
   }
 }
+
 main().catch(err => {
   console.error(err);
   process.exit(1);
 });
+
 // Handle graceful shutdown
 const signals = ['SIGINT', 'SIGTERM', 'SIGQUIT'] as const;
 for (const signal of signals) {
@@ -531,10 +619,15 @@ for (const signal of signals) {
     });
   });
 }
-Step 7: Update drizzle.config.ts for SQLite
+```
+
+## Step 7: Update drizzle.config.ts for SQLite
+
+```typescript
 import { defineConfig } from 'drizzle-kit';
 import * as dotenv from 'dotenv';
 dotenv.config();
+
 export default defineConfig({
   schema: './shared/sqlite-schema.ts',
   out: './migrations',
@@ -543,12 +636,17 @@ export default defineConfig({
     url: './data/app.db'
   }
 });
-Step 8: Helper Functions for SQLite Array Handling
-Create a new file server/utils.ts:
+```
 
+## Step 8: Helper Functions for SQLite Array Handling
+
+Create a new file `server/utils.ts`:
+
+```typescript
 /**
  * Helper functions for working with SQLite
  */
+
 // Parse JSON string arrays from SQLite to JavaScript arrays
 export function parseJsonArray(jsonStr: string | null | undefined): string[] {
   if (!jsonStr) return [];
@@ -560,6 +658,7 @@ export function parseJsonArray(jsonStr: string | null | undefined): string[] {
     return [];
   }
 }
+
 // Convert JavaScript arrays to JSON strings for SQLite storage
 export function stringifyArray(arr: any[] | null | undefined): string {
   if (!arr) return '[]';
@@ -570,6 +669,7 @@ export function stringifyArray(arr: any[] | null | undefined): string {
     return '[]';
   }
 }
+
 // Helper for SQLite date handling
 export function toSqliteDate(date: Date | string | null | undefined): string | null {
   if (!date) return null;
@@ -583,6 +683,7 @@ export function toSqliteDate(date: Date | string | null | undefined): string | n
   }
   return (date as Date).toISOString().split('T')[0];
 }
+
 // Helper for SQLite datetime handling
 export function toSqliteDateTime(date: Date | string | null | undefined): string | null {
   if (!date) return null;
@@ -596,27 +697,32 @@ export function toSqliteDateTime(date: Date | string | null | undefined): string
   }
   return (date as Date).toISOString();
 }
-Additional Steps and Considerations:
-1. JSON Handling
+```
+
+## Additional Steps and Considerations:
+
+### 1. JSON Handling
 In PostgreSQL, you can use array and JSON column types directly. In SQLite, you need to:
+- Store arrays and JSON objects as strings
+- Parse them in your application code when retrieving from the database
+- Stringify them when saving to the database
 
-Store arrays and JSON objects as strings
-Parse them in your application code when retrieving from the database
-Stringify them when saving to the database
-2. Timestamp Handling
+### 2. Timestamp Handling
 SQLite doesn't have native date/time types. Instead:
+- Store dates and times as ISO string format (or other string formats)
+- Use the SQLite `datetime()` function for date operations
+- Do date comparisons carefully
 
-Store dates and times as ISO string format (or other string formats)
-Use the SQLite datetime() function for date operations
-Do date comparisons carefully
-3. Foreign Keys
+### 3. Foreign Keys
 SQLite supports foreign keys but they need to be enabled:
-
+```typescript
 // Add this to your db-sqlite.ts file
 sqlite.exec('PRAGMA foreign_keys = ON;');
-4. Transaction Support
-SQLite supports transactions which are important for data integrity:
+```
 
+### 4. Transaction Support
+SQLite supports transactions which are important for data integrity:
+```typescript
 // Example transaction in db-sqlite.ts
 export function withTransaction<T>(callback: () => T): T {
   sqlite.exec('BEGIN TRANSACTION');
@@ -629,19 +735,21 @@ export function withTransaction<T>(callback: () => T): T {
     throw error;
   }
 }
-5. SQL Query Testing
+```
+
+### 5. SQL Query Testing
 Test your SQL queries thoroughly, as SQLite's SQL dialect has some differences from PostgreSQL.
 
-6. Mobile/Offline Support
+### 6. Mobile/Offline Support
 One of the main advantages of SQLite is offline support:
+- Consider adding client-side synchronization logic
+- Implement conflict resolution strategies
+- Add versioning to handle schema updates
 
-Consider adding client-side synchronization logic
-Implement conflict resolution strategies
-Add versioning to handle schema updates
-7. Performance Considerations
+### 7. Performance Considerations
 SQLite is very efficient but has different optimization strategies:
+- Adding proper indexes is crucial
+- Use prepared statements for repeated queries
+- Vacuum the database periodically to reclaim space
 
-Adding proper indexes is crucial
-Use prepared statements for repeated queries
-Vacuum the database periodically to reclaim space
 By following these steps, you'll have a fully functional SQLite implementation ready for your application, with mobile offline support and improved portability.
